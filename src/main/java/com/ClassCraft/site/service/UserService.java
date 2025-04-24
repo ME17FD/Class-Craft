@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.ClassCraft.site.dto.UserDTO;
+import com.ClassCraft.site.models.User;
 
 
 // UserService.java
@@ -14,4 +15,6 @@ public interface UserService<T extends UserDTO> {
     T update(Long id, T dto);
     void delete(Long id);
     boolean approveUser(Long id);
+    User findByEmail(String email);
+    UserDTO convertToDTO(User user);
 }

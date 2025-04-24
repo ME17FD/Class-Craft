@@ -11,7 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.ClassCraft.site.dto.ProfessorDTO;
+import com.ClassCraft.site.dto.UserDTO;
 import com.ClassCraft.site.models.Professor;
+import com.ClassCraft.site.models.User;
 import com.ClassCraft.site.repository.ProfessorRepository;
 import com.ClassCraft.site.service.UserService;
 
@@ -20,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class ProfessorServiceImpl implements UserService<ProfessorDTO> {
-    
+
     private final ProfessorRepository professorRepository;
     private final ModelMapper modelMapper;
 
@@ -30,7 +32,7 @@ public class ProfessorServiceImpl implements UserService<ProfessorDTO> {
         if (professorRepository.existsByEmail(dto.getEmail())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
         }
-        
+
         Professor professor = modelMapper.map(dto, Professor.class);
         professor.setApproved(false);
         Professor savedProfessor = professorRepository.save(professor);
@@ -89,4 +91,19 @@ public class ProfessorServiceImpl implements UserService<ProfessorDTO> {
                 .map(professor -> modelMapper.map(professor, ProfessorDTO.class))
                 .collect(Collectors.toList());
     }
-}
+
+    @Override
+    @Transactional(readOnly = true)
+    public User findByEmail(String email) {
+        return professorRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Professor not found"));
+    }
+
+    @Override
+    public UserDTO convertToDTO(User user) {
+        if (user instanceof Professor professor) {
+            return modelMapper.map(professor, ProfessorDTO.class);
+        }
+        throw new IllegalArgumentException("Unexpected user type");
+    }
+} 
