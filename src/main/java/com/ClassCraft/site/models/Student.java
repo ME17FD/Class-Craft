@@ -1,6 +1,8 @@
 package com.ClassCraft.site.models;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,4 +12,7 @@ import lombok.Setter;
 public class Student extends User {
     private String CNE;
     private String registrationNumber;
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private Group group;
 }
