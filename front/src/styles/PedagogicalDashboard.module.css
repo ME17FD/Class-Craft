@@ -1,0 +1,35 @@
+@import '../styles/variable.css';
+.dashboard {
+    font-family: 'Inter', sans-serif;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    color: var(--text-color);
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow-md);
+}
+
+.header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin: 0;
+    background: linear-gradient(90deg, var(--primary-blue), var(--light-blue));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.content {
+    background-color: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
