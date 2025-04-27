@@ -17,4 +17,5 @@ public interface UserService<T extends UserDTO> {
     boolean approveUser(Long id);
     User findByEmail(String email);
     UserDTO convertToDTO(User user);
+    boolean existsByEmail(String email);
 }

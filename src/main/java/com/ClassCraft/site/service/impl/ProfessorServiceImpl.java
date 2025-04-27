@@ -106,4 +106,9 @@ public class ProfessorServiceImpl implements UserService<ProfessorDTO> {
         }
         throw new IllegalArgumentException("Unexpected user type");
     }
+    @Override
+    public boolean existsByEmail(String email) {
+        // Custom implementation of existsByEmail
+        return professorRepository.existsByEmail(email);
+    }
 } 

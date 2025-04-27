@@ -9,4 +9,5 @@ import com.ClassCraft.site.models.Professor;
 @Repository
 public interface ProfessorRepository extends UserRepository<Professor> {
     List<Professor> findBySpecialty(String specialty);
+    
 }

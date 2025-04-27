@@ -50,8 +50,8 @@ public class SecurityConfig {
         config.setAllowedOrigins(ALLOWED_ORIGINS);
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Add OPTIONS
         config.setAllowedHeaders(Arrays.asList("*"));
-        config.setAllowCredentials(true); // Important for cookies/sessions
-        config.setMaxAge(3600L); // How long the CORS config can be cached
+        config.setAllowCredentials(true); 
+        config.setMaxAge(3600L); 
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", config); // Apply to all API endpoints

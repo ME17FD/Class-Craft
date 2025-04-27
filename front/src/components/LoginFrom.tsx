@@ -1,12 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "../styles/LoginForm.module.css";
+import { register, login } from "../services/auth";
+import { AxiosError } from "axios"; // ✅ Good for catching backend error details
+import { useNavigate } from 'react-router-dom';
 
 interface UserData {
-  id?: number; // Long en TypeScript est représenté par number
   firstName: string;
   lastName: string;
   email: string;
   password: string;
+}
+
+interface SignInData {
+  email: string;
+  password: string;
+}
+
+interface ApiError {
+  message: string;
 }
 
 const LoginForm: React.FC = () => {
@@ -17,41 +28,82 @@ const LoginForm: React.FC = () => {
     email: "",
     password: "",
   });
-  const [signInData, setSignInData] = useState<
-    Omit<UserData, "firstName" | "lastName">
-  >({
+  const [signInData, setSignInData] = useState<SignInData>({
     email: "",
     password: "",
   });
+  const [error, setError] = useState<string>("");
+
+  const navigate = useNavigate();
+
+  // Redirect to Dashboard if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/dashboard"); // Redirect to dashboard if token exists
+    }
+  }, [navigate]);
 
   const handleSignUpClick = () => setIsRightPanelActive(true);
   const handleSignInClick = () => setIsRightPanelActive(false);
 
-  const handleSignUpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    setter: React.Dispatch<React.SetStateAction<any>>
+  ) => {
     const { name, value } = e.target;
-    setSignUpData((prev) => ({ ...prev, [name]: value }));
+    setter((prev: any) => ({ ...prev, [name]: value }));
   };
 
-  const handleSignInChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setSignInData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSignUpSubmit = (e: React.FormEvent) => {
+  const handleSignUpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Ajoutez ici la logique d'inscription
+    setError("");
+    try {
+      await register(signUpData);
+      alert("✅ Inscription réussie ! Vous pouvez maintenant vous connecter.");
+      setSignUpData({ firstName: "", lastName: "", email: "", password: "" });
+      setIsRightPanelActive(false);
+    } catch (err) {
+      const axiosError = err as AxiosError<ApiError>;
+      console.error(axiosError);
+      setError(
+        axiosError.response?.data?.message ||
+          "❌ Erreur lors de l'inscription. Veuillez réessayer."
+      );
+    }
   };
 
-  const handleSignInSubmit = (e: React.FormEvent) => {
+  const handleSignInSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Ajoutez ici la logique de connexion
+    setError("");
+    try {
+      const authData = await login(signInData);
+      console.log("✅ Login Success:", authData);
+  
+      // Store the token and user data in localStorage
+      localStorage.setItem("token", authData.token);
+      localStorage.setItem("userRole", authData.role);
+      localStorage.setItem("userDetails", JSON.stringify(authData.userDetails));
+  
+      // Redirect to dashboard
+      navigate("/dashboard");
+    } catch (err) {
+      const axiosError = err as AxiosError<ApiError>;
+      console.error(axiosError);
+      setError(
+        axiosError.response?.data?.message ||
+          "❌ Email ou mot de passe incorrect."
+      );
+    }
   };
 
   return (
     <div
       className={`${styles.container} ${
         isRightPanelActive ? styles.rightPanelActive : ""
-      }`}>
+      }`}
+    >
+      {/* Sign Up Form */}
       <div className={`${styles.formContainer} ${styles.signUpContainer}`}>
         <form onSubmit={handleSignUpSubmit}>
           <h1>Créer un compte</h1>
@@ -60,7 +112,7 @@ const LoginForm: React.FC = () => {
             name="firstName"
             placeholder="Prénom"
             value={signUpData.firstName}
-            onChange={handleSignUpChange}
+            onChange={(e) => handleChange(e, setSignUpData)}
             required
           />
           <input
@@ -68,7 +120,7 @@ const LoginForm: React.FC = () => {
             name="lastName"
             placeholder="Nom"
             value={signUpData.lastName}
-            onChange={handleSignUpChange}
+            onChange={(e) => handleChange(e, setSignUpData)}
             required
           />
           <input
@@ -76,7 +128,7 @@ const LoginForm: React.FC = () => {
             name="email"
             placeholder="Email"
             value={signUpData.email}
-            onChange={handleSignUpChange}
+            onChange={(e) => handleChange(e, setSignUpData)}
             required
           />
           <input
@@ -84,13 +136,17 @@ const LoginForm: React.FC = () => {
             name="password"
             placeholder="Mot de passe"
             value={signUpData.password}
-            onChange={handleSignUpChange}
+            onChange={(e) => handleChange(e, setSignUpData)}
             required
           />
           <button type="submit">S'inscrire</button>
+          {error && isRightPanelActive && (
+            <p className={styles.error}>{error}</p>
+          )}
         </form>
       </div>
 
+      {/* Sign In Form */}
       <div className={`${styles.formContainer} ${styles.signInContainer}`}>
         <form onSubmit={handleSignInSubmit}>
           <h1>Se connecter</h1>
@@ -99,7 +155,7 @@ const LoginForm: React.FC = () => {
             name="email"
             placeholder="Email"
             value={signInData.email}
-            onChange={handleSignInChange}
+            onChange={(e) => handleChange(e, setSignInData)}
             required
           />
           <input
@@ -107,13 +163,17 @@ const LoginForm: React.FC = () => {
             name="password"
             placeholder="Mot de passe"
             value={signInData.password}
-            onChange={handleSignInChange}
+            onChange={(e) => handleChange(e, setSignInData)}
             required
           />
           <button type="submit">Connexion</button>
+          {error && !isRightPanelActive && (
+            <p className={styles.error}>{error}</p>
+          )}
         </form>
       </div>
 
+      {/* Overlay Panels */}
       <div className={styles.overlayContainer}>
         <div className={styles.overlay}>
           <div className={`${styles.overlayPanel} ${styles.overlayLeft}`}>
