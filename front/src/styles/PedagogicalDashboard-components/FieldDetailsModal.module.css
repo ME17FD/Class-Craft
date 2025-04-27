@@ -1,0 +1,174 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background-color: white;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    width: 90%;
+    max-width: 1000px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modalHeader {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modalHeader h2 {
+    color: #2d3748;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.description {
+    color: #718096;
+    font-size: 1rem;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.section {
+    background-color: #f7fafc;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+}
+
+.section h3 {
+    color: #2d3748;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.modulesList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.moduleCard {
+    background-color: white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.moduleHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.moduleHeader h4 {
+    color: #2d3748;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.moduleCode {
+    background-color: #ebf8ff;
+    color: #2b6cb0;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.subModulesList {
+    margin-bottom: 1rem;
+}
+
+.subModuleItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.subModuleItem:last-child {
+    border-bottom: none;
+}
+
+.subModuleName {
+    color: #4a5568;
+    font-size: 0.9rem;
+}
+
+.subModuleHours {
+    color: #718096;
+    font-size: 0.875rem;
+    background-color: #f7fafc;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+}
+
+.professorsList {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.professorsList h5 {
+    color: #4a5568;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.professorItem {
+    color: #718096;
+    font-size: 0.875rem;
+    padding: 0.25rem 0;
+}
+
+.groupsList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.groupCard {
+    background-color: white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.groupCard h4 {
+    color: #2d3748;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.studentCount {
+    color: #718096;
+    font-size: 0.875rem;
+    background-color: #f7fafc;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
