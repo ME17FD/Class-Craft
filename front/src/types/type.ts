@@ -25,6 +25,11 @@ export type Field = {
   id: number;
   name: string;
   description: string;
+  modules?: ExtendedModule[];
+};
+
+export type ExtendedModule = Module & {
+  subModules: SubModule[];
 };
 
 export type Professor = {
@@ -44,7 +49,7 @@ export type Group = {
 
 export type CrudModalType = 'add' | 'edit' | 'delete' | 'assign';
 
-export type TabType = 'groups' | 'students' | 'fields' | 'modules' | 'submodules' | 'professors';
+export type TabType = 'groups' | 'students' | 'fields' | 'modules' | 'submodules' | 'professors' | 'weekly' | 'field' | 'daily' | 'create';
 
 export interface ModalState {
   isOpen: boolean;

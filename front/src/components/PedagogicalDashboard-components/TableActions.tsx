@@ -14,10 +14,15 @@ interface TableProps<T> {
 }
 
 const Table = <T,>({
-  data,
-  columns,
+  data = [],
+  columns = [],
   emptyMessage = "Aucune donnée disponible",
 }: TableProps<T>) => {
+  // Vérifier si les données ou les colonnes sont undefined
+  if (!data || !columns) {
+    return <div className={styles.emptyTable}>{emptyMessage}</div>;
+  }
+
   return (
     <table className={styles.table}>
       <thead>
@@ -41,7 +46,7 @@ const Table = <T,>({
                 <td key={colIndex}>
                   {column.render
                     ? column.render(item)
-                    : column.accessor
+                    : column.accessor && item
                     ? String(item[column.accessor])
                     : null}
                 </td>

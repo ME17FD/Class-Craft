@@ -8,13 +8,13 @@ import StudentFormModal from "./StudentFormModal";
 interface StudentsTabProps {
   students: Student[];
   groups: Group[];
-  onSaveStudent: (student: Student) => void;
+  onEdit: (student: Student) => void;
 }
 
 const StudentsTab: React.FC<StudentsTabProps> = ({
   students,
   groups,
-  onSaveStudent,
+  onEdit,
 }) => {
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -50,7 +50,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   };
 
   const handleSave = (studentData: Omit<Student, "id">) => {
-    onSaveStudent({
+    onEdit({
       ...studentData,
       id: modalState.student?.id || 0,
     });
@@ -58,23 +58,19 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   };
 
   const columns = [
-    { header: "CNE", accessor: "cne" },
-    { header: "Apogée", accessor: "apogee" },
-    { header: "Nom", accessor: "lastName" },
-    { header: "Prénom", accessor: "firstName" },
-    {
-      header: "Groupe",
-      render: (student: Student) => getGroupName(student.groupId),
-    },
+    { header: "CNE", accessor: "cne" as keyof Student },
+    { header: "Apogée", accessor: "apogee" as keyof Student },
+    { header: "Nom", accessor: "lastName" as keyof Student },
+    { header: "Prénom", accessor: "firstName" as keyof Student },
+    { header: "Groupe", render: (student: Student) => getGroupName(student.groupId) },
     {
       header: "Actions",
       render: (student: Student) => (
-        <Button
-          variant="edit"
-          onClick={() => handleOpenEditModal(student)}
-          small>
-          Modifier
-        </Button>
+        <div className={styles.actions}>
+          <Button variant="secondary" onClick={() => handleOpenEditModal(student)}>
+            Modifier
+          </Button>
+        </div>
       ),
     },
   ];

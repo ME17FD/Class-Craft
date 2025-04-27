@@ -1,8 +1,8 @@
-import PedagogicalDashboard from "./components/PedagogicalDashboard";
-export default function App() {
-  return (
-    <div className="App">
-      <PedagogicalDashboard></PedagogicalDashboard>
-    </div>
-  );
-}
+import React from 'react';
+import PlanningDashboard from './components/PlanningDashboard/PlanningDashboard';
+
+const App: React.FC = () => {
+  return <PlanningDashboard />;
+};
+
+export default App;

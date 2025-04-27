@@ -20,7 +20,8 @@ interface CrudModalProps {
   fields: Field[];
   modules: Module[];
   subModules: SubModule[];
-  onSave: (data: any) => void;
+  groups: Group[];
+  onSave: (entityType: TabType, data: any) => void;
   onClose: () => void;
   onAssignStudent?: (studentId: number, assign: boolean) => void;
 }
@@ -33,11 +34,15 @@ const CrudModal: React.FC<CrudModalProps> = ({
   fields,
   modules,
   subModules,
+  groups,
   onSave,
   onClose,
   onAssignStudent,
 }) => {
-  const [formData, setFormData] = useState(entity);
+  const [formData, setFormData] = useState(() => ({
+    ...entity,
+    subModules: entity?.subModules || []
+  }));
 
   if (!isOpen) return null;
 
@@ -58,6 +63,26 @@ const CrudModal: React.FC<CrudModalProps> = ({
     setFormData({ ...formData, [field]: options });
   };
 
+  const handleSubmit = () => {
+    onSave(entityType, formData);
+  };
+
+  const handleAddSubModule = () => {
+    const newSubModules = [...(formData.subModules || []), { name: "", hours: 0 }];
+    setFormData({ ...formData, subModules: newSubModules });
+  };
+
+  const handleSubModuleChange = (index: number, field: string, value: string | number) => {
+    const newSubModules = [...(formData.subModules || [])];
+    newSubModules[index] = { ...newSubModules[index], [field]: value };
+    setFormData({ ...formData, subModules: newSubModules });
+  };
+
+  const handleRemoveSubModule = (index: number) => {
+    const newSubModules = (formData.subModules || []).filter((_: any, i: number) => i !== index);
+    setFormData({ ...formData, subModules: newSubModules });
+  };
+
   const renderFormFields = () => {
     switch (entityType) {
       case "groups":
@@ -68,7 +93,7 @@ const CrudModal: React.FC<CrudModalProps> = ({
               <input
                 type="text"
                 name="name"
-                value={formData.name || ""}
+                value={formData?.name || ""}
                 onChange={handleChange}
               />
             </div>
@@ -76,7 +101,7 @@ const CrudModal: React.FC<CrudModalProps> = ({
               <label>Filière</label>
               <select
                 name="fieldId"
-                value={formData.fieldId || ""}
+                value={formData?.fieldId || ""}
                 onChange={handleChange}>
                 {fields.map((field) => (
                   <option key={field.id} value={field.id}>
@@ -87,44 +112,255 @@ const CrudModal: React.FC<CrudModalProps> = ({
             </div>
           </>
         );
-      // Cas pour les autres entités...
+      case "modules":
+        return (
+          <>
+            <div className={styles.formGroup}>
+              <label>Nom</label>
+              <input
+                type="text"
+                name="name"
+                value={formData?.name || ""}
+                onChange={handleChange}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Code</label>
+              <input
+                type="text"
+                name="code"
+                value={formData?.code || ""}
+                onChange={handleChange}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Filière</label>
+              <select
+                name="fieldId"
+                value={formData?.fieldId || ""}
+                onChange={handleChange}>
+                {fields.map((field) => (
+                  <option key={field.id} value={field.id}>
+                    {field.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className={styles.formGroup}>
+              <label>Sous-modules</label>
+              <div className={styles.subModulesList}>
+                {formData.subModules.map((subModule: any, index: number) => (
+                  <div key={index} className={styles.subModuleItem}>
+                    <div className={styles.subModuleField}>
+                      <label>Nom</label>
+                      <input
+                        type="text"
+                        value={subModule.name}
+                        onChange={(e) => handleSubModuleChange(index, 'name', e.target.value)}
+                        placeholder="Nom du sous-module"
+                      />
+                    </div>
+                    <div className={styles.subModuleField}>
+                      <label>Heures</label>
+                      <input
+                        type="number"
+                        value={subModule.hours}
+                        onChange={(e) => handleSubModuleChange(index, 'hours', Number(e.target.value))}
+                        placeholder="Nombre d'heures"
+                      />
+                    </div>
+                    <Button
+                      variant="delete"
+                      onClick={() => handleRemoveSubModule(index)}>
+                      Supprimer
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <Button
+                variant="primary"
+                onClick={handleAddSubModule}>
+                + Ajouter un sous-module
+              </Button>
+            </div>
+          </>
+        );
+      case "submodules":
+        return (
+          <>
+            <div className={styles.formGroup}>
+              <label>Nom</label>
+              <input
+                type="text"
+                name="name"
+                value={formData?.name || ""}
+                onChange={handleChange}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Heures</label>
+              <input
+                type="number"
+                name="hours"
+                value={formData?.hours || 0}
+                onChange={handleChange}
+                min="0"
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Module parent</label>
+              <select
+                name="moduleId"
+                value={formData?.moduleId || ""}
+                onChange={handleChange}>
+                {modules.map((module) => (
+                  <option key={module.id} value={module.id}>
+                    {module.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </>
+        );
+      case "professors":
+        return (
+          <>
+            <div className={styles.formGroup}>
+              <label>Nom</label>
+              <input
+                type="text"
+                name="name"
+                value={formData?.name || ""}
+                onChange={handleChange}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Email</label>
+              <input
+                type="email"
+                name="email"
+                value={formData?.email || ""}
+                onChange={handleChange}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Modules</label>
+              <select
+                multiple
+                name="modules"
+                value={formData?.modules || []}
+                onChange={(e) => handleMultiSelect(e, 'modules')}>
+                {modules.map((module) => (
+                  <option key={module.id} value={module.id}>
+                    {module.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className={styles.formGroup}>
+              <label>Sous-modules</label>
+              <select
+                multiple
+                name="subModules"
+                value={formData?.subModules || []}
+                onChange={(e) => handleMultiSelect(e, 'subModules')}>
+                {subModules.map((subModule) => (
+                  <option key={subModule.id} value={subModule.id}>
+                    {subModule.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </>
+        );
+      case "students":
+        return (
+          <>
+            <div className={styles.formGroup}>
+              <label>CNE</label>
+              <input
+                type="text"
+                name="cne"
+                value={formData?.cne || ""}
+                onChange={handleChange}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Apogée</label>
+              <input
+                type="text"
+                name="apogee"
+                value={formData?.apogee || ""}
+                onChange={handleChange}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Nom</label>
+              <input
+                type="text"
+                name="lastName"
+                value={formData?.lastName || ""}
+                onChange={handleChange}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Prénom</label>
+              <input
+                type="text"
+                name="firstName"
+                value={formData?.firstName || ""}
+                onChange={handleChange}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Groupe</label>
+              <select
+                name="groupId"
+                value={formData?.groupId || ""}
+                onChange={handleChange}>
+                <option value="">Aucun groupe</option>
+                {groups.map((group) => (
+                  <option key={group.id} value={group.id}>
+                    {group.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </>
+        );
+      default:
+        return null;
+    }
+  };
+
+  // Fonction pour obtenir le titre de la modal en fonction du type et de l'entité
+  const getModalTitle = () => {
+    if (type === "add") {
+      return `Ajouter ${entityType}`;
+    } else if (type === "edit" && entity) {
+      return `Modifier ${entity.name}`;
+    } else if (type === "delete" && entity) {
+      return `Supprimer ${entity.name}`;
+    } else {
+      return `${type} ${entityType}`;
     }
   };
 
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modal}>
-        <h2>
-          {type === "add" && `Ajouter ${entityType}`}
-          {type === "edit" && `Modifier ${entity.name}`}
-          {type === "delete" && `Supprimer ${entity.name}`}
-        </h2>
-
-        {type !== "delete" ? (
-          <form>
-            {renderFormFields()}
-            <div className={styles.modalActions}>
-              <Button variant="secondary" onClick={onClose}>
-                Annuler
-              </Button>
-              <Button variant="primary" onClick={() => onSave(formData)}>
-                Sauvegarder
-              </Button>
-            </div>
-          </form>
-        ) : (
-          <div className={styles.deleteConfirmation}>
-            <p>Êtes-vous sûr de vouloir supprimer cet élément ?</p>
-            <div className={styles.modalActions}>
-              <Button variant="secondary" onClick={onClose}>
-                Annuler
-              </Button>
-              <Button variant="delete" onClick={() => onSave(entity)}>
-                Confirmer
-              </Button>
-            </div>
+        <h2>{getModalTitle()}</h2>
+        <form onSubmit={handleSubmit}>
+          {renderFormFields()}
+          <div className={styles.modalActions}>
+            <Button variant="secondary" onClick={onClose}>
+              Annuler
+            </Button>
+            <Button variant="primary" onClick={handleSubmit}>
+              {type === "delete" ? "Confirmer" : "Enregistrer"}
+            </Button>
           </div>
-        )}
+        </form>
       </div>
     </div>
   );

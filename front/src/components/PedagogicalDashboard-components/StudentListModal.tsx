@@ -16,13 +16,16 @@ const StudentListModal: React.FC<StudentListModalProps> = ({
   onRemoveStudent,
   onClose,
 }) => {
+  // S'assurer que students est toujours un tableau
+  const students = group.students || [];
+
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modal}>
         <h2>Étudiants du groupe {group.name}</h2>
 
         <div className={styles.studentList}>
-          {group.students.length === 0 ? (
+          {students.length === 0 ? (
             <p className={styles.emptyMessage}>Aucun étudiant dans ce groupe</p>
           ) : (
             <table className={styles.table}>
@@ -36,7 +39,7 @@ const StudentListModal: React.FC<StudentListModalProps> = ({
                 </tr>
               </thead>
               <tbody>
-                {group.students.map((student) => (
+                {students.map((student) => (
                   <tr key={student.id}>
                     <td>{student.apogee}</td>
                     <td>{student.cne}</td>

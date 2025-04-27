@@ -31,3 +31,32 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Dépendances Node.js
+node_modules/
+
+# Yarn Plug'n'Play
+.pnp*
+.yarn/
+
+# Next.js
+.next/
+
+# Build output
+dist/
+build/
+
+# Tests/coverage
+coverage/
+
+# Environnements
+.env*
+
+# Systèmes
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
