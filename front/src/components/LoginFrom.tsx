@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import styles from "../styles/LoginForm.module.css";
 import { register, login } from "../services/auth";
 import { AxiosError } from "axios"; // ✅ Good for catching backend error details
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 interface UserData {
   firstName: string;
@@ -40,8 +40,17 @@ const LoginForm: React.FC = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      navigate("/dashboard"); // Redirect to dashboard if token exists
-    }
+      const userRole = localStorage.getItem("userRole");
+      if (userRole === "ADMIN") {
+        navigate("/admin-dashboard");
+      } else if (userRole === "PROFESSOR") {
+        navigate("/professor-dashboard");
+      } else if (userRole === "STUDENT") {
+        navigate("/dashboard");
+      } else {
+        // Unknown role, fallback
+        navigate("/");
+      }    }
   }, [navigate]);
 
   const handleSignUpClick = () => setIsRightPanelActive(true);
@@ -79,14 +88,23 @@ const LoginForm: React.FC = () => {
     try {
       const authData = await login(signInData);
       console.log("✅ Login Success:", authData);
-  
+
       // Store the token and user data in localStorage
       localStorage.setItem("token", authData.token);
       localStorage.setItem("userRole", authData.role);
       localStorage.setItem("userDetails", JSON.stringify(authData.userDetails));
-  
-      // Redirect to dashboard
-      navigate("/dashboard");
+
+      // Redirect based on role
+      if (authData.role === "ADMIN") {
+        navigate("/admin-dashboard");
+      } else if (authData.role === "PROFESSOR") {
+        navigate("/professor-dashboard");
+      } else if (authData.role === "STUDENT") {
+        navigate("/dashboard");
+      } else {
+        // Unknown role, fallback
+        navigate("/");
+      }
     } catch (err) {
       const axiosError = err as AxiosError<ApiError>;
       console.error(axiosError);
