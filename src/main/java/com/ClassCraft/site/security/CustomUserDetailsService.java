@@ -9,33 +9,55 @@ import com.ClassCraft.site.models.Admin;
 import com.ClassCraft.site.models.Professor;
 import com.ClassCraft.site.models.Student;
 import com.ClassCraft.site.models.User;
+import com.ClassCraft.site.repository.AdminRepository;
+import com.ClassCraft.site.repository.ProfessorRepository;
 import com.ClassCraft.site.repository.StudentRepository;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final StudentRepository studentRepository;
+    private final ProfessorRepository professorRepository;
+    private final AdminRepository adminRepository;
 
-    public CustomUserDetailsService(StudentRepository studentRepository) {
+    public CustomUserDetailsService(StudentRepository studentRepository,
+            ProfessorRepository professorRepository,
+            AdminRepository adminRepository) {
         this.studentRepository = studentRepository;
+        this.professorRepository = professorRepository;
+        this.adminRepository = adminRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        // In your case, you might need to modify this to check other repositories
-        // for Professor and Admin if they're in separate tables
-        User user = studentRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        User user ;
+
+        // Search in StudentRepository
+        user = studentRepository.findByEmail(email).orElse(null);
+
+        // If not found, search in ProfessorRepository
+        if (user == null) {
+            user = professorRepository.findByEmail(email).orElse(null);
+        }
+
+        // If still not found, search in AdminRepository
+        if (user == null) {
+            user = adminRepository.findByEmail(email).orElse(null);
+        }
+
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found with email: " + email);
+        }
 
         String role = determineUserRole(user);
-        
+
         return org.springframework.security.core.userdetails.User.builder()
-            .username(user.getEmail())
-            .password(user.getPassword())
-            .roles(role)
-            .accountLocked(isAccountLocked(user))
-            .disabled(!isAccountEnabled(user))
-            .build();
+                .username(user.getEmail())
+                .password(user.getPassword())
+                .roles(role)
+                .accountLocked(isAccountLocked(user))
+                .disabled(!isAccountEnabled(user))
+                .build();
     }
 
     private String determineUserRole(User user) {

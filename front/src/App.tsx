@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginForm from './components/LoginFrom';
 import Dashboard from './components/Dashboard.tsx';
 import ProtectedRoute from './components/ProtectedRoute';  // Custom ProtectedRoute component
+import PlanningDashboard from './components/PlanningDashboard/PlanningDashboard.tsx';
+import PedagogicalDashboard from './components/PedagogicalDashboard.tsx';
 
 const App: React.FC = () => {
   return (
