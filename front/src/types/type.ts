@@ -5,6 +5,7 @@ export type Student = {
   lastName: string;
   firstName: string;
   groupId: number | null;
+  email?: string;
 };
 
 export type Module = {

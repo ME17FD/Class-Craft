@@ -2,10 +2,9 @@ package com.ClassCraft.site.service;
 
 import java.sql.Date;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.ClassCraft.site.models.*;
@@ -23,11 +22,17 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final SessionRepository sessionRepository;
     private final SubModuleRepository subModuleRepository;
     private final StudentRepository studentRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public DatabaseSeeder(ClassroomRepository classroomRepository, FiliereRepository filiereRepository,
-                           GroupRepository groupRepository, AcademicModuleRepository moduleRepository,
-                           ProfessorRepository professorRepository, SessionRepository sessionRepository,
-                           SubModuleRepository subModuleRepository, StudentRepository studentRepository) {
+    public DatabaseSeeder(ClassroomRepository classroomRepository,
+                          FiliereRepository filiereRepository,
+                          GroupRepository groupRepository,
+                          AcademicModuleRepository moduleRepository,
+                          ProfessorRepository professorRepository,
+                          SessionRepository sessionRepository,
+                          SubModuleRepository subModuleRepository,
+                          StudentRepository studentRepository,
+                          PasswordEncoder passwordEncoder) {
         this.classroomRepository = classroomRepository;
         this.filiereRepository = filiereRepository;
         this.groupRepository = groupRepository;
@@ -36,6 +41,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         this.sessionRepository = sessionRepository;
         this.subModuleRepository = subModuleRepository;
         this.studentRepository = studentRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -66,7 +72,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             classroomRepository.save(amphitheatre2);
         }
 
-        // --- Create Salles (normal classrooms) ---
+        // --- Create Salles ---
         if (!classroomRepository.existsByName("Salle 101")) {
             Salle salle1 = new Salle();
             salle1.setName("Salle 101");
@@ -116,17 +122,17 @@ public class DatabaseSeeder implements CommandLineRunner {
         Group groupCS1 = groupRepository.findByName("Group CS1");
 
         // --- Create Professors ---
-        if (professorRepository.findByEmail("john.doe@example.com") == null) {
+        if (professorRepository.findByEmail("john.doe@example.com").isEmpty()) {
             Professor prof1 = new Professor();
             prof1.setFirstName("John");
             prof1.setLastName("Doe");
             prof1.setEmail("john.doe@example.com");
-            prof1.setPassword("password"); // you should encode in reality
+            prof1.setPassword(passwordEncoder.encode("password"));
             prof1.setSpecialty("Software Engineering");
             prof1.setGrade("Associate Professor");
             professorRepository.save(prof1);
         }
-        Professor professorJohn = professorRepository.findByEmail("john.doe@example.com").orElse(null);;
+        Professor professorJohn = professorRepository.findByEmail("john.doe@example.com").orElse(null);
 
         // --- Create Modules ---
         if (moduleRepository.findByCode("CS101") == null) {
@@ -158,24 +164,24 @@ public class DatabaseSeeder implements CommandLineRunner {
         }
 
         // --- Create Students ---
-        if (studentRepository.findByEmail("student1@example.com") == null) {
+        if (studentRepository.findByEmail("student1@example.com").isEmpty()) {
             Student student1 = new Student();
             student1.setFirstName("Alice");
             student1.setLastName("Smith");
             student1.setEmail("student1@example.com");
-            student1.setPassword("password"); // same, should be encoded
+            student1.setPassword(passwordEncoder.encode("password"));
             student1.setCNE("CNE001");
             student1.setRegistrationNumber("REG001");
             student1.setGroup(groupCS1);
             student1.setApproved(true);
             studentRepository.save(student1);
         }
-        if (studentRepository.findByEmail("student2@example.com") == null) {
+        if (studentRepository.findByEmail("student2@example.com").isEmpty()) {
             Student student2 = new Student();
             student2.setFirstName("Bob");
             student2.setLastName("Johnson");
             student2.setEmail("student2@example.com");
-            student2.setPassword("password");
+            student2.setPassword(passwordEncoder.encode("password"));
             student2.setCNE("CNE002");
             student2.setRegistrationNumber("REG002");
             student2.setGroup(groupCS1);

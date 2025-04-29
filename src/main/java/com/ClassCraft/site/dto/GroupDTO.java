@@ -62,5 +62,22 @@ public class GroupDTO {
         
         public String getRegistrationNumber() { return registrationNumber; }
         public void setRegistrationNumber(String registrationNumber) { this.registrationNumber = registrationNumber; }
+        public StudentInfoDTO(Long id, String firstName, String lastName, String email, String cNE,
+                String registrationNumber) {
+            this.id = id;
+            this.firstName = firstName;
+            this.lastName = lastName;
+            this.email = email;
+            CNE = cNE;
+            this.registrationNumber = registrationNumber;
+        }
+    }
+
+    public GroupDTO(Long id, String name, Integer size, Long filiereId, List<StudentInfoDTO> students) {
+        this.id = id;
+        this.name = name;
+        this.size = size;
+        this.filiereId = filiereId;
+        this.students = students;
     }
 }
