@@ -16,7 +16,7 @@ const App: React.FC = () => {
         <Route path="/dashboard" element={<ProtectedRoute Component={Dashboard} role="STUDENT" />} />
 
         {/* Protected for ADMIN */}
-        <Route path="/admin-dashboard" element={<ProtectedRoute Component={PlanningDashboard} role="ADMIN" />} />
+        <Route path="/admin-dashboard" element={<ProtectedRoute Component={PedagogicalDashboard} role="ADMIN" />} />
 
         {/* Protected for PROFESSOR */}
         <Route path="/professor-dashboard" element={<ProtectedRoute Component={PedagogicalDashboard} role="PROFESSOR" />} />

@@ -10,4 +10,5 @@ import com.ClassCraft.site.models.Classroom;
 @Repository
 public interface ClassroomRepository extends JpaRepository<Classroom, Long> {
     List<Classroom> findByCapacityGreaterThanEqual(int minCapacity);
+    Boolean existsByName(String name);
 }
