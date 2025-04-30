@@ -2,6 +2,9 @@ package com.ClassCraft.site.models;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,9 +25,11 @@ public class Group {
     private String name;
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Student> students;
 
     @ManyToOne
+    @JsonBackReference
     private Filiere filiere;
 
     // Getter for id

@@ -10,5 +10,4 @@ import com.ClassCraft.site.models.Group;
 @Repository
 public interface GroupRepository extends JpaRepository<Group, Long> {
     List<Group> findByFiliereId(Long filiereId);
-    Group findByName(String name);
 }

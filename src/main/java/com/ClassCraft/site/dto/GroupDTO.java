@@ -1,6 +1,7 @@
 package com.ClassCraft.site.dto;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GroupDTO {
     private Long id;
@@ -32,7 +33,19 @@ public class GroupDTO {
     public String getFiliereName() { return filiereName; }
     public void setFiliereName(String filiereName) { this.filiereName = filiereName; }
     
-    public List<StudentInfoDTO> getStudents() { return students; }
+    public List<StudentInfoDTO> getStudents() {
+        if (students == null) return null;
+        return students.stream()
+            .map(s -> new StudentInfoDTO(
+                s.getId(),
+                s.getFirstName(),
+                s.getLastName(),
+                s.getEmail(),
+                s.getCNE(),
+                s.getRegistrationNumber()
+            ))
+            .collect(Collectors.toList());
+    }
     public void setStudents(List<StudentInfoDTO> students) { this.students = students; }
 
     // Nested DTO for student information
@@ -80,4 +93,13 @@ public class GroupDTO {
         this.filiereId = filiereId;
         this.students = students;
     }
+    public GroupDTO(Long id, String name, Integer size, Long filiereId, String filiereName, List<StudentInfoDTO> students) {
+        this.id = id;
+        this.name = name;
+        this.size = size;
+        this.filiereId = filiereId;
+        this.filiereName = filiereName;
+        this.students = students;
+    }
+    
 }

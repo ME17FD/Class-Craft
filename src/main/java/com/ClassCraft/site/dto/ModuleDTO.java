@@ -6,6 +6,7 @@ public class ModuleDTO {
     private String code;
     private Long filiereId;
     private Long professorInChargeId;
+    private String professorInChargeName;
     public Long getId() {
         return id;
     }
@@ -38,5 +39,13 @@ public class ModuleDTO {
     }
 
     // Getters and setters
+
+    public String getProfessorInChargeName() {
+        return professorInChargeName;
+    }
+
+    public void setProfessorInChargeName(String professorInChargeName) {
+        this.professorInChargeName = professorInChargeName;
+    }
     
 }

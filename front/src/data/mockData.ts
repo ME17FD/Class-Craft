@@ -5,7 +5,7 @@ export const mockStudents: Student[] = [
     {
         id: 1,
         cne: "E001",
-        apogee: "A001",
+        registrationNumber: "A001",
         lastName: "Alami",
         firstName: "Youssef",
         groupId: 1
@@ -13,7 +13,7 @@ export const mockStudents: Student[] = [
     {
         id: 2,
         cne: "E002",
-        apogee: "A002",
+        registrationNumber: "A002",
         lastName: "Benjelloun",
         firstName: "Fatima",
         groupId: 1
@@ -21,7 +21,7 @@ export const mockStudents: Student[] = [
     {
         id: 3,
         cne: "E003",
-        apogee: "A003",
+        registrationNumber: "A003",
         lastName: "Idrissi",
         firstName: "Karim",
         groupId: 2
@@ -29,7 +29,7 @@ export const mockStudents: Student[] = [
     {
         id: 4,
         cne: "E004",
-        apogee: "A004",
+        registrationNumber: "A004",
         lastName: "Hassani",
         firstName: "Samira",
         groupId: 2
@@ -37,7 +37,7 @@ export const mockStudents: Student[] = [
     {
         id: 5,
         cne: "E005",
-        apogee: "A005",
+        registrationNumber: "A005",
         lastName: "El Fassi",
         firstName: "Mehdi",
         groupId: 3
@@ -45,7 +45,7 @@ export const mockStudents: Student[] = [
     {
         id: 6,
         cne: "E006",
-        apogee: "A006",
+        registrationNumber: "A006",
         lastName: "Benali",
         firstName: "Leila",
         groupId: 3
@@ -53,7 +53,7 @@ export const mockStudents: Student[] = [
     {
         id: 7,
         cne: "E007",
-        apogee: "A007",
+        registrationNumber: "A007",
         lastName: "Alami",
         firstName: "Ahmed",
         groupId: 4
@@ -61,7 +61,7 @@ export const mockStudents: Student[] = [
     {
         id: 8,
         cne: "E008",
-        apogee: "A008",
+        registrationNumber: "A008",
         lastName: "Benjelloun",
         firstName: "Youssef",
         groupId: 4
@@ -69,7 +69,7 @@ export const mockStudents: Student[] = [
     {
         id: 9,
         cne: "E009",
-        apogee: "A009",
+        registrationNumber: "A009",
         lastName: "Idrissi",
         firstName: "Fatima",
         groupId: 5
@@ -77,7 +77,7 @@ export const mockStudents: Student[] = [
     {
         id: 10,
         cne: "E010",
-        apogee: "A010",
+        registrationNumber: "A010",
         lastName: "Hassani",
         firstName: "Karim",
         groupId: 5
@@ -85,7 +85,7 @@ export const mockStudents: Student[] = [
     {
         id: 11,
         cne: "E011",
-        apogee: "A011",
+        registrationNumber: "A011",
         lastName: "El Fassi",
         firstName: "Samira",
         groupId: 6
@@ -93,7 +93,7 @@ export const mockStudents: Student[] = [
     {
         id: 12,
         cne: "E012",
-        apogee: "A012",
+        registrationNumber: "A012",
         lastName: "Benali",
         firstName: "Mehdi",
         groupId: 6
@@ -102,7 +102,7 @@ export const mockStudents: Student[] = [
     {
         id: 13,
         cne: "E013",
-        apogee: "A013",
+        registrationNumber: "A013",
         lastName: "Alami",
         firstName: "Leila",
         groupId: null
@@ -110,7 +110,7 @@ export const mockStudents: Student[] = [
     {
         id: 14,
         cne: "E014",
-        apogee: "A014",
+        registrationNumber: "A014",
         lastName: "Benjelloun",
         firstName: "Ahmed",
         groupId: null
@@ -280,37 +280,37 @@ export const mockGroups: Group[] = [
     {
         id: 1,
         name: "GL-1A",
-        fieldId: 1,
+        filiereId: 1,
         students: getGroupStudents(1)
     },
     {
         id: 2,
         name: "GL-1B",
-        fieldId: 1,
+        filiereId: 1,
         students: getGroupStudents(2)
     },
     {
         id: 3,
         name: "RT-1A",
-        fieldId: 2,
+        filiereId: 2,
         students: getGroupStudents(3)
     },
     {
         id: 4,
         name: "RT-1B",
-        fieldId: 2,
+        filiereId: 2,
         students: getGroupStudents(4)
     },
     {
         id: 5,
         name: "IA-1A",
-        fieldId: 3,
+        filiereId: 3,
         students: getGroupStudents(5)
     },
     {
         id: 6,
         name: "IA-1B",
-        fieldId: 3,
+        filiereId: 3,
         students: getGroupStudents(6)
     }
 ];

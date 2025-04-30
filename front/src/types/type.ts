@@ -1,7 +1,7 @@
 export type Student = {
   id: number;
   cne: string;
-  apogee: string;
+  registrationNumber: string;
   lastName: string;
   firstName: string;
   groupId: number | null;
@@ -44,7 +44,7 @@ export type Professor = {
 export type Group = {
   id: number;
   name: string;
-  fieldId: number;
+  filiereId: number;
   students: Student[];
 };
 

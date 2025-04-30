@@ -1,13 +1,34 @@
 package com.ClassCraft.site.dto;
 
+import com.ClassCraft.site.models.Student;
+
 public class StudentDTO extends UserDTO {
     private String CNE;
     private String registrationNumber;
     private Long groupId;
     private String groupName;
-    private String phone;
     private String password;
-
+public static StudentDTO fromEntity(Student student) {
+        StudentDTO dto = new StudentDTO();
+        
+        // Set UserDTO fields
+        dto.setId(student.getId());
+        dto.setFirstName(student.getFirstName());
+        dto.setLastName(student.getLastName());
+        dto.setEmail(student.getEmail());
+        
+        // Set Student-specific fields
+        dto.setCNE(student.getCNE());
+        dto.setRegistrationNumber(student.getRegistrationNumber());
+        
+        // Set group info (without creating circular reference)
+        if (student.getGroup() != null) {
+            dto.setGroupId(student.getGroup().getId());
+            dto.setGroupName(student.getGroup().getName());
+        }
+        
+        return dto;
+    }
 
     // Getters and setters
     public String getCNE() { return CNE; }
@@ -22,13 +43,6 @@ public class StudentDTO extends UserDTO {
     public String getGroupName() { return groupName; }
     public void setGroupName(String groupName) { this.groupName = groupName; }
 
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
 
     public String getPassword() {
         return password;

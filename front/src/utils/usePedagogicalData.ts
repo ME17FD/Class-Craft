@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Field, Module, SubModule, Group, Professor, Student, CrudModalType, TabType, ModalState } from '../types/type';
-import { useMockData } from '../hooks/useMockData';
-
+//import { useMockData } from '../hooks/useMockData';
+import { useApiData } from '../hooks/useApiData';
 const usePedagogicalData = () => {
   const {
     fields,
@@ -30,7 +30,7 @@ const usePedagogicalData = () => {
     deleteStudent,
     addStudentToGroup,
     removeStudentFromGroup
-  } = useMockData();
+  } = useApiData();
 
   const [modalState, setModalState] = useState<ModalState>({
     isOpen: false,

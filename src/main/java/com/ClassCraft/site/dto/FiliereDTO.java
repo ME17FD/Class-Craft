@@ -5,6 +5,7 @@ public class FiliereDTO {
     private String name;
     private String description;
     private Long sessionId;
+    
     public Long getId() {
         return id;
     }

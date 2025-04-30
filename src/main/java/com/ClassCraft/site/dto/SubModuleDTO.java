@@ -5,6 +5,7 @@ public class SubModuleDTO {
     private String name;
     private Integer nbrHours;
     private Long moduleId;
+    private String moduleName;
     private Long teacherId;
     public Long getId() {
         return id;
@@ -38,4 +39,12 @@ public class SubModuleDTO {
     }
 
     // Getters and setters
+
+    public String getModuleName() {
+        return moduleName;
+    }
+
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
+    }
 }

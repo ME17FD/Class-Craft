@@ -50,7 +50,7 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
   // Filtrer les groupes en fonction des filtres sélectionnés
   const filteredGroups = groups.filter(group => {
     // Filtrer par filière
-    if (selectedField && group.fieldId !== selectedField) {
+    if (selectedField && group.filiereId !== selectedField) {
       return false;
     }
     
@@ -103,7 +103,7 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
     {
       header: "Filière",
       render: (group: Group) => {
-        const field = fields.find((f) => f.id === group.fieldId);
+        const field = fields.find((f) => f.id === group.filiereId);
         return field ? field.name : "N/A";
       },
     },
@@ -124,7 +124,7 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
     {
       header: "Modules",
       render: (group: Group) => {
-        const groupModules = modules.filter(module => module.fieldId === group.fieldId);
+        const groupModules = modules.filter(module => module.fieldId === group.filiereId);
         return (
           <div className={styles.moduleList}>
             {groupModules.map(module => (
@@ -142,7 +142,7 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
         const groupProfessors = professors.filter(professor => 
           professor.modules?.some(moduleId => 
             modules.some(module => 
-              module.id === moduleId && module.fieldId === group.fieldId
+              module.id === moduleId && module.fieldId === group.filiereId
             )
           )
         );
@@ -194,7 +194,7 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
   return (
     <div className={styles.groupsTab}>
       <div className={styles.header}>
-        <Button variant="primary" onClick={() => onEdit({ id: 0, name: "", fieldId: 0, students: [] })}>
+        <Button variant="primary" onClick={() => onEdit({ id: 0, name: "", filiereId: 0, students: [] })}>
           + Ajouter un groupe
         </Button>
       </div>
