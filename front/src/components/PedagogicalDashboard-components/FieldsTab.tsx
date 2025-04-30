@@ -4,6 +4,7 @@ import Table from "./TableActions";
 import Button from "./Button";
 import { Field, Module, SubModule, Group, Professor } from "../../types/type";
 import FieldDetailsModal from "./FieldDetailsModal";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
 
 interface FieldsTabProps {
   fields: Field[];
@@ -25,6 +26,7 @@ const FieldsTab: React.FC<FieldsTabProps> = ({
   onDelete,
 }) => {
   const [selectedField, setSelectedField] = useState<Field | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const handleOpenDetails = (field: Field) => {
     setSelectedField(field);
@@ -32,6 +34,19 @@ const FieldsTab: React.FC<FieldsTabProps> = ({
 
   const handleCloseDetails = () => {
     setSelectedField(null);
+  };
+
+  const handleDeleteClick = (field: Field) => {
+    setSelectedField(field);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (selectedField) {
+      onDelete(selectedField);
+      setIsDeleteModalOpen(false);
+      setSelectedField(null);
+    }
   };
 
   const columns = [
@@ -47,10 +62,10 @@ const FieldsTab: React.FC<FieldsTabProps> = ({
             small>
             Détails
           </Button>
-          <Button variant="edit" onClick={() => onEdit(field)} small>
+          <Button variant="secondary" onClick={() => onEdit(field)} small>
             Modifier
           </Button>
-          <Button variant="delete" onClick={() => onDelete(field)} small>
+          <Button variant="delete" onClick={() => handleDeleteClick(field)} small>
             Supprimer
           </Button>
         </div>
@@ -59,7 +74,7 @@ const FieldsTab: React.FC<FieldsTabProps> = ({
   ];
 
   return (
-    <>
+    <div className={styles.container}>
       <div className={styles.header}>
         <Button
           variant="primary"
@@ -77,14 +92,21 @@ const FieldsTab: React.FC<FieldsTabProps> = ({
       {selectedField && (
         <FieldDetailsModal
           field={selectedField}
-          modules={modules}
-          subModules={subModules}
-          groups={groups}
+          modules={modules.filter(m => m.fieldId === selectedField.id)}
+          subModules={subModules.filter(sm => modules.some(m => m.id === sm.moduleId && m.fieldId === selectedField.id))}
+          groups={groups.filter(g => g.filiereId === selectedField.id)}
           professors={professors}
-          onClose={handleCloseDetails}
+          onClose={() => setSelectedField(null)}
         />
       )}
-    </>
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        entityName={selectedField?.name || "cette filière"}
+      />
+    </div>
   );
 };
 

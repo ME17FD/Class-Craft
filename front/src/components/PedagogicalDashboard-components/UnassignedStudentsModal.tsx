@@ -2,92 +2,93 @@ import React, { useState, useEffect } from "react";
 import styles from "../../styles/PedagogicalDashboard-components/UnassignedStudentsModal.module.css";
 import { Student } from "../../types/type";
 import Button from "./Button";
+import Modal from "./Modal";
 
 interface UnassignedStudentsModalProps {
+  isOpen: boolean;
   onClose: () => void;
   onAssignStudent: (studentId: number) => void;
   students: Student[];
 }
 
 const UnassignedStudentsModal: React.FC<UnassignedStudentsModalProps> = ({
+  isOpen,
   onClose,
   onAssignStudent,
-  students = [], // Valeur par défaut pour éviter undefined
+  students,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
 
   useEffect(() => {
-    try {
-      // Filtrer les étudiants qui n'ont pas de groupe
-      const unassignedStudents = students.filter(student => student.groupId === null);
-      
-      // Filtrer selon le terme de recherche (apogée)
-      const filtered = unassignedStudents.filter(student =>
-        student.apogee.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      
-      setFilteredStudents(filtered);
-    } catch (error) {
-      console.error("Erreur lors du filtrage des étudiants:", error);
-      setFilteredStudents([]);
-    }
-  }, [students, searchTerm]);
+    setFilteredStudents(
+      students.filter(
+        (student) =>
+          student.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          student.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          student.registrationNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          student.cne.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+  }, [searchTerm, students]);
 
   return (
-    <div className={styles.modalOverlay}>
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose}
+      title="Étudiants non assignés"
+    >
       <div className={styles.modal}>
-        <h2>Ajouter un étudiant au groupe</h2>
-        
         <div className={styles.searchBar}>
           <input
             type="text"
-            placeholder="Rechercher par numéro Apogée..."
+            placeholder="Rechercher un étudiant..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className={styles.searchInput}
           />
         </div>
-
         <div className={styles.studentsList}>
-          {filteredStudents.length === 0 ? (
-            <p className={styles.noResults}>Aucun étudiant disponible</p>
-          ) : (
+          {filteredStudents.length > 0 ? (
             <table className={styles.studentsTable}>
               <thead>
                 <tr>
-                  <th>Apogée</th>
-                  <th>Nom complet</th>
+                  <th>CNE</th>
+                  <th>Numéro d'inscription</th>
+                  <th>Nom</th>
+                  <th>Prénom</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredStudents.map((student) => (
                   <tr key={student.id}>
-                    <td>{student.apogee}</td>
-                    <td>{`${student.lastName} ${student.firstName}`}</td>
+                    <td>{student.cne}</td>
+                    <td>{student.registrationNumber}</td>
+                    <td>{student.lastName}</td>
+                    <td>{student.firstName}</td>
                     <td>
                       <Button
-                        variant="primary"
+                        variant="assign"
                         onClick={() => onAssignStudent(student.id)}
                       >
-                        Ajouter
+                        Assigner
                       </Button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          ) : (
+            <p className={styles.noResults}>Aucun étudiant trouvé</p>
           )}
         </div>
-
         <div className={styles.modalActions}>
           <Button variant="secondary" onClick={onClose}>
             Fermer
           </Button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };
 

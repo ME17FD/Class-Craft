@@ -3,6 +3,7 @@ import styles from "../../styles/PedagogicalDashboard-components/ModulesTab.modu
 import Table from "./TableActions";
 import Button from "./Button";
 import { Module, Field, Professor, SubModule } from "../../types/type";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
 
 interface ModulesTabProps {
   modules: Module[];
@@ -23,6 +24,8 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
 }) => {
   const [selectedField, setSelectedField] = useState<number>(0);
   const [selectedProfessor, setSelectedProfessor] = useState<number>(0);
+  const [selectedModule, setSelectedModule] = useState<Module | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const getFieldName = (fieldId: number) => {
     return fields.find((f) => f.id === fieldId)?.name || "Non spécifié";
@@ -47,6 +50,19 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
     });
   }, [modules, selectedField, selectedProfessor, professors]);
 
+  const handleDeleteClick = (module: Module) => {
+    setSelectedModule(module);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (selectedModule) {
+      onDelete(selectedModule);
+      setIsDeleteModalOpen(false);
+      setSelectedModule(null);
+    }
+  };
+
   const columns = [
     { header: "Nom", accessor: "name" as keyof Module },
     {
@@ -65,10 +81,10 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
       header: "Actions",
       render: (module: Module) => (
         <div className={styles.actions}>
-          <Button variant="edit" onClick={() => onEdit(module)} small>
+          <Button variant="secondary" onClick={() => onEdit(module)}>
             Modifier
           </Button>
-          <Button variant="delete" onClick={() => onDelete(module)} small>
+          <Button variant="delete" onClick={() => handleDeleteClick(module)}>
             Supprimer
           </Button>
         </div>
@@ -77,7 +93,7 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
   ];
 
   return (
-    <>
+    <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.filters}>
           <div className={styles.filterGroup}>
@@ -119,7 +135,14 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
         columns={columns}
         emptyMessage="Aucun module trouvé"
       />
-    </>
+      
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        entityName={selectedModule?.name || "ce module"}
+      />
+    </div>
   );
 };
 

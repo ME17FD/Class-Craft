@@ -13,7 +13,7 @@ const AddStudentModal: React.FC<AddStudentModalProps> = ({
   onClose,
 }) => {
   const [cne, setCne] = React.useState("");
-  const [apogee, setApogee] = React.useState("");
+  const [registrationNumber, setRegistrationNumber] = React.useState("");
   const [lastName, setLastName] = React.useState("");
   const [firstName, setFirstName] = React.useState("");
 
@@ -21,12 +21,12 @@ const AddStudentModal: React.FC<AddStudentModalProps> = ({
     e.preventDefault();
     onSave({
       cne,
-      apogee,
+      registrationNumber,
       lastName,
       firstName,
-      name: `${lastName} ${firstName}`, // On garde name pour la compatibilité
       groupId: null,
     });
+    onClose();
   };
 
   return (
@@ -49,8 +49,8 @@ const AddStudentModal: React.FC<AddStudentModalProps> = ({
             <label>Apogée</label>
             <input
               type="text"
-              value={apogee}
-              onChange={(e) => setApogee(e.target.value)}
+              value={registrationNumber}
+              onChange={(e) => setRegistrationNumber(e.target.value)}
               required
             />
           </div>

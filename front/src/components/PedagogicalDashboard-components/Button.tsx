@@ -7,14 +7,16 @@ type ButtonVariant =
   | "edit"
   | "delete"
   | "assign"
-  | "unassign";
+  | "unassign"
+  | "error";
 
 interface ButtonProps {
   variant: ButtonVariant;
-  onClick: () => void;
+  onClick?: () => void;
   children: React.ReactNode;
   small?: boolean;
   disabled?: boolean;
+  type?: "button" | "submit" | "reset";
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -23,6 +25,7 @@ const Button: React.FC<ButtonProps> = ({
   children,
   small = false,
   disabled = false,
+  type = "button",
 }) => {
   return (
     <button
@@ -30,7 +33,8 @@ const Button: React.FC<ButtonProps> = ({
         small ? styles.small : ""
       }`}
       onClick={onClick}
-      disabled={disabled}>
+      disabled={disabled}
+      type={type}>
       {children}
     </button>
   );

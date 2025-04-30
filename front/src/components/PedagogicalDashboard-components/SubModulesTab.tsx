@@ -4,6 +4,7 @@ import Table from "./TableActions";
 import Button from "./Button";
 import { SubModule, Module, Field, Professor } from "../../types/type";
 import SubModuleFormModal from "./SubModuleFormModal";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
 
 interface SubModulesTabProps {
   subModules: SubModule[];
@@ -23,6 +24,8 @@ const SubModulesTab: React.FC<SubModulesTabProps> = ({
   onDelete,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedSubModule, setSelectedSubModule] = useState<SubModule | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const getModuleName = (moduleId: number) => {
     if (!modules || modules.length === 0) return "Non spécifié";
@@ -49,6 +52,19 @@ const SubModulesTab: React.FC<SubModulesTabProps> = ({
     return moduleProfessors.map(p => p.name).join(", ") || "Aucun professeur";
   };
 
+  const handleDeleteClick = (subModule: SubModule) => {
+    setSelectedSubModule(subModule);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (selectedSubModule) {
+      onDelete(selectedSubModule);
+      setIsDeleteModalOpen(false);
+      setSelectedSubModule(null);
+    }
+  };
+
   const columns = [
     { header: "Nom", accessor: "name" as keyof SubModule },
     { header: "Heures", accessor: "hours" as keyof SubModule },
@@ -68,10 +84,10 @@ const SubModulesTab: React.FC<SubModulesTabProps> = ({
       header: "Actions",
       render: (subModule: SubModule) => (
         <div className={styles.actions}>
-          <Button variant="edit" onClick={() => onEdit(subModule)} small>
+          <Button variant="secondary" onClick={() => onEdit(subModule)}>
             Modifier
           </Button>
-          <Button variant="delete" onClick={() => onDelete(subModule)} small>
+          <Button variant="delete" onClick={() => handleDeleteClick(subModule)}>
             Supprimer
           </Button>
         </div>
@@ -80,7 +96,7 @@ const SubModulesTab: React.FC<SubModulesTabProps> = ({
   ];
 
   return (
-    <>
+    <div className={styles.container}>
       <div className={styles.header}>
         <Button
           variant="primary"
@@ -112,7 +128,14 @@ const SubModulesTab: React.FC<SubModulesTabProps> = ({
         modules={modules}
         fields={fields}
       />
-    </>
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        entityName={selectedSubModule?.name || "ce sous-module"}
+      />
+    </div>
   );
 };
 

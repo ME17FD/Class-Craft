@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import styles from "../../styles/PedagogicalDashboard-components/CrudModal.module.css";
 import Button from "./Button";
+import Modal from "./Modal";
 import {
   CrudModalType,
   TabType,
@@ -347,22 +348,38 @@ const CrudModal: React.FC<CrudModalProps> = ({
   };
 
   return (
-    <div className={styles.modalOverlay}>
-      <div className={styles.modal}>
-        <h2>{getModalTitle()}</h2>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={getModalTitle()}
+    >
+      {type === "delete" ? (
+        <div className={styles.deleteConfirmation}>
+          <p>Êtes-vous sûr de vouloir supprimer {entity?.name || "cet élément"} ?</p>
+          <p className={styles.warning}>Cette action est irréversible.</p>
+          <div className={styles.modalActions}>
+            <Button variant="secondary" onClick={onClose}>
+              Annuler
+            </Button>
+            <Button variant="delete" onClick={handleSubmit}>
+              Supprimer
+            </Button>
+          </div>
+        </div>
+      ) : (
         <form onSubmit={handleSubmit}>
           {renderFormFields()}
           <div className={styles.modalActions}>
             <Button variant="secondary" onClick={onClose}>
               Annuler
             </Button>
-            <Button variant="primary" onClick={handleSubmit}>
-              {type === "delete" ? "Confirmer" : "Enregistrer"}
+            <Button variant="primary" type="submit">
+              Enregistrer
             </Button>
           </div>
         </form>
-      </div>
-    </div>
+      )}
+    </Modal>
   );
 };
 

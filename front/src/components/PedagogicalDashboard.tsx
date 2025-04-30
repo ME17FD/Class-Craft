@@ -87,7 +87,6 @@ const PedagogicalDashboard: React.FC = () => {
             groups={data.groups}
             fields={data.fields}
             modules={data.modules}
-            subModules={data.subModules}
             professors={data.professors}
             students={data.allStudents}
             onEdit={(group) => handleEdit("groups", group)}
@@ -100,6 +99,7 @@ const PedagogicalDashboard: React.FC = () => {
             students={data.allStudents}
             groups={data.groups}
             onEdit={(student) => handleEdit("students", student)}
+            onDelete={(student) => handleDelete("students", student)}
           />
         )}
         {activeTab === "fields" && (
@@ -139,11 +139,12 @@ const PedagogicalDashboard: React.FC = () => {
             modules={data.modules}
             subModules={data.subModules}
             onEdit={(professor) => handleEdit("professors", professor)}
+            onDelete={(professor) => handleDelete("professors", professor)}
           />
         )}
       </div>
 
-      {activeTab !== "fields" && (
+      {modalState.isOpen && modalState.type !== 'delete' && (
         <CrudModal
           isOpen={modalState.isOpen}
           type={modalState.type}

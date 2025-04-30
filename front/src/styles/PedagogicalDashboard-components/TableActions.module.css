@@ -1,33 +1,39 @@
-@import '../../styles/variable.css';
+@import '../../styles/variables.css';
+
 .table {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-    font-size: 0.9rem;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: var(--spacing-md);
+    font-size: 0.875rem;
+    background-color: var(--bg-primary);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
 }
 
 .table th {
-    background-color: var(--lighter-blue);
-    color: var(--primary-blue);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
     font-weight: 600;
     text-align: left;
-    padding: 0.75rem 1rem;
+    padding: var(--spacing-md) var(--spacing-lg);
     border-bottom: 2px solid var(--border-color);
 }
 
 .table td {
-    padding: 0.75rem 1rem;
+    padding: var(--spacing-md) var(--spacing-lg);
     border-bottom: 1px solid var(--border-color);
-    vertical-align: top;
+    color: var(--text-primary);
 }
 
 .table tr:hover {
-    background-color: var(--light-gray);
+    background-color: var(--bg-secondary);
 }
 
 .emptyCell {
     text-align: center;
-    padding: 2rem;
-    color: var(--text-color);
-    opacity: 0.7;
+    padding: var(--spacing-xl);
+    color: var(--text-secondary);
+    font-style: italic;
 }

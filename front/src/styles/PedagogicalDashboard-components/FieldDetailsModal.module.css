@@ -13,25 +13,30 @@
 
 .modal {
     background-color: white;
-    border-radius: 0.5rem;
     padding: 2rem;
+    border-radius: 12px;
     width: 90%;
-    max-width: 1000px;
-    max-height: 90vh;
+    max-width: 800px;
+    max-height: 80vh;
     overflow-y: auto;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .modalHeader {
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 1.5rem;
 }
 
 .modalHeader h2 {
-    color: #2d3748;
+    color: #1a365d;
     font-size: 1.5rem;
+    font-weight: 600;
     margin-bottom: 0.5rem;
+}
+
+.modalHeader p {
+    color: #4a5568;
+    font-size: 1rem;
+    line-height: 1.5;
 }
 
 .description {
@@ -46,15 +51,49 @@
 }
 
 .section {
-    background-color: #f7fafc;
-    border-radius: 0.5rem;
-    padding: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .section h3 {
     color: #2d3748;
     font-size: 1.25rem;
+    font-weight: 600;
     margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.table th,
+.table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.table th {
+    background-color: #f7fafc;
+    font-weight: 600;
+    color: #4a5568;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+}
+
+.table tr:hover {
+    background-color: #f7fafc;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
 }
 
 .modulesList {
@@ -168,7 +207,27 @@
 .modalActions {
     display: flex;
     justify-content: flex-end;
-    margin-top: 2rem;
-    padding-top: 1rem;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
     border-top: 1px solid #e2e8f0;
+}
+
+/* Scrollbar styling */
+.modal::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.modal::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 4px;
+}
+
+.modal::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
 }

@@ -17,13 +17,17 @@ const GroupFormModal: React.FC<GroupFormModalProps> = ({
   onClose,
 }) => {
   const [name, setName] = React.useState(group?.name || "");
-  const [fieldId, setFieldId] = React.useState(
-    group?.fieldId || fields[0]?.id || 0
+  const [filiereId, setFiliereId] = React.useState(
+    group?.filiereId || fields[0]?.id || 0
   );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({ name, fieldId, students: [] });
+    onSave({
+      name,
+      filiereId,
+    });
+    onClose();
   };
 
   return (
@@ -45,8 +49,8 @@ const GroupFormModal: React.FC<GroupFormModalProps> = ({
           <div className={styles.formGroup}>
             <label>Filière</label>
             <select
-              value={fieldId}
-              onChange={(e) => setFieldId(Number(e.target.value))}
+              value={filiereId}
+              onChange={(e) => setFiliereId(Number(e.target.value))}
               required>
               {fields.map((field) => (
                 <option key={field.id} value={field.id}>
