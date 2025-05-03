@@ -38,7 +38,7 @@ const FieldDetailsModal: React.FC<FieldDetailsModalProps> = ({
   }));
 
   // Trouver les groupes de la filière
-  const fieldGroups = groups.filter(group => group.fieldId === field.id);
+  const fieldGroups = groups.filter(group => group.filiereId === field.id);
 
   return (
     <div className={styles.modalOverlay}>

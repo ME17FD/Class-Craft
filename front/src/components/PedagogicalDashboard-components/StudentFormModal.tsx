@@ -18,7 +18,7 @@ const StudentFormModal: React.FC<StudentFormModalProps> = ({
 }) => {
   const [formData, setFormData] = useState<Omit<Student, "id">>({
     cne: "",
-    apogee: "",
+    registrationNumber: "",
     lastName: "",
     firstName: "",
     groupId: null,
@@ -28,7 +28,7 @@ const StudentFormModal: React.FC<StudentFormModalProps> = ({
     if (student) {
       setFormData({
         cne: student.cne,
-        apogee: student.apogee,
+        registrationNumber: student.registrationNumber,
         lastName: student.lastName,
         firstName: student.firstName,
         groupId: student.groupId,
@@ -71,7 +71,7 @@ const StudentFormModal: React.FC<StudentFormModalProps> = ({
               <input
                 type="text"
                 name="apogee"
-                value={formData.apogee}
+                value={formData.registrationNumber}
                 onChange={handleChange}
                 required
               />
