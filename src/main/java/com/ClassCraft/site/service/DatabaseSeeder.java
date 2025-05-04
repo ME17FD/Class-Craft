@@ -160,10 +160,9 @@ public class DatabaseSeeder implements CommandLineRunner {
         String[] amphitheatreNames = {"Amphitheatre A", "Amphitheatre B", "Amphitheatre C", "Amphitheatre D"};
         for (String name : amphitheatreNames) {
             if (!classroomRepository.existsByName(name)) {
-                Amphitheatre amphitheatre = new Amphitheatre();
+                Classroom amphitheatre = new Classroom();
                 amphitheatre.setName(name);
                 amphitheatre.setCapacity(200 + random.nextInt(200)); // 200-400 capacity
-                amphitheatre.setHasMicrophone(random.nextBoolean());
                 classroomRepository.save(amphitheatre);
                 classrooms.add(amphitheatre);
             }
@@ -173,10 +172,10 @@ public class DatabaseSeeder implements CommandLineRunner {
         for (int i = 1; i <= 20; i++) {
             String name = "Salle " + (100 + i);
             if (!classroomRepository.existsByName(name)) {
-                Salle salle = new Salle();
+                Classroom salle = new Classroom();
                 salle.setName(name);
                 salle.setCapacity(20 + random.nextInt(30)); // 20-50 capacity
-                salle.setHasProjector(random.nextBoolean());
+                salle.setType(Classroom.ClassroomType.SALLE_TD); // ← Nouveau champ "type"
                 classroomRepository.save(salle);
                 classrooms.add(salle);
             }

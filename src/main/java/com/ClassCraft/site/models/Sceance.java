@@ -26,10 +26,16 @@ public class Sceance {
     
     @ManyToOne
     private SubModule subModule;
+     
+    @ManyToOne
+    private Module Module;
     
     @ManyToOne
     private Group group;
     
     @ManyToOne
     private Classroom classroom;
+
+    @ManyToOne
+    private Professor professor;
 }

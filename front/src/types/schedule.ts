@@ -2,6 +2,7 @@ import { Group, Professor, Module, SubModule, Field } from './type';
 
 // Type pour une séance
 export interface Session {
+    startDate: string | number | Date;
     id: number;
     startTime: string;
     endTime: string;
@@ -11,7 +12,7 @@ export interface Session {
     subModule?: SubModule;
     room: string;
     group: Group;
-    type: 'CM' | 'TD' | 'TP' | 'EXAM' | 'RATTRAPAGE';
+    type: 'CM' | 'TD' | 'TP' | 'EXAM' | 'RATTRAPAGE' | 'EVENT';
     professorPresent: boolean;
     duration: number;
 }

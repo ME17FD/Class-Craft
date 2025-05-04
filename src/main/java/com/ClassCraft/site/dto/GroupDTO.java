@@ -1,5 +1,6 @@
 package com.ClassCraft.site.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -10,6 +11,8 @@ public class GroupDTO {
     private Long filiereId;
     private String filiereName;  // Added for convenience
     private List<StudentInfoDTO> students;  // Nested DTO for student information
+    public GroupDTO() {
+}
 
     // Getters and setters
     public Long getId() { return id; }
@@ -17,7 +20,7 @@ public class GroupDTO {
     
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-    
+
     public Integer getSize() {
         if (size != null) {
             return size;

@@ -11,9 +11,7 @@ import {
   Student,
 } from "../types/type";
 
-
-
-
+import { Session } from "../types/schedule";
 
 export const useApiData = () => {
   const [fields, setFields] = useState<Field[]>([]);
@@ -22,7 +20,8 @@ export const useApiData = () => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [professors, setProfessors] = useState<Professor[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
- 
+  const [seances, setSeances] = useState<Session[]>([]);
+
   useEffect(() => {
     const fetchData = async () => {
       console.log("Initiating API requests...");
@@ -35,7 +34,7 @@ export const useApiData = () => {
           { name: "groups", url: "/api/groups" },
           { name: "professors", url: "/api/professors" },
           { name: "students", url: "/api/students" },
-          { name: "sessions", url: "/api/sessions" },
+          { name: "seances", url: "/api/seances" },
         ];
   
         // Create requests with enhanced logging
@@ -97,6 +96,7 @@ export const useApiData = () => {
             case "groups": setGroups(result.value.data); break;
             case "professors": setProfessors(result.value.data); break;
             case "students": setStudents(result.value.data); break;
+            case "seances": setSeances(result.value.data); break;
           }
         });
   
@@ -208,8 +208,28 @@ export const useApiData = () => {
     setStudents(prev => prev.filter(s => s.id !== studentId));
   }, []);
 
+  // ----- CRUD: Seances -----
+const addSeance = useCallback(async (seance: Session) => {
+  const res = await axios.post("/api/seances", seance);
+  setSeances(prev => [...prev, res.data]);
+}, []);
+
+const updateSeance = useCallback(async (seance: Session) => {
+  await axios.put(`/api/seances/${seance.id}`, seance);
+  setSeances(prev => prev.map(s => s.id === seance.id ? seance : s));
+}, []);
+
+const deleteSeance = useCallback(async (seanceId: number) => {
+  await axios.delete(`/api/seances/${seanceId}`);
+  setSeances(prev => prev.filter(s => s.id !== seanceId));
+}, []);
+
+
   return {
-   
+    seances,
+    addSeance,
+    updateSeance,
+    deleteSeance,
     fields,
     modules,
     subModules,

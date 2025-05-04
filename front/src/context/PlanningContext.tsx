@@ -62,7 +62,7 @@ export const PlanningProvider = ({ children }: { children: ReactNode }) => {
       const date = new Date().toISOString().split("T")[0]; // À remplacer par la vraie date
       const sessionWithPresence = {
         ...session,
-        professorPresent: session.professorPresent || false, // Valeur par défaut
+        professorPresent: session.professorPresent || true, // Valeur par défaut
       };
 
       if (!acc[date]) acc[date] = [];
@@ -76,7 +76,7 @@ export const PlanningProvider = ({ children }: { children: ReactNode }) => {
         date,
         sessions: sessions.map((s) => ({
           ...s,
-          professorPresent: s.professorPresent || false, // Garantir la présence de la propriété
+          professorPresent: s.professorPresent || true, // Garantir la présence de la propriété
         })),
       }))
     );

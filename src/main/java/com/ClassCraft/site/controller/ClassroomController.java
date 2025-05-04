@@ -4,24 +4,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.ClassCraft.site.dto.AmphitheatreDTO;
+import org.springframework.web.bind.annotation.*;
 import com.ClassCraft.site.dto.ClassroomDTO;
-import com.ClassCraft.site.dto.SalleDTO;
-import com.ClassCraft.site.models.Amphitheatre;
 import com.ClassCraft.site.models.Classroom;
-import com.ClassCraft.site.models.Salle;
+import com.ClassCraft.site.models.Classroom.ClassroomType;
 import com.ClassCraft.site.repository.ClassroomRepository;
 
 import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/api/classrooms")
 @RequiredArgsConstructor
@@ -29,6 +19,7 @@ public class ClassroomController {
 
     private final ClassroomRepository classroomRepository;
 
+    // Récupérer toutes les classes de salles
     @GetMapping
     public ResponseEntity<List<ClassroomDTO>> getAllClassrooms() {
         List<Classroom> classrooms = classroomRepository.findAll();
@@ -38,6 +29,7 @@ public class ClassroomController {
         return ResponseEntity.ok(dtos);
     }
 
+    // Récupérer une salle par son ID
     @GetMapping("/{id}")
     public ResponseEntity<ClassroomDTO> getClassroom(@PathVariable Long id) {
         return classroomRepository.findById(id)
@@ -46,12 +38,14 @@ public class ClassroomController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // Créer une nouvelle salle
     @PostMapping
     public ResponseEntity<ClassroomDTO> createClassroom(@RequestBody ClassroomDTO dto) {
         Classroom saved = classroomRepository.save(convertToEntity(dto));
         return ResponseEntity.ok(convertToDTO(saved));
     }
 
+    // Mettre à jour une salle existante
     @PutMapping("/{id}")
     public ResponseEntity<ClassroomDTO> updateClassroom(@PathVariable Long id, @RequestBody ClassroomDTO dto) {
         return classroomRepository.findById(id).map(existing -> {
@@ -61,6 +55,7 @@ public class ClassroomController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    // Supprimer une salle par son ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteClassroom(@PathVariable Long id) {
         if (!classroomRepository.existsById(id)) return ResponseEntity.notFound().build();
@@ -70,56 +65,42 @@ public class ClassroomController {
 
     // ======== Helper methods ========
 
+    // Convertir une entité Classroom en DTO
     private ClassroomDTO convertToDTO(Classroom classroom) {
-        if (classroom instanceof Salle salle) {
-            SalleDTO dto = new SalleDTO();
-            dto.setId(salle.getId());
-            dto.setName(salle.getName());
-            dto.setCapacity(salle.getCapacity());
-            dto.setHasProjector(salle.getHasProjector());
-            return dto;
-        } else if (classroom instanceof Amphitheatre amp) {
-            AmphitheatreDTO dto = new AmphitheatreDTO();
-            dto.setId(amp.getId());
-            dto.setName(amp.getName());
-            dto.setCapacity(amp.getCapacity());
-            dto.setHasMicrophone(amp.getHasMicrophone());
-            return dto;
-        } else {
-            throw new IllegalArgumentException("Unknown classroom type");
-        }
+        ClassroomDTO dto = new ClassroomDTO();
+        dto.setId(classroom.getId());
+        dto.setName(classroom.getName());
+        dto.setCapacity(classroom.getCapacity());
+        dto.setType(classroom.getType()); // Ajouter le type directement
+        return dto;
     }
 
+    // Convertir un DTO en entité Classroom
     private Classroom convertToEntity(ClassroomDTO dto) {
-        if ("SALLE".equals(dto.getType())) {
-            Salle salle = new Salle();
-            salle.setId(dto.getId());
-            salle.setName(dto.getName());
-            salle.setCapacity(dto.getCapacity());
-            salle.setHasProjector(((SalleDTO) dto).getHasProjector());
-            return salle;
-        } else if ("AMPHITHEATRE".equals(dto.getType())) {
-            Amphitheatre amp = new Amphitheatre();
-            amp.setId(dto.getId());
-            amp.setName(dto.getName());
-            amp.setCapacity(dto.getCapacity());
-            amp.setHasMicrophone(((AmphitheatreDTO) dto).getHasMicrophone());
-            return amp;
+        // Créer la salle en fonction du type
+        Classroom classroom;
+        if (dto.getType() == ClassroomType.AMPHI) {
+            classroom = new Classroom();
+        } 
+        else if (dto.getType() == ClassroomType.SALLE_TD) {
+            classroom = new Classroom(); // Classe qui correspond à "Salle TD" (exemple)
+        } else if (dto.getType() == ClassroomType.SALLE_TP) {
+            classroom = new Classroom(); // Classe qui correspond à "Salle TP" (exemple)
         } else {
-            throw new IllegalArgumentException("Invalid type: " + dto.getType());
+            throw new IllegalArgumentException("Unknown classroom type: " + dto.getType());
         }
+
+        classroom.setName(dto.getName());
+        classroom.setCapacity(dto.getCapacity());
+        classroom.setType(dto.getType());
+        return classroom;
     }
 
+    // Mettre à jour l'entité Classroom existante
     private Classroom updateEntity(Classroom existing, ClassroomDTO dto) {
         existing.setName(dto.getName());
         existing.setCapacity(dto.getCapacity());
-
-        if (existing instanceof Salle salle && dto instanceof SalleDTO salleDTO) {
-            salle.setHasProjector(salleDTO.getHasProjector());
-        } else if (existing instanceof Amphitheatre amp && dto instanceof AmphitheatreDTO ampDTO) {
-            amp.setHasMicrophone(ampDTO.getHasMicrophone());
-        }
-
+        existing.setType(dto.getType());
         return existing;
     }
 }
