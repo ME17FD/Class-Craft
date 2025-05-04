@@ -24,6 +24,9 @@ public class GroupDTO {
         }
         return students != null ? students.size() : 0;
     }
+
+    public GroupDTO() {
+    }
     
     public void setSize(Integer size) { this.size = size; }
     

@@ -42,10 +42,10 @@ export type Professor = {
 };
 
 export type Group = {
-  id: number;
-  name: string;
-  filiereId: number;
-  students: Student[];
+  id ?: number;
+  name ?: string;
+  filiereId ?: number;
+  students ?: Student[];
 };
 
 export type CrudModalType = 'add' | 'edit' | 'delete' | 'assign';

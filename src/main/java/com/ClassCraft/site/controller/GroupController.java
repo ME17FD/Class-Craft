@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -102,31 +101,38 @@ public class GroupController {
     }
 
     @PostMapping
-    public ResponseEntity<Group> createGroup(@RequestBody Group newGroup) {
-        // Optionally check for filiere existence
-        if (newGroup.getFiliere() != null) {
-            Optional<Filiere> filiere = filiereRepository.findById(newGroup.getFiliere().getId());
-            filiere.ifPresent(newGroup::setFiliere);
-        }
+public ResponseEntity<GroupDTO> createGroup(@RequestBody GroupDTO groupDTO) {
+    // Map GroupDTO to Group entity
+    Group newGroup = new Group();
+    newGroup.setName(groupDTO.getName());
 
-        Group savedGroup = groupRepository.save(newGroup);
-        return ResponseEntity.ok(savedGroup);
+    // If Filiere is provided in DTO, set it
+    if (groupDTO.getFiliereId() != null) {
+        Optional<Filiere> filiere = filiereRepository.findById(groupDTO.getFiliereId());
+        filiere.ifPresent(newGroup::setFiliere);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Group> updateGroup(@PathVariable Long id, @RequestBody Group updatedGroup) {
-        Optional<Group> optionalGroup = groupRepository.findById(id);
-        if (optionalGroup.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+    Group savedGroup = groupRepository.save(newGroup);
 
-        Group group = optionalGroup.get();
-        group.setName(updatedGroup.getName());
-        group.setFiliere(updatedGroup.getFiliere()); // You may want to verify Filiere exists
+    // Map saved Group entity to GroupDTO for the response
+    
 
-        Group saved = groupRepository.save(group);
-        return ResponseEntity.ok(saved);
-    }
+    Long filiereId = (savedGroup.getFiliere() != null) ? savedGroup.getFiliere().getId() : null;
+    String filiereName = (savedGroup.getFiliere() != null) ? savedGroup.getFiliere().getName() : null;
+
+    GroupDTO savedGroupDTO = new GroupDTO(
+        savedGroup.getId(),
+        savedGroup.getName(),
+        0,
+        filiereId,
+        filiereName,
+        null
+    );
+
+    // Return the saved GroupDTO as a response
+    return ResponseEntity.ok(savedGroupDTO);
+}
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGroup(@PathVariable Long id) {

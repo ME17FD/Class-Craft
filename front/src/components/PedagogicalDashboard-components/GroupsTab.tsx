@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import styles from "../../styles/PedagogicalDashboard-components/GroupsTab.module.css";
 import Button from "./Button";
 import { Group, Field, Module, Professor, Student } from "../../types/type";
@@ -6,6 +6,8 @@ import Table from "./TableActions";
 import GroupStudentsModal from "./GroupStudentsModal";
 import UnassignedStudentsModal from "./UnassignedStudentsModal";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import GroupFormModal from "./GroupFormModal";
+import { useApiData } from "../../hooks/useApiData";
 
 interface GroupsTabProps {
   groups: Group[];
@@ -19,7 +21,7 @@ interface GroupsTabProps {
 }
 
 const GroupsTab: React.FC<GroupsTabProps> = ({
-  groups = [],
+  groups: initialGroups = [],
   fields = [],
   modules = [],
   professors = [],
@@ -28,42 +30,32 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
   onDelete,
   onAssignStudents,
 }) => {
+  const [localGroups, setLocalGroups] = useState<Group[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isStudentsModalOpen, setIsStudentsModalOpen] = useState(false);
   const [isUnassignedModalOpen, setIsUnassignedModalOpen] = useState(false);
-  
-  // États pour les filtres
+  const [isGroupFormOpen, setIsGroupFormOpen] = useState(false);
+  const [editingGroup, setEditingGroup] = useState<Group | undefined>(undefined);
+
   const [selectedField, setSelectedField] = useState<number | null>(null);
   const [selectedModule, setSelectedModule] = useState<number | null>(null);
   const [selectedProfessor, setSelectedProfessor] = useState<number | null>(null);
-  
-  // Filtrer les modules en fonction de la filière sélectionnée
-  const filteredModules = selectedField 
+
+  const apiData = useApiData();
+
+  useEffect(() => {
+    setLocalGroups(initialGroups);
+  }, [initialGroups]);
+
+  const filteredModules = selectedField
     ? modules.filter(module => module.fieldId === selectedField)
     : modules;
-  
-  // Filtrer les groupes en fonction des filtres sélectionnés
-  const filteredGroups = groups.filter(group => {
-    // Filtrer par filière
-    if (selectedField && group.filiereId !== selectedField) {
-      return false;
-    }
-    
-    // Filtrer par module (si le groupe a des étudiants qui suivent ce module)
-    if (selectedModule) {
-      // Logique à implémenter: vérifier si des étudiants du groupe suivent ce module
-      // Pour l'instant, on retourne true pour tous les groupes
-      return true;
-    }
-    
-    // Filtrer par professeur (si le professeur enseigne dans ce groupe)
-    if (selectedProfessor) {
-      // Logique à implémenter: vérifier si le professeur enseigne dans ce groupe
-      // Pour l'instant, on retourne true pour tous les groupes
-      return true;
-    }
-    
+
+  const filteredGroups = localGroups.filter(group => {
+    if (selectedField && group.filiereId !== selectedField) return false;
+    if (selectedModule) return true;
+    if (selectedProfessor) return true;
     return true;
   });
 
@@ -97,38 +89,53 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
   const handleConfirmDelete = () => {
     if (selectedGroup) {
       onDelete(selectedGroup);
+      setLocalGroups(prev => prev.filter(group => group.id !== selectedGroup.id));
       setIsDeleteModalOpen(false);
       setSelectedGroup(null);
     }
   };
 
+  const handleEdit = (group: Group) => {
+    setEditingGroup(group);
+    setIsGroupFormOpen(true);
+  };
+
+  const handleSaveGroup = async (groupData: Omit<Group, "id" | "students">) => {
+    if (editingGroup) {
+      const updatedGroup = { ...editingGroup, ...groupData };
+      onEdit(updatedGroup);
+      setLocalGroups(prev =>
+        prev.map(group => group.id === updatedGroup.id ? updatedGroup : group)
+      );
+    } else {
+      const newGroup = await apiData.addGroup(groupData);
+      if (newGroup) {
+        setLocalGroups(prev => [...prev, { ...newGroup, students: [] }]);
+      }
+    }
+    setIsGroupFormOpen(false);
+  };
+  
   const columns = [
     { header: "Nom", accessor: "name" as keyof Group },
-    { 
-      header: "Filière", 
-      render: (group: Group) => fields.find(f => f.id === group.filiereId)?.name || "Inconnue" 
+    {
+      header: "Filière",
+      render: (group: Group) => fields.find(f => f.id === group.filiereId)?.name || "Inconnue"
     },
-    { 
-      header: "Nombre d'étudiants", 
+    {
+      header: "Nombre d'étudiants",
       render: (group: Group) => (
-        <span 
-          className={styles.studentCount}
-          onClick={() => handleShowStudents(group)}
-        >
-          {group.students.length}
+        <span className={styles.studentCount} onClick={() => handleShowStudents(group)}>
+          {group.students?.length}
         </span>
-      )
+      ),
     },
     {
       header: "Actions",
       render: (group: Group) => (
         <div className={styles.actions}>
-          <Button variant="secondary" onClick={() => onEdit(group)}>
-            Modifier
-          </Button>
-          <Button variant="delete" onClick={() => handleDeleteClick(group)}>
-            Supprimer
-          </Button>
+          <Button variant="secondary" onClick={() => handleEdit(group)}>Modifier</Button>
+          <Button variant="delete" onClick={() => handleDeleteClick(group)}>Supprimer</Button>
         </div>
       ),
     },
@@ -150,9 +157,7 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
           >
             <option value="">Toutes les filières</option>
             {fields.map((field) => (
-              <option key={field.id} value={field.id}>
-                {field.name}
-              </option>
+              <option key={field.id} value={field.id}>{field.name}</option>
             ))}
           </select>
 
@@ -162,9 +167,7 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
           >
             <option value="">Tous les modules</option>
             {filteredModules.map((module) => (
-              <option key={module.id} value={module.id}>
-                {module.name}
-              </option>
+              <option key={module.id} value={module.id}>{module.name}</option>
             ))}
           </select>
 
@@ -174,34 +177,30 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
           >
             <option value="">Tous les professeurs</option>
             {professors.map((professor) => (
-              <option key={professor.id} value={professor.id}>
-                {professor.name}
-              </option>
+              <option key={professor.id} value={professor.id}>{professor.name}</option>
             ))}
           </select>
 
-          <Button variant="secondary" onClick={resetFilters}>
-            Réinitialiser les filtres
-          </Button>
+          <Button variant="secondary" onClick={resetFilters}>Réinitialiser les filtres</Button>
         </div>
 
         <Button
           variant="secondary"
-          onClick={() => onEdit({ id: 0, name: "", filiereId: 0, students: [] })}>
+          onClick={() => {
+            setEditingGroup(undefined);
+            setIsGroupFormOpen(true);
+          }}
+        >
           + AJOUTER UN GROUPE
         </Button>
       </div>
 
-      <Table
-        data={filteredGroups}
-        columns={columns}
-        emptyMessage="Aucun groupe trouvé"
-      />
+      <Table data={filteredGroups} columns={columns} emptyMessage="Aucun groupe trouvé" />
 
       {isStudentsModalOpen && selectedGroup && (
         <GroupStudentsModal
           isOpen={isStudentsModalOpen}
-          students={selectedGroup.students}
+          students={selectedGroup.students ?? []}
           onClose={() => setIsStudentsModalOpen(false)}
           onAssignStudents={handleAssignStudents}
         />
@@ -210,8 +209,8 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
       <UnassignedStudentsModal
         isOpen={isUnassignedModalOpen}
         onClose={() => setIsUnassignedModalOpen(false)}
-        onAssignStudent={(studentId) => onAssignStudents(studentId, true)}
-        students={students.filter((s) => !s.groupId)}
+        onAssignStudent={handleAssignStudent}
+        students={students.filter(s => !s.groupId)}
       />
 
       <DeleteConfirmationModal
@@ -220,6 +219,15 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
         onConfirm={handleConfirmDelete}
         entityName={selectedGroup?.name || "ce groupe"}
       />
+
+      {isGroupFormOpen && (
+        <GroupFormModal
+          group={editingGroup}
+          fields={fields}
+          onSave={handleSaveGroup}
+          onClose={() => setIsGroupFormOpen(false)}
+        />
+      )}
     </div>
   );
 };
