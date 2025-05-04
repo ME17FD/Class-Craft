@@ -1,6 +1,5 @@
 package com.ClassCraft.site.dto;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,8 +27,7 @@ public class GroupDTO {
         return students != null ? students.size() : 0;
     }
 
-    public GroupDTO() {
-    }
+    
     
     public void setSize(Integer size) { this.size = size; }
     

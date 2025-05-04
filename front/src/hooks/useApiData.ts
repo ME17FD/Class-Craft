@@ -10,8 +10,6 @@ import {
   Student,
 } from "../types/type";
 
-import { Session } from "../types/schedule";
-
 export const useApiData = () => {
   const [fields, setFields] = useState<Field[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
@@ -19,93 +17,71 @@ export const useApiData = () => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [professors, setProfessors] = useState<Professor[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
-  const [seances, setSeances] = useState<Session[]>([]);
+  const fetchData = async () => {
+    console.log("Initiating API requests...");
+    
+    try {
+      const endpoints = [
+        { name: "filieres", url: "/api/filieres" },
+        { name: "modules", url: "/api/modules" },
+        { name: "submodules", url: "/api/submodules" },
+        { name: "groups", url: "/api/groups" },
+        { name: "professors", url: "/api/professors" },
+        { name: "students", url: "/api/students" },
+      ];
+
+      const requests = endpoints.map(endpoint => 
+        api.get(endpoint.url)
+          .then(response => {
+            console.log(`✅ Success [${endpoint.name}]:`, response.data);
+            return response;
+          })
+          .catch(error => {
+            console.error(`❌ Failed [${endpoint.name}]:`, error);
+            throw error;
+          })
+      );
+
+      const results = await Promise.allSettled(requests);
+
+      const successful = results.filter(r => r.status === "fulfilled") as PromiseFulfilledResult<any>[];
+      const failed = results.filter(r => r.status === "rejected") as PromiseRejectedResult[];
+      
+      if (failed.length > 0) {
+        console.group("Failed API Requests");
+        failed.forEach((f, i) => {
+          const error = f.reason as AxiosError;
+          console.error(`Request ${i + 1} failed:`, {
+            endpoint: endpoints[i].name,
+            status: error.response?.status,
+            message: error.message,
+          });
+        });
+        console.groupEnd();
+      }
+
+      successful.forEach(result => {
+        const endpointName = endpoints.find(e => 
+          e.url === result.value.config.url
+        )?.name;
+        
+        switch (endpointName) {
+          case "filieres": setFields(result.value.data); break;
+          case "modules": setModules(result.value.data); break;
+          case "submodules": setSubModules(result.value.data); break;
+          case "groups": setGroups(result.value.data); break;
+          case "professors": setProfessors(result.value.data); break;
+          case "students": setStudents(result.value.data); break;
+        }
+      });
+
+    } catch (error) {
+      console.error("Global error handler:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      console.log("Initiating API requests...");
-      
-      try {
-        const endpoints = [
-          { name: "filieres", url: "/api/filieres" },
-          { name: "modules", url: "/api/modules" },
-          { name: "submodules", url: "/api/submodules" },
-          { name: "groups", url: "/api/groups" },
-          { name: "professors", url: "/api/professors" },
-          { name: "students", url: "/api/students" },
-          { name: "seances", url: "/api/seances" },
-        ];
-  
-        // Create requests with enhanced logging
-        const requests = endpoints.map(endpoint => 
-          api.get(endpoint.url)
-            .then(response => {
-              console.log(`✅ Success [${endpoint.name}]:`, {
-                status: response.status,
-                data: response.data,
-                headers: response.headers
-              });
-              return response;
-            })
-            .catch(error => {
-              console.error(`❌ Failed [${endpoint.name}]:`, {
-                status: error.response?.status,
-                statusText: error.response?.statusText,
-                data: error.response?.data,
-                config: {
-                  url: error.config?.url,
-                  headers: error.config?.headers
-                }
-              });
-              throw error; // Re-throw to trigger catch block
-            })
-        );
-  
-        const results = await Promise.allSettled(requests);
-  
-        // Process successful responses
-        const successful = results.filter(r => r.status === "fulfilled") as PromiseFulfilledResult<AxiosResponse>[];
-        
-        // Handle failed requests
-        const failed = results.filter(r => r.status === "rejected") as PromiseRejectedResult[];
-        if (failed.length > 0) {
-          console.groupCollapsed("Failed API Requests");
-          failed.forEach((f, i) => {
-            const error = f.reason as AxiosError;
-            console.error(`Request ${i + 1} failed:`, {
-              endpoint: endpoints[i].name,
-              status: error.response?.status,
-              message: error.message,
-              responseData: error.response?.data
-            });
-          });
-          console.groupEnd();
-        }
-  
-        // Update state only with successful responses
-        successful.forEach(result => {
-          const endpointName = endpoints.find(e => 
-            e.url === result.value.config.url
-          )?.name;
-          
-          switch (endpointName) {
-            case "filieres": setFields(result.value.data); break;
-            case "modules": setModules(result.value.data); break;
-            case "submodules": setSubModules(result.value.data); break;
-            case "groups": setGroups(result.value.data); break;
-            case "professors": setProfessors(result.value.data); break;
-            case "students": setStudents(result.value.data); break;
-            case "seances": setSeances(result.value.data); break;
-          }
-        });
-  
-      } catch (error) {
-        console.error("Global error handler:", {
-          error,
-          stringified: JSON.stringify(error, Object.getOwnPropertyNames(error))
-        });
-      }
-    };
+    
   
     fetchData();
   }, []);
@@ -236,28 +212,7 @@ export const useApiData = () => {
     setStudents(prev => prev.filter(s => s.id !== studentId));
   }, []);
 
-  // ----- CRUD: Seances -----
-const addSeance = useCallback(async (seance: Session) => {
-  const res = await axios.post("/api/seances", seance);
-  setSeances(prev => [...prev, res.data]);
-}, []);
-
-const updateSeance = useCallback(async (seance: Session) => {
-  await axios.put(`/api/seances/${seance.id}`, seance);
-  setSeances(prev => prev.map(s => s.id === seance.id ? seance : s));
-}, []);
-
-const deleteSeance = useCallback(async (seanceId: number) => {
-  await axios.delete(`/api/seances/${seanceId}`);
-  setSeances(prev => prev.filter(s => s.id !== seanceId));
-}, []);
-
-
   return {
-    seances,
-    addSeance,
-    updateSeance,
-    deleteSeance,
     fields,
     modules,
     subModules,
