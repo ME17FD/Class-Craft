@@ -102,31 +102,36 @@ public class GroupController {
     }
 
     @PostMapping
-    public ResponseEntity<Group> createGroup(@RequestBody Group newGroup) {
-        // Optionally check for filiere existence
-        if (newGroup.getFiliere() != null) {
-            Optional<Filiere> filiere = filiereRepository.findById(newGroup.getFiliere().getId());
-            filiere.ifPresent(newGroup::setFiliere);
-        }
+public ResponseEntity<GroupDTO> createGroup(@RequestBody GroupDTO groupDTO) {
+    // Map GroupDTO to Group entity
+    Group newGroup = new Group();
+    newGroup.setName(groupDTO.getName());
 
-        Group savedGroup = groupRepository.save(newGroup);
-        return ResponseEntity.ok(savedGroup);
+    // If Filiere is provided in DTO, set it
+    if (groupDTO.getFiliereId() != null) {
+        Optional<Filiere> filiere = filiereRepository.findById(groupDTO.getFiliereId());
+        filiere.ifPresent(newGroup::setFiliere);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Group> updateGroup(@PathVariable Long id, @RequestBody Group updatedGroup) {
-        Optional<Group> optionalGroup = groupRepository.findById(id);
-        if (optionalGroup.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+    Group savedGroup = groupRepository.save(newGroup);
+    
 
-        Group group = optionalGroup.get();
-        group.setName(updatedGroup.getName());
-        group.setFiliere(updatedGroup.getFiliere()); // You may want to verify Filiere exists
+    Long filiereId = (savedGroup.getFiliere() != null) ? savedGroup.getFiliere().getId() : null;
+    String filiereName = (savedGroup.getFiliere() != null) ? savedGroup.getFiliere().getName() : null;
 
-        Group saved = groupRepository.save(group);
-        return ResponseEntity.ok(saved);
-    }
+    GroupDTO savedGroupDTO = new GroupDTO(
+        savedGroup.getId(),
+        savedGroup.getName(),
+        0,
+        filiereId,
+        filiereName,
+        null
+    );
+
+    // Return the saved GroupDTO as a response
+    return ResponseEntity.ok(savedGroupDTO);
+}
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGroup(@PathVariable Long id) {
@@ -136,5 +141,47 @@ public class GroupController {
 
         groupRepository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<GroupDTO> updateGroup(@PathVariable Long id, @RequestBody GroupDTO groupDTO) {
+        Optional<Group> optionalGroup = groupRepository.findById(id);
+        if (optionalGroup.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Group group = optionalGroup.get();
+        group.setName(groupDTO.getName());
+
+        // Update Filiere if provided
+        if (groupDTO.getFiliereId() != null) {
+            Optional<Filiere> filiere = filiereRepository.findById(groupDTO.getFiliereId());
+            filiere.ifPresent(group::setFiliere);
+        }
+
+        Group updatedGroup = groupRepository.save(group);
+
+        Long filiereId = (updatedGroup.getFiliere() != null) ? updatedGroup.getFiliere().getId() : null;
+        String filiereName = (updatedGroup.getFiliere() != null) ? updatedGroup.getFiliere().getName() : null;
+
+        GroupDTO updatedGroupDTO = new GroupDTO(
+            updatedGroup.getId(),
+            updatedGroup.getName(),
+            updatedGroup.getStudents().size(),
+            filiereId,
+            filiereName,
+            updatedGroup.getStudents().stream().map(student -> 
+                new StudentInfoDTO(
+                    student.getId(),
+                    student.getFirstName(),
+                    student.getLastName(),
+                    student.getEmail(),
+                    student.getCNE(),
+                    student.getRegistrationNumber()
+                )
+            ).collect(Collectors.toList())
+        );
+
+        return ResponseEntity.ok(updatedGroupDTO);
     }
 }

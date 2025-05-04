@@ -71,3 +71,8 @@
 .modal::-webkit-scrollbar-thumb:hover {
     background: #a0aec0;
 }
+
+.error {
+    color: #ff4d4f;
+    margin-top: 8px;
+  }

@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import api from "../services/api"; // your path to the api.ts file
-import axios, { AxiosError, AxiosResponse } from "axios";
-
+import api from "../services/api"; // your api service
+import { AxiosError } from "axios";
 import {
   Field,
   Module,
@@ -113,98 +112,127 @@ export const useApiData = () => {
 
   // ----- CRUD: Fields -----
   const addField = useCallback(async (field: Field) => {
-    const res = await axios.post("/api/fields", field);
+    const res = await api.post("/api/filieres", field);
     setFields(prev => [...prev, res.data]);
+    return res.data;
   }, []);
 
   const updateField = useCallback(async (field: Field) => {
-    await axios.put(`/api/fields/${field.id}`, field);
+    await api.put(`/api/filieres/${field.id}`, field);
     setFields(prev => prev.map(f => f.id === field.id ? field : f));
   }, []);
 
   const deleteField = useCallback(async (fieldId: number) => {
-    await axios.delete(`/api/fields/${fieldId}`);
+    await api.delete(`/api/filieres/${fieldId}`);
     setFields(prev => prev.filter(f => f.id !== fieldId));
   }, []);
 
   // ----- CRUD: Modules -----
   const addModule = useCallback(async (module: Module) => {
-    const res = await axios.post("/api/modules", module);
+    const res = await api.post("/api/modules", module);
     setModules(prev => [...prev, res.data]);
+    return res.data;
   }, []);
 
   const updateModule = useCallback(async (module: Module) => {
-    await axios.put(`/api/modules/${module.id}`, module);
+    await api.put(`/api/modules/${module.id}`, module);
     setModules(prev => prev.map(m => m.id === module.id ? module : m));
   }, []);
 
   const deleteModule = useCallback(async (moduleId: number) => {
-    await axios.delete(`/api/modules/${moduleId}`);
+    await api.delete(`/api/modules/${moduleId}`);
     setModules(prev => prev.filter(m => m.id !== moduleId));
   }, []);
 
   // ----- CRUD: SubModules -----
   const addSubModule = useCallback(async (subModule: SubModule) => {
-    const res = await axios.post("/api/submodules", subModule);
+    const res = await api.post("/api/submodules", subModule);
     setSubModules(prev => [...prev, res.data]);
+    return res.data;
   }, []);
 
   const updateSubModule = useCallback(async (subModule: SubModule) => {
-    await axios.put(`/api/submodules/${subModule.id}`, subModule);
+    await api.put(`/api/submodules/${subModule.id}`, subModule);
     setSubModules(prev => prev.map(s => s.id === subModule.id ? subModule : s));
   }, []);
 
   const deleteSubModule = useCallback(async (subModuleId: number) => {
-    await axios.delete(`/api/submodules/${subModuleId}`);
+    await api.delete(`/api/submodules/${subModuleId}`);
     setSubModules(prev => prev.filter(s => s.id !== subModuleId));
   }, []);
 
-  // ----- CRUD: Groups (already included in your version) -----
-  const addGroup = useCallback(async (group: Group) => {
-    const res = await axios.post("/api/groups", group);
-    setGroups(prev => [...prev, res.data]);
+  // ----- CRUD: Groups -----
+  const addGroup = useCallback(async (group: Omit<Group, 'id'>) => {
+    try {
+      const res = await api.post("/api/groups", group);
+      setGroups(prev => [...prev, res.data]);
+      return res.data;
+    } catch (error) {
+      console.error("Failed to create group:", error);
+      throw error;
+    }
   }, []);
 
-  const updateGroup = useCallback(async (group: Group) => {
-    await axios.put(`/api/groups/${group.id}`, group);
-    setGroups(prev => prev.map(g => g.id === group.id ? group : g));
+  const updateGroup = useCallback(async (group: Group): Promise<boolean> => {
+    try {
+      const res = await api.put(`/api/groups/${group.id}`, group);
+      setGroups(prev => prev.map(g => g.id === group.id ? res.data : g));
+      return true;  // Return true if the update is successful
+    } catch (error) {
+      console.error("Failed to update group:", error);
+      return false;  // Return false if an error occurs
+    }
   }, []);
 
-  const deleteGroup = useCallback(async (groupId: number) => {
-    await axios.delete(`/api/groups/${groupId}`);
-    setGroups(prev => prev.filter(g => g.id !== groupId));
-    setStudents(prev => prev.map(s => s.groupId === groupId ? { ...s, groupId: null } : s));
-  }, []);
+  const deleteGroup = useCallback(
+    async (groupId: number): Promise<boolean> => {
+      try {
+        await api.delete(`/api/groups/${groupId}`);
+        setGroups(prev => prev.filter(g => g.id !== groupId));
+        setStudents(prev =>
+          prev.map(s => (s.groupId === groupId ? { ...s, groupId: null } : s))
+        );
+        return true;
+      } catch (error) {
+        console.error("Failed to delete group:", error);
+        return false;
+      }
+    },
+    [setGroups, setStudents]
+  );
+  
 
   // ----- CRUD: Professors -----
   const addProfessor = useCallback(async (prof: Professor) => {
-    const res = await axios.post("/api/professors", prof);
+    const res = await api.post("/api/professors", prof);
     setProfessors(prev => [...prev, res.data]);
+    return res.data;
   }, []);
 
   const updateProfessor = useCallback(async (prof: Professor) => {
-    await axios.put(`/api/professors/${prof.id}`, prof);
+    await api.put(`/api/professors/${prof.id}`, prof);
     setProfessors(prev => prev.map(p => p.id === prof.id ? prof : p));
   }, []);
 
   const deleteProfessor = useCallback(async (profId: number) => {
-    await axios.delete(`/api/professors/${profId}`);
+    await api.delete(`/api/professors/${profId}`);
     setProfessors(prev => prev.filter(p => p.id !== profId));
   }, []);
 
   // ----- CRUD: Students -----
   const addStudent = useCallback(async (student: Student) => {
-    const res = await axios.post("/api/students", student);
+    const res = await api.post("/api/students", student);
     setStudents(prev => [...prev, res.data]);
+    return res.data;
   }, []);
 
   const updateStudent = useCallback(async (student: Student) => {
-    await axios.put(`/api/students/${student.id}`, student);
+    await api.put(`/api/students/${student.id}`, student);
     setStudents(prev => prev.map(s => s.id === student.id ? student : s));
   }, []);
 
   const deleteStudent = useCallback(async (studentId: number) => {
-    await axios.delete(`/api/students/${studentId}`);
+    await api.delete(`/api/students/${studentId}`);
     setStudents(prev => prev.filter(s => s.id !== studentId));
   }, []);
 
@@ -253,6 +281,7 @@ const deleteSeance = useCallback(async (seanceId: number) => {
     deleteProfessor,
     addStudent,
     updateStudent,
-    deleteStudent
+    deleteStudent,
+    fetchData
   };
 };

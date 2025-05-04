@@ -19,6 +19,18 @@ export default function Sidebar() {
       setIsOpen(false);
     };
 
+    const handleLogout = () => {
+      // Clear the user's session data
+      localStorage.removeItem("token");
+      localStorage.removeItem("userRole");
+      localStorage.removeItem("userDetails");
+      // Redirect to login
+      navigate("/");
+    };
+
+    const userDetails = JSON.parse(localStorage.getItem("userDetails") || "{}");
+
+
   return (
     <>
       {isOpen && (
@@ -50,7 +62,7 @@ export default function Sidebar() {
               className={styles.profileImage}
             />
           </div>
-          <h3 className={styles.profileName}>John Doe</h3>
+          <h3 className={styles.profileName}> {userDetails.firstName} {userDetails.lastName}</h3>
         </div>
 
         {/* Boutons de navigation */}
@@ -69,7 +81,7 @@ export default function Sidebar() {
         </div>
 
         {/* Bouton de déconnexion (en bas) */}
-        <button className={styles.logoutButton}>
+        <button className={styles.logoutButton} onClick={handleLogout}>
           <FiLogOut className={styles.logoutIcon} />
         </button>
       </div>
