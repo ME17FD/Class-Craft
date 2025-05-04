@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "../../styles/PedagogicalDashboard-components/GroupsTab.module.css";
 import Button from "./Button";
-import { Group, Field, Module, Professor, Student } from "../../types/type";
+import { Group, Field, Module, Student } from "../../types/type";
 import Table from "./TableActions";
 import GroupStudentsModal from "./GroupStudentsModal";
 import UnassignedStudentsModal from "./UnassignedStudentsModal";
@@ -11,7 +11,6 @@ interface GroupsTabProps {
   groups: Group[];
   fields: Field[];
   modules: Module[];
-  professors: Professor[];
   students: Student[];
   onEdit: (group: Group) => void;
   onDelete: (groupId: number) => Promise<boolean>;
@@ -23,7 +22,6 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
   groups: initialGroups = [],
   fields = [],
   modules = [],
-  professors = [],
   students = [],
   onEdit,
   onDelete,
@@ -117,8 +115,8 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
     {
       header: "Nombre d'étudiants",
       render: (group: Group) => (
-        <span 
-          className={styles.studentCount} 
+        <span
+          className={styles.studentCount}
           onClick={() => handleShowStudents(group)}
         >
           {group.students?.length || 0}
@@ -164,15 +162,6 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
             ))}
           </select>
 
-          <select
-            value={selectedProfessor || ""}
-            onChange={(e) => setSelectedProfessor(e.target.value ? Number(e.target.value) : null)}
-          >
-            <option value="">Tous les professeurs</option>
-            {professors.map((professor) => (
-              <option key={professor.id} value={professor.id}>{professor.name}</option>
-            ))}
-          </select>
 
           <Button variant="secondary" onClick={resetFilters}>
             Réinitialiser les filtres

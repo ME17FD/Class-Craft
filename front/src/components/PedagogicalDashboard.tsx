@@ -103,7 +103,6 @@ const PedagogicalDashboard: React.FC = () => {
               groups={data.groups}
               fields={data.fields}
               modules={data.modules}
-              professors={data.professors}
               students={data.allStudents}
               onEdit={(group) => handleEdit("groups", group)}
               onDelete={deleteGroup}
