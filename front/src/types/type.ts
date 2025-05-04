@@ -12,7 +12,7 @@ export type Module = {
   id: number;
   name: string;
   code: string;
-  fieldId: number;
+  fieldId: number | null;
 };
 
 export type SubModule = {

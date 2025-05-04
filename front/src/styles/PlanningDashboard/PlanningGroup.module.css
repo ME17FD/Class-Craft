@@ -1,0 +1,342 @@
+/* GroupPlanning.module.css */
+
+
+/* Variables CSS */
+
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2980b9;
+    --background-light: #f8f9fa;
+    --border-color: #e2e8f0;
+    --text-dark: #2c3e50;
+    --text-light: #7f8c8d;
+    --modal-z-index: 1000;
+}
+
+
+/* Styles généraux */
+
+.container {
+    padding: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    background-color: var(--background-light);
+    min-height: 100vh;
+}
+
+
+/* Grille des groupes compacte */
+
+.groupsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.2rem;
+    padding: 0.8rem 0;
+}
+
+
+/* Carte de groupe réduite */
+
+.groupCard {
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    padding: 0.8rem;
+    min-height: 100px;
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.groupCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+}
+
+.cardHeader {
+    padding: 0.5rem 0;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.cardHeader h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-dark);
+}
+
+.cardPreview {
+    padding: 0.4rem;
+}
+
+.previewSession {
+    font-size: 0.75em;
+    padding: 0.2rem 0.4rem;
+    margin: 0.1rem 0;
+    background: var(--background-light);
+    border-radius: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* Modal agrandie sans overflow */
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--modal-z-index);
+}
+
+.modalContent {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    max-width: 95vw;
+    max-height: 95vh;
+    min-width: 800px;
+    overflow: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--text-dark);
+    transition: color 0.2s;
+}
+
+.closeButton:hover {
+    color: var(--text-dark);
+}
+
+
+/* Grille principale */
+
+.scheduleGrid {
+    display: grid;
+    grid-template-columns: 70px repeat(6, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--border-color);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.timeColumn {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: var(--background-light);
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+}
+
+.timeCell {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+    color: var(--text-dark);
+    background: white;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.dayHeader {
+    padding: 0.8rem;
+    font-size: 0.9em;
+    font-weight: 600;
+    text-align: center;
+    background: var(--primary-color);
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.timeSlot {
+    position: relative;
+    min-height: 54px;
+    background: white;
+    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+}
+
+.timeSlot:hover {
+    background-color: #f5f5f5;
+}
+
+.controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    align-items: center;
+}
+
+.searchInput {
+    flex: 1;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.addButton {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.addButton:hover {
+    background: var(--secondary-color);
+}
+
+
+/* Sessions compactes */
+
+.sessionCard {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    background: #e3f2fd;
+    border: 1px solid var(--primary-color);
+    border-radius: 4px;
+    padding: 0.4rem;
+    font-size: 0.75em;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sessionCard:hover {
+    background: #bbdefb;
+    z-index: 3;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.sessionTitle {
+    font-weight: 500;
+    margin-bottom: 0.2rem;
+    color: #0d47a1;
+}
+
+.sessionDetails {
+    color: #455a64;
+    line-height: 1.3;
+}
+
+.container {
+    padding: 2rem;
+}
+
+.controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.durationBadge {
+    background: #3b82f6;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    margin-left: 8px;
+    display: inline-block;
+}
+
+
+/* PlanningGroup.module.css */
+
+.exportButtons {
+    display: flex;
+    gap: 1rem;
+    margin-left: auto;
+    align-items: center;
+}
+
+.excelButton {
+    background: #217346;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.excelButton:hover {
+    background: #1a5c38;
+}
+
+.pdfButton {
+    background: #e53e3e;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.pdfButton:hover {
+    background: #c53030;
+}
+
+.pdfButton:disabled {
+    background: #718096;
+    cursor: not-allowed;
+}
+
+.searchInput {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.filterSelect {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+}
+
+.groupsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .controls {
+        grid-template-columns: 1fr;
+    }
+
+    .addButton {
+        grid-column: span 1;
+    }
+}

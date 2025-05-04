@@ -1,109 +1,143 @@
-import { Session, WeeklySchedule, FieldSchedule, DailyReport, Room, TimeSlot } from '../types/schedule';
-import { mockGroups, mockProfessors, mockModules, mockSubModules, mockFields } from './mockData';
-
-// Créneaux horaires standards
-export const timeSlots: TimeSlot[] = [
-    { startTime: "08:30", endTime: "10:00" },
-    { startTime: "10:15", endTime: "11:45" },
-    { startTime: "13:30", endTime: "15:00" },
-    { startTime: "15:15", endTime: "16:45" }
-];
-
-// Salles
-export const rooms: Room[] = [
-    { id: 1, name: "S101", capacity: 30, type: "Salle de cours" },
-    { id: 2, name: "S102", capacity: 30, type: "Salle de cours" },
-    { id: 3, name: "L101", capacity: 20, type: "Laboratoire" },
-    { id: 4, name: "L102", capacity: 20, type: "Laboratoire" },
-    { id: 5, name: "I101", capacity: 25, type: "Salle informatique" },
-    { id: 6, name: "I102", capacity: 25, type: "Salle informatique" }
-];
-
-// Séances de test
-export const mockSessions: Session[] = [
+import { 
+    
+    Session, 
+    Room 
+  } from "../types/schedule";
+import {Student, 
+    Module, 
+    SubModule, 
+    Field, 
+    Professor, 
+    Group } from "../types/type";
+  export const staticStudents: Student[] = [
     {
-        id: 1,
-        startTime: "08:30",
-        endTime: "10:00",
-        day: "Lundi",
-        professor: mockProfessors[0],
-        module: mockModules[0],
-        room: "S101",
-        group: mockGroups[0]
+      id: 1,
+      cne: "G123456",
+      registrationNumber: "2023-001",
+      lastName: "Dupont",
+      firstName: "Jean",
+      groupId: 1,
+      email: "jean.dupont@edu.um"
     },
     {
-        id: 2,
-        startTime: "10:15",
-        endTime: "11:45",
-        day: "Lundi",
-        professor: mockProfessors[1],
-        subModule: mockSubModules[0],
-        room: "L101",
-        group: mockGroups[0]
-    },
-    {
-        id: 3,
-        startTime: "13:30",
-        endTime: "15:00",
-        day: "Lundi",
-        professor: mockProfessors[2],
-        module: mockModules[1],
-        room: "I101",
-        group: mockGroups[1]
+      id: 2,
+      cne: "G654321",
+      registrationNumber: "2023-002",
+      lastName: "Martin",
+      firstName: "Sophie",
+      groupId: 1
     }
-];
-
-// Emplois du temps hebdomadaires
-export const mockWeeklySchedules: WeeklySchedule[] = [
+  ];
+  
+  export const staticModules: Module[] = [
     {
-        id: 1,
-        group: mockGroups[0],
-        sessions: mockSessions.filter(s => s.group.id === mockGroups[0].id),
-        weekNumber: 1,
-        semester: 1,
-        academicYear: "2023-2024"
+      id: 1,
+      name: "Algorithmique",
+      code: "ALGO-101",
+      fieldId: 1
     },
     {
-        id: 2,
-        group: mockGroups[1],
-        sessions: mockSessions.filter(s => s.group.id === mockGroups[1].id),
-        weekNumber: 1,
-        semester: 1,
-        academicYear: "2023-2024"
+      id: 2,
+      name: "Base de données",
+      code: "BD-201",
+      fieldId: 1
     }
-];
-
-// Emplois du temps de filière
-export const mockFieldSchedules: FieldSchedule[] = [
+  ];
+  
+  export const staticSubModules: SubModule[] = [
     {
-        id: 1,
-        field: mockFields[0],
-        weeklySchedules: mockWeeklySchedules.filter(ws => ws.group.fieldId === mockFields[0].id),
-        semester: 1,
-        academicYear: "2023-2024"
+      id: 1,
+      name: "Structures de données",
+      hours: 30,
+      moduleId: 1
     },
     {
-        id: 2,
-        field: mockFields[1],
-        weeklySchedules: mockWeeklySchedules.filter(ws => ws.group.fieldId === mockFields[1].id),
-        semester: 1,
-        academicYear: "2023-2024"
+      id: 2,
+      name: "SQL Avancé",
+      hours: 20,
+      moduleId: 2
     }
-];
-
-// Rapports quotidiens
-export const mockDailyReports: DailyReport[] = [
+  ];
+  
+  export const staticFields: Field[] = [
     {
-        id: 1,
-        date: "2024-01-15", // Lundi
-        sessions: mockSessions.filter(s => s.day === "Lundi")
+      id: 1,
+      name: "Informatique",
+      description: "Filière en sciences informatiques"
+    }
+  ];
+  
+  export const staticProfessors: Professor[] = [
+    {
+      id: 1,
+      name: "Dr. Smith",
+      email: "smith@um.ac.ma",
+      modules: [1],
+      subModules: [1]
     },
     {
-        id: 2,
-        date: "2024-01-16", // Mardi
-        sessions: mockSessions.filter(s => s.day === "Mardi")
+      id: 2,
+      name: "Pr. Johnson",
+      email: "johnson@um.ac.ma",
+      modules: [2],
+      subModules: [2]
     }
-];
-
-// Alias pour compatibilité avec le composant FieldScheduleTab
-export const mockSchedules = mockFieldSchedules; 
+  ];
+  
+  export const staticGroups: Group[] = [
+    {
+      id: 1,
+      name: "Groupe A",
+      filiereId: 1,
+      students: staticStudents.filter(s => s.groupId === 1)
+    }
+  ];
+  
+  export const staticRooms: Room[] = [
+    {
+      id: 1,
+      name: "B203",
+      capacity: 30,
+      type: "Salle de cours"
+    },
+    {
+      id: 2,
+      name: "Labo Info 1",
+      capacity: 20,
+      type: "Salle informatique"
+    }
+  ];
+  
+  export const staticSessions: Session[] = [
+    {
+      id: 1,
+      startTime: "08:00",
+      endTime: "10:00",
+      day: "Lundi",
+      professor: staticProfessors[0],
+      module: staticModules[0],
+      subModule: staticSubModules[0],
+      room: "B203",
+      group: staticGroups[0],
+      professorPresent: true
+    },
+    {
+      id: 2,
+      startTime: "14:00",
+      endTime: "16:00",
+      day: "Mardi",
+      professor: staticProfessors[1],
+      module: staticModules[1],
+      room: "Labo Info 1",
+      group: staticGroups[0],
+      professorPresent: false
+    }
+  ];
+  
+  export const staticDailyReports = [
+    {
+      id: 1,
+      date: "2023-10-01",
+      sessions: staticSessions
+    }
+  ];

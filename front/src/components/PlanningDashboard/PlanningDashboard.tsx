@@ -1,55 +1,69 @@
-import React, { useState } from 'react';
-import { PlanningProvider } from './PlanningContext';
-import GroupPlanning from './GroupPlanning';
-import SemesterPlanning from './SemesterPlanning';
-import ProfessorPlanning from './ProfessorPlanning';
-import RoomReport from './RoomReport';
-import RattrapagePlanning from './RattrapagePlanning';
-import ExamPlanning from './ExamPlanning';
-import styles from '../../styles/PlanningDashboard/PlanningDashboard.module.css';
+import React, { useState } from "react";
+import { PlanningProvider } from "../../context/PlanningContext";
+import GroupPlanning from "./GroupPlanning";
+import SemesterPlanning from "./SemesterPlanning";
+import ProfessorPlanning from "./ProfessorPlanning";
+import RoomReport from "./RoomReport";
+import RattrapagePlanning from "./RattrapagePlanning";
+import ExamPlanning from "./ExamPlanning";
+import styles from "../../styles/PlanningDashboard/PlanningDashboard.module.css";
+import Sidebar from "../Sidebar";
 
 const tabs = [
-  { id: 'group', label: 'Planning des groupes' },
-  { id: 'semester', label: 'Planning des semestres' },
-  { id: 'professor', label: 'Planning des professeurs' },
-  { id: 'room', label: 'Rapport des salles' },
-  { id: 'rattrapage', label: 'Séances de rattrapage' },
-  { id: 'exam', label: 'Examens' },
+  { id: "group", label: "Planning des groupes", icon: "👥" },
+  { id: "semester", label: "Planning des semestres", icon: "📅" },
+  { id: "professor", label: "Planning des professeurs", icon: "👨‍🏫" },
+  { id: "room", label: "Rapport des salles", icon: "🏫" },
+  { id: "rattrapage", label: "Séances de rattrapage", icon: "🔄" },
+  { id: "exam", label: "Examens", icon: "📝" },
 ];
 
-type TabId = typeof tabs[number]['id'];
+type TabId = (typeof tabs)[number]["id"];
 
 const PlanningDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabId>('group');
+  const [activeTab, setActiveTab] = useState<TabId>("group");
 
   return (
-    <PlanningProvider>
-      <div className={styles.dashboard}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>Générateur de planning</h1>
-        </header>
-        <nav className={styles.tabNav}>
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              className={activeTab === tab.id ? styles.activeTab : styles.tab}
-              onClick={() => setActiveTab(tab.id as TabId)}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-        <div className={styles.content}>
-          {activeTab === 'group' && <GroupPlanning />}
-          {activeTab === 'semester' && <SemesterPlanning />}
-          {activeTab === 'professor' && <ProfessorPlanning />}
-          {activeTab === 'room' && <RoomReport />}
-          {activeTab === 'rattrapage' && <RattrapagePlanning />}
-          {activeTab === 'exam' && <ExamPlanning />}
-        </div>
-      </div>
-    </PlanningProvider>
+    <div className={styles.layout}>
+      <Sidebar />
+      <PlanningProvider>
+        <main className={styles.main}>
+          <header className={styles.header}>
+            <div className={styles.headerContent}>
+              <h1 className={styles.title}>Générateur de planning</h1>
+            </div>
+            <div className={styles.tabBar}>
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  className={`${styles.tab} ${
+                    activeTab === tab.id ? styles.active : ""
+                  }`}
+                  onClick={() => setActiveTab(tab.id)}>
+                  <span className={styles.tabIcon}>{tab.icon}</span>
+                  {tab.label}
+                  {activeTab === tab.id && (
+                    <span className={styles.activeIndicator} />
+                  )}
+                </button>
+              ))}
+            </div>
+          </header>
+
+          <section className={styles.contentPanel}>
+            <div className={styles.panelContainer}>
+              {activeTab === "group" && <GroupPlanning />}
+              {activeTab === "semester" && <SemesterPlanning />}
+              {activeTab === "professor" && <ProfessorPlanning />}
+              {activeTab === "room" && <RoomReport />}
+              {activeTab === "rattrapage" && <RattrapagePlanning />}
+              {activeTab === "exam" && <ExamPlanning />}
+            </div>
+          </section>
+        </main>
+      </PlanningProvider>
+    </div>
   );
 };
 
-export default PlanningDashboard; 
+export default PlanningDashboard;

@@ -1,116 +1,164 @@
-import React, { useState, useEffect } from 'react';
-import { Session, Group, Module, Professor, Room } from '../../types/planning';
-import styles from '../../styles/PedagogicalDashboard-components/CrudModal.module.css';
-
-interface SessionFormModalProps {
-  isOpen: boolean;
+// SessionFormModal.tsx
+import { Session, Module, SubModule, Professor, Room } from "../../types/type";
+import { useStaticData } from "../../hooks/useStaticData";
+import { useState, useEffect } from "react";
+type Props = {
+  day: string;
+  time: string;
+  session: Session | null;
   onClose: () => void;
   onSave: (session: Session) => void;
-  groups: Group[];
-  modules: Module[];
-  professors: Professor[];
-  rooms: Room[];
-  initialSession?: Session;
-}
+};
 
-const defaultSession = (groups: Group[], modules: Module[], professors: Professor[], rooms: Room[]): Session => ({
-  id: Date.now(),
-  groupId: groups[0]?.id || 0,
-  moduleId: modules[0]?.id || 0,
-  professorId: professors[0]?.id || 0,
-  roomId: rooms[0]?.id || 0,
-  date: new Date().toISOString().split('T')[0],
-  startTime: '08:00',
-  endTime: '10:00',
-  type: 'CM',
-});
-
-const SessionFormModal: React.FC<SessionFormModalProps> = ({
-  isOpen,
+export const SessionFormModal = ({
+  day,
+  time,
+  session,
   onClose,
   onSave,
-  groups,
-  modules,
-  professors,
-  rooms,
-  initialSession,
-}) => {
-  const [form, setForm] = useState<Session>(initialSession || defaultSession(groups, modules, professors, rooms));
-
+}: Props) => {
+  const { modules, subModules, professors, rooms } = useStaticData();
+  const [selectedModule, setSelectedModule] = useState(
+    session?.module?.id || ""
+  );
+  const [selectedSubModule, setSelectedSubModule] = useState(
+    session?.subModule?.id || ""
+  );
+  const [selectedProfessor, setSelectedProfessor] = useState(
+    session?.professor.id || ""
+  );
+  const [selectedRoom, setSelectedRoom] = useState(session?.room || "");
+  const [selectedType, setSelectedType] = useState(session?.type || "CM");
+  const [duration, setDuration] = useState(session?.duration || 1);
   useEffect(() => {
-    setForm(initialSession || defaultSession(groups, modules, professors, rooms));
-  }, [isOpen, initialSession, groups, modules, professors, rooms]);
-
-  const handleChange = (field: keyof Session, value: any) => {
-    setForm(prev => ({ ...prev, [field]: value }));
-  };
+    if (selectedSubModule) {
+      const subMod = subModules.find(
+        (sm) => sm.id === Number(selectedSubModule)
+      );
+      setDuration(subMod?.hours || 1);
+    }
+  }, [selectedSubModule]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(form);
+
+    const newSession: Session = {
+      ...(session || {}),
+      id: session?.id || Date.now(),
+      day,
+      startTime: time,
+      duration,
+      endTime: calculateEndTime(selectedTime, duration),
+      module: modules.find((m) => m.id === Number(selectedModule)),
+      subModule: subModules.find((sm) => sm.id === Number(selectedSubModule)),
+      professor: professors.find((p) => p.id === Number(selectedProfessor))!,
+      room: selectedRoom,
+      type: selectedType,
+    };
+
+    onSave(newSession);
+    onClose();
   };
 
-  if (!isOpen) return null;
-
+  const calculateEndTime = (start: string, hours: number) => {
+    const [h, m] = start.split(":").map(Number);
+    const totalMinutes = h * 60 + m + hours * 60;
+    const endH = Math.floor(totalMinutes / 60);
+    const endM = totalMinutes % 60;
+    return `${endH.toString().padStart(2, "0")}:${endM
+      .toString()
+      .padStart(2, "0")}`;
+  };
   return (
     <div className={styles.modalOverlay}>
-      <div className={styles.modal}>
-        <h2>{initialSession ? 'Modifier une séance' : 'Ajouter une séance'}</h2>
-        <form onSubmit={handleSubmit} className={styles.form}>
+      <div className={styles.modalContent}>
+        <h2>{session ? "Modifier" : "Créer"} une séance</h2>
+        <form onSubmit={handleSubmit}>
+          {/* Champs du formulaire */}
           <div className={styles.formGroup}>
-            <label>Groupe</label>
-            <select value={form.groupId} onChange={e => handleChange('groupId', Number(e.target.value))} required>
-              {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+            <label>Type de séance</label>
+            <select
+              value={selectedType}
+              onChange={(e) => setSelectedType(e.target.value)}>
+              <option value="CM">Cours Magistral</option>
+              <option value="TD">Travaux Dirigés</option>
+              <option value="TP">Travaux Pratiques</option>
+              <option value="EXAM">Examen</option>
             </select>
           </div>
+
           <div className={styles.formGroup}>
             <label>Module</label>
-            <select value={form.moduleId} onChange={e => handleChange('moduleId', Number(e.target.value))} required>
-              {modules.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+            <select
+              value={selectedModule}
+              onChange={(e) => setSelectedModule(e.target.value)}>
+              {modules.map((module) => (
+                <option key={module.id} value={module.id}>
+                  {module.name}
+                </option>
+              ))}
             </select>
           </div>
+
+          <div className={styles.formGroup}>
+            <label>Sous-module</label>
+            <select
+              value={selectedSubModule}
+              onChange={(e) => setSelectedSubModule(e.target.value)}>
+              {subModules
+                .filter((sm) => sm.moduleId === Number(selectedModule))
+                .map((subModule) => (
+                  <option key={subModule.id} value={subModule.id}>
+                    {subModule.name}
+                  </option>
+                ))}
+            </select>
+          </div>
+
           <div className={styles.formGroup}>
             <label>Professeur</label>
-            <select value={form.professorId} onChange={e => handleChange('professorId', Number(e.target.value))} required>
-              {professors.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            <select
+              value={selectedProfessor}
+              onChange={(e) => setSelectedProfessor(e.target.value)}>
+              {professors.map((prof) => (
+                <option key={prof.id} value={prof.id}>
+                  {prof.name}
+                </option>
+              ))}
             </select>
           </div>
+
+          <div className={styles.formGroup}>
+            <label>Durée (heures)</label>
+            <input
+              type="number"
+              value={duration}
+              onChange={(e) => setDuration(Number(e.target.value))}
+              className={styles.durationInput}
+            />
+          </div>
+
           <div className={styles.formGroup}>
             <label>Salle</label>
-            <select value={form.roomId} onChange={e => handleChange('roomId', Number(e.target.value))} required>
-              {rooms.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+            <select
+              value={selectedRoom}
+              onChange={(e) => setSelectedRoom(e.target.value)}>
+              {rooms.map((room) => (
+                <option key={room.id} value={room.name}>
+                  {room.name}
+                </option>
+              ))}
             </select>
           </div>
-          <div className={styles.formGroup}>
-            <label>Date</label>
-            <input type="date" value={form.date} onChange={e => handleChange('date', e.target.value)} required />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Début</label>
-            <input type="time" value={form.startTime} onChange={e => handleChange('startTime', e.target.value)} required />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Fin</label>
-            <input type="time" value={form.endTime} onChange={e => handleChange('endTime', e.target.value)} required />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Type</label>
-            <select value={form.type} onChange={e => handleChange('type', e.target.value)} required>
-              <option value='CM'>CM</option>
-              <option value='TD'>TD</option>
-              <option value='TP'>TP</option>
-              <option value='RATTRAPAGE'>Rattrapage</option>
-              <option value='EXAMEN'>Examen</option>
-            </select>
-          </div>
-          <div className={styles.modalActions}>
-            <button type="button" className={styles.button} onClick={onClose}>Annuler</button>
-            <button type="submit" className={styles.button + ' ' + styles.primary}>{initialSession ? 'Enregistrer' : 'Ajouter'}</button>
+
+          <div className={styles.buttonGroup}>
+            <button type="button" onClick={onClose}>
+              Annuler
+            </button>
+            <button type="submit">Sauvegarder</button>
           </div>
         </form>
       </div>
     </div>
   );
 };
-
-export default SessionFormModal; 

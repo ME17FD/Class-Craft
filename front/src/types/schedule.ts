@@ -3,14 +3,17 @@ import { Group, Professor, Module, SubModule, Field } from './type';
 // Type pour une séance
 export interface Session {
     id: number;
-    startTime: string; // Format: "HH:mm"
-    endTime: string; // Format: "HH:mm"
+    startTime: string;
+    endTime: string;
     day: string;
     professor: Professor;
     module?: Module;
     subModule?: SubModule;
     room: string;
     group: Group;
+    type: 'CM' | 'TD' | 'TP' | 'EXAM' | 'RATTRAPAGE';
+    professorPresent: boolean;
+    duration: number;
 }
 
 // Type pour un emploi du temps hebdomadaire

@@ -11,6 +11,10 @@ import {
   Student,
 } from "../types/type";
 
+
+
+
+
 export const useApiData = () => {
   const [fields, setFields] = useState<Field[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
@@ -18,7 +22,7 @@ export const useApiData = () => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [professors, setProfessors] = useState<Professor[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
-
+ 
   useEffect(() => {
     const fetchData = async () => {
       console.log("Initiating API requests...");
@@ -30,7 +34,8 @@ export const useApiData = () => {
           { name: "submodules", url: "/api/submodules" },
           { name: "groups", url: "/api/groups" },
           { name: "professors", url: "/api/professors" },
-          { name: "students", url: "/api/students" }
+          { name: "students", url: "/api/students" },
+          { name: "sessions", url: "/api/sessions" },
         ];
   
         // Create requests with enhanced logging
@@ -204,6 +209,7 @@ export const useApiData = () => {
   }, []);
 
   return {
+   
     fields,
     modules,
     subModules,
