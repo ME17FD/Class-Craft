@@ -19,6 +19,7 @@ import {
   Professor,
   ExtendedModule,
 } from "../types/type";
+import { useApiData } from "../hooks/useApiData";
 
 const PedagogicalDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>("groups");
@@ -75,6 +76,7 @@ const PedagogicalDashboard: React.FC = () => {
     });
     handleFieldClose();
   };
+  const { deleteGroup } = useApiData();
 
   const tabs = [
     { id: "groups" as TabType, label: "Groupes" },
@@ -97,15 +99,17 @@ const PedagogicalDashboard: React.FC = () => {
 
         <div className={styles.content}>
           {activeTab === "groups" && (
-            <GroupsTab
+              <GroupsTab
               groups={data.groups}
               fields={data.fields}
               modules={data.modules}
               professors={data.professors}
               students={data.allStudents}
               onEdit={(group) => handleEdit("groups", group)}
-              onDelete={(group) => handleDelete("groups", group)}
+              onDelete={deleteGroup}
+              onAdd={() => handleAdd("groups")}
               onAssignStudents={handleAssignStudents}
+
             />
           )}
           {activeTab === "students" && (

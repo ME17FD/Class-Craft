@@ -149,16 +149,34 @@ export const useApiData = () => {
     }
   }, []);
 
-  const updateGroup = useCallback(async (group: Group) => {
-    await api.put(`/api/groups/${group.id}`, group);
-    setGroups(prev => prev.map(g => g.id === group.id ? group : g));
+  const updateGroup = useCallback(async (group: Group): Promise<boolean> => {
+    try {
+      const res = await api.put(`/api/groups/${group.id}`, group);
+      setGroups(prev => prev.map(g => g.id === group.id ? res.data : g));
+      return true;  // Return true if the update is successful
+    } catch (error) {
+      console.error("Failed to update group:", error);
+      return false;  // Return false if an error occurs
+    }
   }, []);
 
-  const deleteGroup = useCallback(async (groupId: number) => {
-    await api.delete(`/api/groups/${groupId}`);
-    setGroups(prev => prev.filter(g => g.id !== groupId));
-    setStudents(prev => prev.map(s => s.groupId === groupId ? { ...s, groupId: null } : s));
-  }, []);
+  const deleteGroup = useCallback(
+    async (groupId: number): Promise<boolean> => {
+      try {
+        await api.delete(`/api/groups/${groupId}`);
+        setGroups(prev => prev.filter(g => g.id !== groupId));
+        setStudents(prev =>
+          prev.map(s => (s.groupId === groupId ? { ...s, groupId: null } : s))
+        );
+        return true;
+      } catch (error) {
+        console.error("Failed to delete group:", error);
+        return false;
+      }
+    },
+    [setGroups, setStudents]
+  );
+  
 
   // ----- CRUD: Professors -----
   const addProfessor = useCallback(async (prof: Professor) => {
