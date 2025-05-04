@@ -7,6 +7,8 @@ public class SessionDTO {
     private String name;
     private Date startDate;
     private Date endDate;
+    
+    
     public Long getId() {
         return id;
     }

@@ -21,14 +21,15 @@ public class Sceance {
     private String dayOfWeek;
     private Time startTime;
     private Time endTime;
-    private String frequency;
+    private int frequency;
+
     private Boolean wasAttended = false;
     
     @ManyToOne
     private SubModule subModule;
      
     @ManyToOne
-    private Module Module;
+    private Module module;
     
     @ManyToOne
     private Group group;

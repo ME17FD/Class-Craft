@@ -7,7 +7,7 @@ public class SeanceDTO {
     private String dayOfWeek;
     private Time startTime;
     private Time endTime;
-    private String frequency;
+    private int frequency;
     private Boolean wasAttended;
 
     private GroupDTO group;
@@ -46,10 +46,10 @@ public class SeanceDTO {
         this.endTime = endTime;
     }
 
-    public String getFrequency() {
+    public int getFrequency() {
         return frequency;
     }
-    public void setFrequency(String frequency) {
+    public void setFrequency(int frequency) {
         this.frequency = frequency;
     }
 
