@@ -16,8 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ClassCraft.site.dto.GroupDTO;
 import com.ClassCraft.site.dto.GroupDTO.StudentInfoDTO;
+import com.ClassCraft.site.dto.ModuleDTO;
 import com.ClassCraft.site.models.Filiere;
 import com.ClassCraft.site.models.Group;
+import com.ClassCraft.site.models.Module;
 import com.ClassCraft.site.repository.FiliereRepository;
 import com.ClassCraft.site.repository.GroupRepository;
 import com.ClassCraft.site.repository.StudentRepository;
@@ -53,19 +55,46 @@ public class GroupController {
 
             Long filiereId = (group.getFiliere() != null) ? group.getFiliere().getId() : null;
             String filiereName = (group.getFiliere() != null) ? group.getFiliere().getName() : null;
-
-            return new GroupDTO(
-                group.getId(),
-                group.getName(),
-                studentDTOs.size(),
-                filiereId,
-                filiereName,
-                studentDTOs
-            );
+            List<ModuleDTO> moduleDTOs = group.getFiliere() != null
+                ? group.getFiliere().getModules().stream().map(module -> {
+                    return createModuleDTO(module);
+                }).collect(Collectors.toList())
+                : List.of();
+                GroupDTO dto = new GroupDTO(
+                    group.getId(),
+                    group.getName(),
+                    studentDTOs.size(),
+                    filiereId,
+                    filiereName,
+                    studentDTOs
+                );
+                dto.setModules(moduleDTOs);
+                return dto;
         }).collect(Collectors.toList());
 
         return ResponseEntity.ok(dtos);
     }
+
+    private ModuleDTO createModuleDTO(Module module) {
+        ModuleDTO dto = new ModuleDTO();
+        dto.setId(module.getId());
+        dto.setName(module.getName());
+        dto.setCode(module.getCode());
+    
+        if (module.getFiliere() != null) {
+            dto.setFiliereId(module.getFiliere().getId());
+        }
+    
+        if (module.getProfessorInCharge() != null) {
+            dto.setProfessorInChargeId(module.getProfessorInCharge().getId());
+            dto.setProfessorInChargeName(
+                module.getProfessorInCharge().getFirstName() + " " + module.getProfessorInCharge().getLastName()
+            );
+        }
+    
+        return dto;
+    }
+    
 
     @GetMapping("/{id}")
     public ResponseEntity<GroupDTO> getGroupById(@PathVariable Long id) {

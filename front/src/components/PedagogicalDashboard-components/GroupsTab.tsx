@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "../../styles/PedagogicalDashboard-components/GroupsTab.module.css";
 import Button from "./Button";
-import { Group, Field, Module, Student } from "../../types/type";
+import { Group, Field, Module, Student,Professor } from "../../types/type";
 import Table from "./TableActions";
 import GroupStudentsModal from "./GroupStudentsModal";
 import UnassignedStudentsModal from "./UnassignedStudentsModal";
@@ -11,6 +11,7 @@ interface GroupsTabProps {
   groups: Group[];
   fields: Field[];
   modules: Module[];
+  professors: Professor[];
   students: Student[];
   onEdit: (group: Group) => void;
   onDelete: (groupId: number) => Promise<boolean>;
@@ -23,11 +24,13 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
   fields = [],
   modules = [],
   students = [],
+  professors = [],
   onEdit,
   onDelete,
   onAdd,
   onAssignStudents,
 }) => {
+
   const [localGroups, setLocalGroups] = useState<Group[]>(initialGroups);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -42,13 +45,45 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
   }, [initialGroups]);
 
   const filteredModules = selectedField
-    ? modules.filter(module => module.fieldId === selectedField)
+    ? modules.filter(module => module.filiereId === selectedField)
     : modules;
 
+
+
   const filteredGroups = localGroups.filter(group => {
+    // Filter by field
     if (selectedField && group.filiereId !== selectedField) return false;
-    if (selectedModule) return true;
-    if (selectedProfessor) return true;
+
+    // Filter by module
+    if (selectedModule) {
+      const module = modules.find(m => m.id === selectedModule);
+      if (!module || group.filiereId !== module.filiereId) return false;
+    }
+
+    if (selectedProfessor) {
+      const professor = professors.find(p => p.id === selectedProfessor);
+      if (!professor) return false;
+  
+      // Get all module IDs that this professor teaches
+      const professorModuleIds = professor.modules.map(m => m.id);
+  
+      // Get all modules in this group's field
+      const field = fields.find(f => f.id === group.filiereId);
+      if (!field) return false;
+  
+      // Get module IDs in this field (from the modules array, not field.modules)
+      const fieldModuleIds = modules
+        .filter(m => m.filiereId === field.id)
+        .map(m => m.id);
+  
+      // Check if professor teaches any module in this group's field
+      const professorTeachesInField = professorModuleIds.some(moduleId => 
+        fieldModuleIds.includes(moduleId)
+      );
+  
+      if (!professorTeachesInField) return false;
+    }
+  
     return true;
   });
 
@@ -161,6 +196,15 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
               <option key={module.id} value={module.id}>{module.name}</option>
             ))}
           </select>
+          <select
+  value={selectedProfessor || ""}
+  onChange={(e) => setSelectedProfessor(e.target.value ? Number(e.target.value) : null)}
+>
+  <option value="">Tous les professeurs</option>
+  {professors.map((prof) => (
+    <option key={prof.id} value={prof.id}>{prof.lastName} {prof.firstName}</option>
+  ))}
+</select>
 
 
           <Button variant="secondary" onClick={resetFilters}>

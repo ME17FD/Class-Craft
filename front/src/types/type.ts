@@ -12,7 +12,7 @@ export type Module = {
   id: number;
   name: string;
   code: string;
-  fieldId: number | null;
+  filiereId: number | null;
 };
 
 export type SubModule = {
@@ -35,10 +35,13 @@ export type ExtendedModule = Module & {
 
 export type Professor = {
   id: number;
-  name: string;
+  lastName: string;
+  firstName: string;
   email: string;
-  modules: number[];
-  subModules: number[];
+  modules: Module[];
+  subModules: SubModule[];
+  grade ?: string;
+  specialty ?: string;
 };
 
 export type Group = {
@@ -46,6 +49,7 @@ export type Group = {
   name ?: string;
   filiereId ?: number;
   students ?: Student[];
+  modules ?: Module[];
 };
 
 export type CrudModalType = 'add' | 'edit' | 'delete' | 'assign';

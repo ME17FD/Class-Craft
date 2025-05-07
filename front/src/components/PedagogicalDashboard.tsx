@@ -44,7 +44,7 @@ const PedagogicalDashboard: React.FC = () => {
   const handleFieldEdit = (field: Field) => {
     // Find the modules associated with this field
     const fieldModules = data.modules
-      .filter((module) => module.fieldId === field.id)
+      .filter((module) => module.filiereId === field.id)
       .map((module) => ({
         ...module,
         subModules: data.subModules.filter(
@@ -104,6 +104,7 @@ const PedagogicalDashboard: React.FC = () => {
               fields={data.fields}
               modules={data.modules}
               students={data.allStudents}
+              professors={data.professors}
               onEdit={(group) => handleEdit("groups", group)}
               onDelete={deleteGroup}
               onAdd={() => handleAdd("groups")}

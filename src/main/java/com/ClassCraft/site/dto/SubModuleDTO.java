@@ -7,6 +7,7 @@ public class SubModuleDTO {
     private Long moduleId;
     private String moduleName;
     private Long teacherId;
+    private ProfessorDTO teacher;
     public Long getId() {
         return id;
     }
@@ -46,5 +47,13 @@ public class SubModuleDTO {
 
     public void setModuleName(String moduleName) {
         this.moduleName = moduleName;
+    }
+
+    public ProfessorDTO getTeacher() {
+        return teacher;
+    }
+
+    public void setTeacher(ProfessorDTO teacher) {
+        this.teacher = teacher;
     }
 }

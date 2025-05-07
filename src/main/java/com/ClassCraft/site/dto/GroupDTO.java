@@ -10,6 +10,7 @@ public class GroupDTO {
     private Long filiereId;
     private String filiereName;  // Added for convenience
     private List<StudentInfoDTO> students;  // Nested DTO for student information
+    private List<ModuleDTO> modules;
     public GroupDTO() {
 }
 
@@ -51,6 +52,14 @@ public class GroupDTO {
             .collect(Collectors.toList());
     }
     public void setStudents(List<StudentInfoDTO> students) { this.students = students; }
+
+    public List<ModuleDTO> getModules() {
+        return modules;
+    }
+
+    public void setModules(List<ModuleDTO> modules) {
+        this.modules = modules;
+    }
 
     // Nested DTO for student information
     public static class StudentInfoDTO {

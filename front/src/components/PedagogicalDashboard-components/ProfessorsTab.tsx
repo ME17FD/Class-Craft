@@ -23,18 +23,14 @@ const ProfessorsTab: React.FC<ProfessorsTabProps> = ({
   const [selectedProfessor, setSelectedProfessor] = useState<Professor | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const getModuleNames = (moduleIds: number[] | undefined) => {
-    if (!moduleIds || !modules) return "Aucun";
-    return moduleIds
-      .map((id) => modules.find((m) => m.id === id)?.name || "Inconnu")
-      .join(", ");
+  const getModuleNames = (professorModules: Module[] | undefined) => {
+    if (!professorModules || professorModules.length === 0) return "Aucun";
+    return professorModules.map(m => m.name).join(", ");
   };
 
-  const getSubModuleNames = (subModuleIds: number[] | undefined) => {
-    if (!subModuleIds || !subModules) return "Aucun";
-    return subModuleIds
-      .map((id) => subModules.find((sm) => sm.id === id)?.name || "Inconnu")
-      .join(", ");
+  const getSubModuleNames = (professorSubModules: SubModule[] | undefined) => {
+    if (!professorSubModules || professorSubModules.length === 0) return "Aucun";
+    return professorSubModules.map(sm => sm.name).join(", ");
   };
 
   const handleDeleteClick = (professor: Professor) => {
@@ -51,17 +47,18 @@ const ProfessorsTab: React.FC<ProfessorsTabProps> = ({
   };
 
   const columns = [
-    { header: "Nom", accessor: "name" as keyof Professor },
+    {
+      header: "Nom",
+      render: (professor: Professor) => `${professor.firstName} ${professor.lastName}`,
+    },
     { header: "Email", accessor: "email" as keyof Professor },
     {
       header: "Modules enseignés",
-      render: (professor: Professor) =>
-        getModuleNames(professor.modules) || "Aucun",
+      render: (professor: Professor) => getModuleNames(professor.modules),
     },
     {
       header: "Sous-modules enseignés",
-      render: (professor: Professor) =>
-        getSubModuleNames(professor.subModules) || "Aucun",
+      render: (professor: Professor) => getSubModuleNames(professor.subModules),
     },
     {
       header: "Actions",
@@ -86,12 +83,14 @@ const ProfessorsTab: React.FC<ProfessorsTabProps> = ({
           onClick={() =>
             onEdit({
               id: 0,
-              name: "",
+              firstName: "",
+              lastName: "",
               email: "",
               modules: [],
               subModules: [],
             })
-          }>
+          }
+        >
           + Ajouter un enseignant
         </Button>
       </div>
@@ -106,7 +105,11 @@ const ProfessorsTab: React.FC<ProfessorsTabProps> = ({
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        entityName={selectedProfessor?.name || "cet enseignant"}
+        entityName={
+          selectedProfessor
+            ? `${selectedProfessor.lastName} ${selectedProfessor.firstName}`
+            : "cet enseignant"
+        }
       />
     </>
   );
