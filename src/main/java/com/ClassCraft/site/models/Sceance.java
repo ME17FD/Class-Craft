@@ -17,14 +17,18 @@ public class Sceance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+    public enum SceanceType {
+        CM, TD, TP, EXAM, RATTRAPAGE, EVENT
+    }
     private String dayOfWeek;
     private Time startTime;
     private Time endTime;
     private int frequency;
-
+    private SceanceType type;
     private Boolean wasAttended = false;
     
+
+
     @ManyToOne
     private SubModule subModule;
      
@@ -39,4 +43,7 @@ public class Sceance {
 
     @ManyToOne
     private Professor professor;
+
+
+  
 }

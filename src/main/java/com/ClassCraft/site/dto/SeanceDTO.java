@@ -10,6 +10,7 @@ public class SeanceDTO {
     private int frequency;
     private Boolean wasAttended;
 
+    private String type;
     private GroupDTO group;
     private SubModuleDTO subModule;
     private ModuleDTO module;
@@ -17,7 +18,15 @@ public class SeanceDTO {
     private ClassroomDTO classroom;
 
     // Getters & Setters
+    
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
     public Long getId() {
         return id;
     }

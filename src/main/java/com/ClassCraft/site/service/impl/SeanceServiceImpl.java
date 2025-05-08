@@ -78,8 +78,9 @@ public class SeanceServiceImpl {
         dto.setStartTime(sceance.getStartTime());
         dto.setEndTime(sceance.getEndTime());
         dto.setFrequency(sceance.getFrequency());
-        dto.setWasAttended(sceance.getWasAttended());
-    
+        dto.setWasAttended(sceance.getWasAttended());   
+        dto.setType(sceance.getType() != null ? sceance.getType().name() : null);
+
         // Remplir SubModuleDTO
         if (sceance.getSubModule() != null) {
             SubModuleDTO subModuleDTO = new SubModuleDTO();

@@ -2,7 +2,6 @@ import { Group, Professor, Module, SubModule, Field } from './type';
 
 // Type pour une séance
 export interface Session {
-    startDate: string | number | Date;
     id: number;
     startTime: string;
     endTime: string;
@@ -58,16 +57,3 @@ export interface Room {
 } 
 
 
-export interface Sceance {
-    id: number;
-    dayOfWeek: string;  // Exemple: "Lundi"
-    startTime: string;  // Exemple: "10:00"
-    endTime: string;    // Exemple: "12:00"
-    frequency: string;  // Exemple: "Hebdomadaire"
-    wasAttended: boolean;
-    moduleId: number;
-    groupId: number;
-    classroomId: number;
-    professorId: number;
-  }
-  
