@@ -33,7 +33,7 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
 
   const getProfessorNames = (moduleId: number) => {
     const moduleProfessors = professors.filter(p => p.modules && p.modules.includes(moduleId));
-    return moduleProfessors.map(p => p.name).join(", ") || "Aucun professeur";
+    return moduleProfessors.map(p => p.firstName).join(", ") || "Aucun professeur";
   };
 
   const getSubModuleNames = (moduleId: number) => {
@@ -43,9 +43,9 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
 
   const filteredModules = useMemo(() => {
     return modules.filter(module => {
-      const matchesField = selectedField === 0 || module.fieldId === selectedField;
+      const matchesField = selectedField === 0 || module.filiereId === selectedField;
       const matchesProfessor = selectedProfessor === 0 || 
-        professors.find(p => p.id === selectedProfessor)?.modules?.includes(module.id);
+        professors.find(p => p.id === selectedProfessor)?.modules?.includes(module);
       return matchesField && matchesProfessor;
     });
   }, [modules, selectedField, selectedProfessor, professors]);
@@ -67,7 +67,7 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
     { header: "Nom", accessor: "name" as keyof Module },
     {
       header: "Filière",
-      render: (module: Module) => getFieldName(module.fieldId),
+      render: (module: Module) => getFieldName(module.filiereId),
     },
     {
       header: "Professeur(s)",
@@ -117,7 +117,7 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
               <option value={0}>Tous les professeurs</option>
               {professors.map((professor) => (
                 <option key={professor.id} value={professor.id}>
-                  {professor.name}
+                  {professor.firstName}
                 </option>
               ))}
             </select>
@@ -125,7 +125,7 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
         </div>
         <Button
           variant="primary"
-          onClick={() => onEdit({ id: 0, name: "", code: "", fieldId: 0 })}>
+          onClick={() => onEdit({ id: 0, name: "", code: "", filiereId: 0 })}>
           + Ajouter un module
         </Button>
       </div>

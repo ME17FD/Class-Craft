@@ -106,7 +106,7 @@ const FieldFormModal: React.FC<FieldFormModalProps> = ({
         id: field?.modules[index]?.id || 0,
         name: m.name,
         code: m.code,
-        fieldId: field?.id || 0,
+        filiereId: field?.id || 0,
         subModules: m.subModules.map((sm, smIndex) => ({
           id: field?.modules[index]?.subModules[smIndex]?.id || 0,
           name: sm.name,

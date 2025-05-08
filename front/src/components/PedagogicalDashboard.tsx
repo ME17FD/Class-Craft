@@ -99,7 +99,7 @@ const PedagogicalDashboard: React.FC = () => {
 
         <div className={styles.content}>
           {activeTab === "groups" && (
-              <GroupsTab
+            <GroupsTab
               groups={data.groups}
               fields={data.fields}
               modules={data.modules}
@@ -109,7 +109,6 @@ const PedagogicalDashboard: React.FC = () => {
               onDelete={deleteGroup}
               onAdd={() => handleAdd("groups")}
               onAssignStudents={handleAssignStudents}
-
             />
           )}
           {activeTab === "students" && (

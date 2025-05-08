@@ -92,8 +92,8 @@ const FieldsTab: React.FC<FieldsTabProps> = ({
       {selectedField && (
         <FieldDetailsModal
           field={selectedField}
-          modules={modules.filter(m => m.fieldId === selectedField.id)}
-          subModules={subModules.filter(sm => modules.some(m => m.id === sm.moduleId && m.fieldId === selectedField.id))}
+          modules={modules.filter(m => m.filiereId === selectedField.id)}
+          subModules={subModules.filter(sm => modules.some(m => m.id === sm.moduleId && m.filiereId === selectedField.id))}
           groups={groups.filter(g => g.filiereId === selectedField.id)}
           professors={professors}
           onClose={() => setSelectedField(null)}

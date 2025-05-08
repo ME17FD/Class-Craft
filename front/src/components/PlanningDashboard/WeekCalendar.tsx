@@ -39,7 +39,7 @@ export const WeekCalendar = ({ sessions }: Props) => {
                     {session && (
                       <div className="session-card">
                         <div>{session.module?.name}</div>
-                        <div>{session.professor.name}</div>
+                        <div>{session.professor.firstName}</div>
                         <div>{session.room}</div>
                       </div>
                     )}

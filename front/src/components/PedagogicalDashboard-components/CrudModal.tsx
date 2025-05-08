@@ -5,12 +5,10 @@ import Modal from "./Modal";
 import {
   CrudModalType,
   TabType,
-  Student,
   Group,
   Field,
   Module,
   SubModule,
-  Professor,
 } from "../../types/type";
 
 interface CrudModalProps {
@@ -42,7 +40,7 @@ const CrudModal: React.FC<CrudModalProps> = ({
 }) => {
   const [formData, setFormData] = useState(() => ({
     ...entity,
-    subModules: entity?.subModules || []
+    subModules: entity?.subModules || [],
   }));
 
   if (!isOpen) return null;
@@ -69,18 +67,27 @@ const CrudModal: React.FC<CrudModalProps> = ({
   };
 
   const handleAddSubModule = () => {
-    const newSubModules = [...(formData.subModules || []), { name: "", hours: 0 }];
+    const newSubModules = [
+      ...(formData.subModules || []),
+      { name: "", hours: 0 },
+    ];
     setFormData({ ...formData, subModules: newSubModules });
   };
 
-  const handleSubModuleChange = (index: number, field: string, value: string | number) => {
+  const handleSubModuleChange = (
+    index: number,
+    field: string,
+    value: string | number
+  ) => {
     const newSubModules = [...(formData.subModules || [])];
     newSubModules[index] = { ...newSubModules[index], [field]: value };
     setFormData({ ...formData, subModules: newSubModules });
   };
 
   const handleRemoveSubModule = (index: number) => {
-    const newSubModules = (formData.subModules || []).filter((_: any, i: number) => i !== index);
+    const newSubModules = (formData.subModules || []).filter(
+      (_: any, i: number) => i !== index
+    );
     setFormData({ ...formData, subModules: newSubModules });
   };
 
@@ -101,9 +108,10 @@ const CrudModal: React.FC<CrudModalProps> = ({
             <div className={styles.formGroup}>
               <label>Filière</label>
               <select
-                name="fieldId"
-                value={formData?.fieldId || ""}
-                onChange={handleChange}>
+                name="filiereId"
+                value={formData?.filiereId || ""}
+                onChange={handleChange}
+              >
                 {fields.map((field) => (
                   <option key={field.id} value={field.id}>
                     {field.name}
@@ -137,9 +145,10 @@ const CrudModal: React.FC<CrudModalProps> = ({
             <div className={styles.formGroup}>
               <label>Filière</label>
               <select
-                name="fieldId"
-                value={formData?.fieldId || ""}
-                onChange={handleChange}>
+                name="filiereId"
+                value={formData?.filiereId || ""}
+                onChange={handleChange}
+              >
                 {fields.map((field) => (
                   <option key={field.id} value={field.id}>
                     {field.name}
@@ -157,7 +166,9 @@ const CrudModal: React.FC<CrudModalProps> = ({
                       <input
                         type="text"
                         value={subModule.name}
-                        onChange={(e) => handleSubModuleChange(index, 'name', e.target.value)}
+                        onChange={(e) =>
+                          handleSubModuleChange(index, "name", e.target.value)
+                        }
                         placeholder="Nom du sous-module"
                       />
                     </div>
@@ -166,21 +177,26 @@ const CrudModal: React.FC<CrudModalProps> = ({
                       <input
                         type="number"
                         value={subModule.hours}
-                        onChange={(e) => handleSubModuleChange(index, 'hours', Number(e.target.value))}
+                        onChange={(e) =>
+                          handleSubModuleChange(
+                            index,
+                            "hours",
+                            Number(e.target.value)
+                          )
+                        }
                         placeholder="Nombre d'heures"
                       />
                     </div>
                     <Button
                       variant="delete"
-                      onClick={() => handleRemoveSubModule(index)}>
+                      onClick={() => handleRemoveSubModule(index)}
+                    >
                       Supprimer
                     </Button>
                   </div>
                 ))}
               </div>
-              <Button
-                variant="primary"
-                onClick={handleAddSubModule}>
+              <Button variant="primary" onClick={handleAddSubModule}>
                 + Ajouter un sous-module
               </Button>
             </div>
@@ -213,7 +229,8 @@ const CrudModal: React.FC<CrudModalProps> = ({
               <select
                 name="moduleId"
                 value={formData?.moduleId || ""}
-                onChange={handleChange}>
+                onChange={handleChange}
+              >
                 {modules.map((module) => (
                   <option key={module.id} value={module.id}>
                     {module.name}
@@ -250,7 +267,8 @@ const CrudModal: React.FC<CrudModalProps> = ({
                 multiple
                 name="modules"
                 value={formData?.modules || []}
-                onChange={(e) => handleMultiSelect(e, 'modules')}>
+                onChange={(e) => handleMultiSelect(e, "modules")}
+              >
                 {modules.map((module) => (
                   <option key={module.id} value={module.id}>
                     {module.name}
@@ -264,7 +282,8 @@ const CrudModal: React.FC<CrudModalProps> = ({
                 multiple
                 name="subModules"
                 value={formData?.subModules || []}
-                onChange={(e) => handleMultiSelect(e, 'subModules')}>
+                onChange={(e) => handleMultiSelect(e, "subModules")}
+              >
                 {subModules.map((subModule) => (
                   <option key={subModule.id} value={subModule.id}>
                     {subModule.name}
@@ -318,7 +337,8 @@ const CrudModal: React.FC<CrudModalProps> = ({
               <select
                 name="groupId"
                 value={formData?.groupId || ""}
-                onChange={handleChange}>
+                onChange={handleChange}
+              >
                 <option value="">Aucun groupe</option>
                 {groups.map((group) => (
                   <option key={group.id} value={group.id}>
@@ -348,14 +368,12 @@ const CrudModal: React.FC<CrudModalProps> = ({
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={getModalTitle()}
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title={getModalTitle()}>
       {type === "delete" ? (
         <div className={styles.deleteConfirmation}>
-          <p>Êtes-vous sûr de vouloir supprimer {entity?.name || "cet élément"} ?</p>
+          <p>
+            Êtes-vous sûr de vouloir supprimer {entity?.name || "cet élément"} ?
+          </p>
           <p className={styles.warning}>Cette action est irréversible.</p>
           <div className={styles.modalActions}>
             <Button variant="secondary" onClick={onClose}>

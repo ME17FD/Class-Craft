@@ -1,7 +1,10 @@
-import { useState, useCallback } from 'react';
-import { Field, Module, SubModule, Group, Professor, Student, CrudModalType, TabType, ModalState } from '../types/type';
+import { useState, useCallback } from "react";
+import {
+  TabType,
+  ModalState,
+} from "../types/type";
 //import { useMockData } from '../hooks/useMockData';
-import { useApiData } from '../hooks/useApiData';
+import { useApiData } from "../hooks/useApiData";
 const usePedagogicalData = () => {
   const {
     fields,
@@ -28,119 +31,145 @@ const usePedagogicalData = () => {
     addStudent,
     updateStudent,
     deleteStudent,
-    addStudentToGroup,
-    removeStudentFromGroup
+    //addStudentToGroup,
+    //removeStudentFromGroup
   } = useApiData();
 
   const [modalState, setModalState] = useState<ModalState>({
     isOpen: false,
-    type: 'add',
-    entityType: 'groups',
-    entity: null
+    type: "add",
+    entityType: "groups",
+    entity: null,
   });
 
   const handleAdd = useCallback((entityType: TabType) => {
     setModalState({
       isOpen: true,
-      type: 'add',
+      type: "add",
       entityType,
-      entity: null
+      entity: null,
     });
   }, []);
 
   const handleEdit = useCallback((entityType: TabType, entity: any) => {
     setModalState({
       isOpen: true,
-      type: 'edit',
+      type: "edit",
       entityType,
-      entity
+      entity,
     });
   }, []);
 
   const handleDelete = useCallback((entityType: TabType, entity: any) => {
     setModalState({
       isOpen: true,
-      type: 'delete',
+      type: "delete",
       entityType,
-      entity
+      entity,
     });
   }, []);
 
-  const handleAssignStudents = useCallback((groupId: number) => {
-    setModalState({
-      isOpen: true,
-      type: 'assign',
-      entityType: 'groups',
-      entity: groups.find(g => g.id === groupId)
-    });
-  }, [groups]);
+  const handleAssignStudents = useCallback(
+    (groupId: number) => {
+      setModalState({
+        isOpen: true,
+        type: "assign",
+        entityType: "groups",
+        entity: groups.find((g) => g.id === groupId),
+      });
+    },
+    [groups]
+  );
 
-  const handleSave = useCallback((entityType: TabType, entity: any) => {
-    switch (entityType) {
-      case 'fields':
-        if (modalState.type === 'add') {
-          addField(entity);
-        } else if (modalState.type === 'edit') {
-          updateField(entity);
-        } else if (modalState.type === 'delete') {
-          deleteField(entity.id);
-        }
-        break;
-      case 'modules':
-        if (modalState.type === 'add') {
-          addModule(entity);
-        } else if (modalState.type === 'edit') {
-          updateModule(entity);
-        } else if (modalState.type === 'delete') {
-          deleteModule(entity.id);
-        }
-        break;
-      case 'submodules':
-        if (modalState.type === 'add') {
-          addSubModule(entity);
-        } else if (modalState.type === 'edit') {
-          updateSubModule(entity);
-        } else if (modalState.type === 'delete') {
-          deleteSubModule(entity.id);
-        }
-        break;
-      case 'groups':
-        if (modalState.type === 'add') {
-          addGroup(entity);
-        } else if (modalState.type === 'edit') {
-          updateGroup(entity);
-        } else if (modalState.type === 'delete') {
-          deleteGroup(entity.id);
-        }
-        break;
-      case 'professors':
-        if (modalState.type === 'add') {
-          addProfessor(entity);
-        } else if (modalState.type === 'edit') {
-          updateProfessor(entity);
-        } else if (modalState.type === 'delete') {
-          deleteProfessor(entity.id);
-        }
-        break;
-      case 'students':
-        if (modalState.type === 'add') {
-          addStudent(entity);
-        } else if (modalState.type === 'edit') {
-          updateStudent(entity);
-        } else if (modalState.type === 'delete') {
-          deleteStudent(entity.id);
-        }
-        break;
-    }
-    handleCloseModal();
-  }, [modalState.type, addField, updateField, deleteField, addModule, updateModule, deleteModule, addSubModule, updateSubModule, deleteSubModule, addGroup, updateGroup, deleteGroup, addProfessor, updateProfessor, deleteProfessor, addStudent, updateStudent, deleteStudent]);
+  const handleSave = useCallback(
+    (entityType: TabType, entity: any) => {
+      switch (entityType) {
+        case "fields":
+          if (modalState.type === "add") {
+            addField(entity);
+          } else if (modalState.type === "edit") {
+            updateField(entity);
+          } else if (modalState.type === "delete") {
+            deleteField(entity.id);
+          }
+          break;
+        case "modules":
+          if (modalState.type === "add") {
+            addModule(entity);
+          } else if (modalState.type === "edit") {
+            updateModule(entity);
+          } else if (modalState.type === "delete") {
+            deleteModule(entity.id);
+          }
+          break;
+        case "submodules":
+          if (modalState.type === "add") {
+            addSubModule(entity);
+          } else if (modalState.type === "edit") {
+            updateSubModule(entity);
+          } else if (modalState.type === "delete") {
+            deleteSubModule(entity.id);
+          }
+          break;
+        case "groups":
+          if (modalState.type === "add") {
+            addGroup(entity);
+          } else if (modalState.type === "edit") {
+            updateGroup(entity);
+          } else if (modalState.type === "delete") {
+            deleteGroup(entity.id);
+          }
+          break;
+        case "professors":
+          if (modalState.type === "add") {
+            addProfessor(entity);
+          } else if (modalState.type === "edit") {
+            updateProfessor(entity);
+          } else if (modalState.type === "delete") {
+            deleteProfessor(entity.id);
+          }
+          break;
+        case "students":
+          if (modalState.type === "add") {
+            addStudent(entity);
+          } else if (modalState.type === "edit") {
+            updateStudent(entity);
+          } else if (modalState.type === "delete") {
+            deleteStudent(entity.id);
+          }
+          break;
+      }
+      handleCloseModal();
+    },
+    [
+      modalState.type,
+      addField,
+      updateField,
+      deleteField,
+      addModule,
+      updateModule,
+      deleteModule,
+      addSubModule,
+      updateSubModule,
+      deleteSubModule,
+      addGroup,
+      updateGroup,
+      deleteGroup,
+      addProfessor,
+      updateProfessor,
+      deleteProfessor,
+      addStudent,
+      updateStudent,
+      deleteStudent,
+    ]
+  );
 
   const handleCloseModal = useCallback(() => {
     setModalState({
       isOpen: false,
-      type: 'add',
-      entityType: 'groups',
-      entity: null
+      type: "add",
+      entityType: "groups",
+      entity: null,
     });
   }, []);
 
@@ -151,7 +180,7 @@ const usePedagogicalData = () => {
       subModules,
       groups,
       professors,
-      allStudents: students
+      allStudents: students,
     },
     modalState,
     handleAdd,
@@ -159,7 +188,7 @@ const usePedagogicalData = () => {
     handleDelete,
     handleAssignStudents,
     handleSave,
-    handleCloseModal
+    handleCloseModal,
   };
 };
 

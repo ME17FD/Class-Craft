@@ -50,7 +50,8 @@ const LoginForm: React.FC = () => {
       } else {
         // Unknown role, fallback
         navigate("/");
-      }    }
+      }
+    }
   }, [navigate]);
 
   const handleSignUpClick = () => setIsRightPanelActive(true);

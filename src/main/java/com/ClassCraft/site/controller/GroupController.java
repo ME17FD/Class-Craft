@@ -22,7 +22,6 @@ import com.ClassCraft.site.models.Group;
 import com.ClassCraft.site.models.Module;
 import com.ClassCraft.site.repository.FiliereRepository;
 import com.ClassCraft.site.repository.GroupRepository;
-import com.ClassCraft.site.repository.StudentRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,7 +31,6 @@ import lombok.RequiredArgsConstructor;
 public class GroupController {
 
     private final GroupRepository groupRepository;
-    private final StudentRepository studentRepository;
     private final FiliereRepository filiereRepository;
 
     
@@ -183,6 +181,7 @@ public ResponseEntity<GroupDTO> createGroup(@RequestBody GroupDTO groupDTO) {
         group.setName(groupDTO.getName());
 
         // Update Filiere if provided
+        System.out.println(groupDTO.getFiliereId());
         if (groupDTO.getFiliereId() != null) {
             Optional<Filiere> filiere = filiereRepository.findById(groupDTO.getFiliereId());
             filiere.ifPresent(group::setFiliere);

@@ -142,55 +142,55 @@ export const mockModules: Module[] = [
         id: 1,
         name: "Programmation Web",
         code: "WEB101",
-        fieldId: 1
+        filiereId: 1
     },
     {
         id: 2,
         name: "Bases de données",
         code: "DB101",
-        fieldId: 1
+        filiereId: 1
     },
     {
         id: 3,
         name: "Architecture Logicielle",
         code: "ARCH101",
-        fieldId: 1
+        filiereId: 1
     },
     {
         id: 4,
         name: "Réseaux Locaux",
         code: "NET101",
-        fieldId: 2
+        filiereId: 2
     },
     {
         id: 5,
         name: "Télécommunications",
         code: "TEL101",
-        fieldId: 2
+        filiereId: 2
     },
     {
         id: 6,
         name: "Sécurité Réseaux",
         code: "SEC101",
-        fieldId: 2
+        filiereId: 2
     },
     {
         id: 7,
         name: "Machine Learning",
         code: "ML101",
-        fieldId: 3
+        filiereId: 3
     },
     {
         id: 8,
         name: "Deep Learning",
         code: "DL101",
-        fieldId: 3
+        filiereId: 3
     },
     {
         id: 9,
         name: "Traitement du Langage Naturel",
         code: "NLP101",
-        fieldId: 3
+        filiereId: 3
     }
 ];
 
@@ -314,56 +314,3 @@ export const mockGroups: Group[] = [
         students: getGroupStudents(6)
     }
 ];
-
-// Professeurs
-export const mockProfessors: Professor[] = [
-    {
-        id: 1,
-        name: "Dr. Ahmed Benali",
-        email: "ahmed.benali@univ.ma",
-        modules: [1, 2],
-        subModules: [1, 3]
-    },
-    {
-        id: 2,
-        name: "Dr. Fatima Alami",
-        email: "fatima.alami@univ.ma",
-        modules: [1],
-        subModules: [2]
-    },
-    {
-        id: 3,
-        name: "Dr. Karim Idrissi",
-        email: "karim.idrissi@univ.ma",
-        modules: [3],
-        subModules: [4]
-    },
-    {
-        id: 4,
-        name: "Dr. Samira Hassani",
-        email: "samira.hassani@univ.ma",
-        modules: [4, 5],
-        subModules: [5, 6]
-    },
-    {
-        id: 5,
-        name: "Dr. Youssef El Fassi",
-        email: "youssef.elfassi@univ.ma",
-        modules: [5, 6],
-        subModules: [7, 8]
-    },
-    {
-        id: 6,
-        name: "Dr. Leila Benjelloun",
-        email: "leila.benjelloun@univ.ma",
-        modules: [7, 8],
-        subModules: [9, 10, 11]
-    },
-    {
-        id: 7,
-        name: "Dr. Mehdi Alami",
-        email: "mehdi.alami@univ.ma",
-        modules: [8, 9],
-        subModules: [11, 12]
-    }
-]; 

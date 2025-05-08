@@ -21,7 +21,7 @@ const FieldDetailsModal: React.FC<FieldDetailsModalProps> = ({
   onClose,
 }) => {
   // Filtrer les modules de la filière
-  const fieldModules = modules.filter(module => module.fieldId === field.id);
+  const fieldModules = modules.filter(module => module.filiereId === field.id);
 
   // Pour chaque module, trouver ses sous-modules
   const modulesWithSubModules = fieldModules.map(module => ({
@@ -33,12 +33,12 @@ const FieldDetailsModal: React.FC<FieldDetailsModalProps> = ({
   const modulesWithProfessors = modulesWithSubModules.map(module => ({
     ...module,
     professors: professors.filter(professor => 
-      professor.modules?.includes(module.id)
+      professor.modules?.includes(module)
     )
   }));
 
   // Trouver les groupes de la filière
-  const fieldGroups = groups.filter(group => group.fieldId === field.id);
+  const fieldGroups = groups.filter(group => group.filiereId === field.id);
 
   return (
     <div className={styles.modalOverlay}>
@@ -79,7 +79,7 @@ const FieldDetailsModal: React.FC<FieldDetailsModalProps> = ({
                     <h5>Enseignants :</h5>
                     {module.professors.map(professor => (
                       <div key={professor.id} className={styles.professorItem}>
-                        {professor.name}
+                        {professor.firstName}
                       </div>
                     ))}
                   </div>

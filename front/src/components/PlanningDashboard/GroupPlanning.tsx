@@ -102,7 +102,7 @@ export const GroupPlanning = () => {
           <option value="">Tous les professeurs</option>
           {professors.map((prof) => (
             <option key={prof.id} value={prof.id}>
-              {prof.name}
+              {prof.firstName}
             </option>
           ))}
         </select>
