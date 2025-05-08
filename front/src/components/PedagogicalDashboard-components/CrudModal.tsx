@@ -22,7 +22,7 @@ interface CrudModalProps {
   groups: Group[];
   onSave: (entityType: TabType, data: any) => void;
   onClose: () => void;
-  onAssignStudent?: (studentId: number, assign: boolean) => void;
+  onAssignStudent?: (studentId: number, studentIds: number[],assign: boolean) => Promise<boolean>;
 }
 
 const CrudModal: React.FC<CrudModalProps> = ({

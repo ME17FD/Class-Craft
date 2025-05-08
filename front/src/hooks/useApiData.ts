@@ -194,6 +194,18 @@ export const useApiData = () => {
     [setGroups, setStudents]
   );
 
+  const assignStudentsToGroup = async (groupId: number, studentIds: number[]) => {
+    const response = await api.put(`/api/groups/${groupId}/students`, { studentIds });
+    return response.data;
+  };
+  
+  const removeStudentsFromGroup = async (groupId: number, studentIds: number[]) => {
+    const response = await api.delete(`/api/groups/${groupId}/students`, {
+      data: { studentIds }
+    });
+    return response.data;
+  };
+
   // ----- CRUD: Professors -----
   const addProfessor = useCallback(async (prof: Professor) => {
     const res = await api.post("/api/professors", prof);
@@ -254,5 +266,7 @@ export const useApiData = () => {
     updateStudent,
     deleteStudent,
     fetchData,
+    assignStudentsToGroup,
+    removeStudentsFromGroup
   };
 };

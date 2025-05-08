@@ -21,6 +21,7 @@ const UnassignedStudentsModal: React.FC<UnassignedStudentsModalProps> = ({
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
 
   useEffect(() => {
+
     setFilteredStudents(
       students.filter(
         (student) =>

@@ -1,7 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   TabType,
   ModalState,
+  Student
 } from "../types/type";
 //import { useMockData } from '../hooks/useMockData';
 import { useApiData } from "../hooks/useApiData";
@@ -12,7 +13,7 @@ const usePedagogicalData = () => {
     subModules,
     groups,
     professors,
-    students,
+    students:initialStudents,
     addField,
     updateField,
     deleteField,
@@ -31,10 +32,15 @@ const usePedagogicalData = () => {
     addStudent,
     updateStudent,
     deleteStudent,
-    //addStudentToGroup,
-    //removeStudentFromGroup
+    assignStudentsToGroup,
+    removeStudentsFromGroup,
   } = useApiData();
-
+  const [students, setStudents] = useState<Student[]>(initialStudents);
+  useEffect(() => {
+    if (initialStudents.length > 0) {
+      setStudents(initialStudents);
+    }
+  }, [initialStudents]);
   const [modalState, setModalState] = useState<ModalState>({
     isOpen: false,
     type: "add",
@@ -70,16 +76,31 @@ const usePedagogicalData = () => {
   }, []);
 
   const handleAssignStudents = useCallback(
-    (groupId: number) => {
-      setModalState({
-        isOpen: true,
-        type: "assign",
-        entityType: "groups",
-        entity: groups.find((g) => g.id === groupId),
-      });
+    async (groupId: number, studentIds: number[], assign: boolean): Promise<boolean> => {
+      try {
+        if (assign) {
+          await assignStudentsToGroup(groupId, studentIds);
+        } else {
+          await removeStudentsFromGroup(groupId, studentIds);
+        }
+
+        setStudents(prev =>
+          prev.map((student: Student) =>
+            studentIds.includes(student.id)
+              ? { ...student, groupId: assign ? groupId : null }
+              : student
+          )
+        );
+
+        return true;
+      } catch (error) {
+        console.error("Failed to assign students:", error);
+        return false;
+      }
     },
-    [groups]
+    [assignStudentsToGroup, removeStudentsFromGroup]
   );
+
 
   const handleSave = useCallback(
     (entityType: TabType, entity: any) => {

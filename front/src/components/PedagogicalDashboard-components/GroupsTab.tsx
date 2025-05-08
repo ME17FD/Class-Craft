@@ -172,6 +172,8 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
       ),
     },
   ];
+  console.log("filter studensssts:", students.filter(s => s.groupId === null || s.groupId === undefined));
+
 
   return (
     <div className={styles.container}>
@@ -236,7 +238,7 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
         isOpen={isUnassignedModalOpen}
         onClose={handleCloseUnassignedModal}
         onAssignStudent={handleAssignStudent}
-        students={students.filter(s => !s.groupId)}
+        students={students.filter(s => s.groupId === null || s.groupId === undefined)}
       />
 
       <DeleteConfirmationModal
