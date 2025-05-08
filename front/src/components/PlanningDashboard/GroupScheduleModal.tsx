@@ -9,6 +9,7 @@ type Props = {
   onClose: () => void;
   onTimeSlotClick: (day: string, time: string) => void;
 };
+
 const exportToExcel = (sessions: Session[], groupName: string) => {
   const worksheet = XLSX.utils.json_to_sheet(
     sessions.map((s) => ({

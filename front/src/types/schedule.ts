@@ -56,3 +56,18 @@ export interface Room {
     capacity: number;
     type: 'Salle de cours' | 'Laboratoire' | 'Salle informatique';
 } 
+
+
+export interface Sceance {
+    id: number;
+    dayOfWeek: string;  // Exemple: "Lundi"
+    startTime: string;  // Exemple: "10:00"
+    endTime: string;    // Exemple: "12:00"
+    frequency: string;  // Exemple: "Hebdomadaire"
+    wasAttended: boolean;
+    moduleId: number;
+    groupId: number;
+    classroomId: number;
+    professorId: number;
+  }
+  

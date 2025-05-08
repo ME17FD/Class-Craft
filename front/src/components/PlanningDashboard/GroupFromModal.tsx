@@ -1,22 +1,17 @@
 import { useState, useEffect } from "react";
-import {
-  Group,
-  Session,
-  Module,
-  SubModule,
-  Professor,
-  Room,
-} from "../../types/type";
+import { Group, Module, SubModule, Professor } from "../../types/type";
+
+import { Sceance, Room } from "../../types/schedule";
 import { GroupScheduleModal } from "./GroupScheduleModal";
 import styles from "../../styles/PlanningDashboard/GroupFormModal.module.css";
-import { useStaticData } from "../../hooks/useStaticData";
+import { useApiData } from "../../hooks/useApiData";
 
 type Props = {
   show: boolean;
   group?: Group;
   onHide: () => void;
   onSave: (group: Group) => void;
-  onSaveSession: (session: Session) => void;
+  onSaveSession: (session: Sceance) => void;
 };
 
 export const GroupFormModal = ({
@@ -26,13 +21,13 @@ export const GroupFormModal = ({
   onSave,
   onSaveSession,
 }: Props) => {
-  const { modules, subModules, professors, rooms, sessions } = useStaticData();
+  const { modules, subModules, professors, rooms, sessions } = useApiData();
   const [name, setName] = useState(group?.name || "");
   const [filiereId, setFiliereId] = useState(group?.filiereId || 0);
   const [showSessionModal, setShowSessionModal] = useState(false);
   const [selectedDay, setSelectedDay] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
-  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [selectedSession, setSelectedSession] = useState<Sceance | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

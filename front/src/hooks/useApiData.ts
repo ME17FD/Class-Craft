@@ -10,6 +10,10 @@ import {
   Student,
 } from "../types/type";
 
+import{
+  Sceance
+} from "../types/schedule";
+
 export const useApiData = () => {
   const [fields, setFields] = useState<Field[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
@@ -17,6 +21,11 @@ export const useApiData = () => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [professors, setProfessors] = useState<Professor[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
+  const [seances, setSeances] = useState<Sceance[]>([]);
+
+  
+
+
   const fetchData = async () => {
     console.log("Initiating API requests...");
     
@@ -28,6 +37,7 @@ export const useApiData = () => {
         { name: "groups", url: "/api/groups" },
         { name: "professors", url: "/api/professors" },
         { name: "students", url: "/api/students" },
+        { name: "seances", url: "/api/seances" },
       ];
 
       const requests = endpoints.map(endpoint => 
@@ -72,6 +82,7 @@ export const useApiData = () => {
           case "groups": setGroups(result.value.data); break;
           case "professors": setProfessors(result.value.data); break;
           case "students": setStudents(result.value.data); break;
+          case "seances": setSeances(result.value.data); break;
         }
       });
 
@@ -86,7 +97,25 @@ export const useApiData = () => {
     fetchData();
   }, []);
 
+// ----- CRUD: Seances -----
+const addSceance = useCallback(async (sceance: Sceance) => {
+  const res = await api.post("/api/seances", sceance);
+  setSeances(prev => [...prev, res.data]);
+  return res.data;
+}, []);
+
+const updateSceance = useCallback(async (sceance: Sceance) => {
+  await api.put(`/api/seances/${sceance.id}`, sceance);
+  setSeances(prev => prev.map(s => s.id === sceance.id ? sceance : s));
+}, []);
+
+const deleteSceance = useCallback(async (sceanceId: number) => {
+  await api.delete(`/api/seances/${sceanceId}`);
+  setSeances(prev => prev.filter(s => s.id !== sceanceId));
+}, []);
+
   // ----- CRUD: Fields -----
+
   const addField = useCallback(async (field: Field) => {
     const res = await api.post("/api/filieres", field);
     setFields(prev => [...prev, res.data]);
@@ -213,6 +242,10 @@ export const useApiData = () => {
   }, []);
 
   return {
+    seances,
+    addSceance,
+    deleteSceance,
+    updateSceance,
     fields,
     modules,
     subModules,

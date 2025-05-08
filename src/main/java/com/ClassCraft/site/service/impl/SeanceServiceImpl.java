@@ -1,25 +1,25 @@
 package com.ClassCraft.site.service.impl;
 
-import com.ClassCraft.site.dto.SeanceDTO;
-import com.ClassCraft.site.models.Professor;
-import com.ClassCraft.site.models.Classroom;
-import com.ClassCraft.site.models.Group;
-import com.ClassCraft.site.models.Module;
-import com.ClassCraft.site.models.Sceance;
-import com.ClassCraft.site.models.SubModule;
-import com.ClassCraft.site.repository.ClassroomRepository;
-import com.ClassCraft.site.repository.SeanceRepository;
-import com.ClassCraft.site.dto.ModuleDTO;
-import com.ClassCraft.site.dto.SubModuleDTO;
-import com.ClassCraft.site.dto.ProfessorDTO;
-import com.ClassCraft.site.dto.ClassroomDTO;
-import com.ClassCraft.site.dto.GroupDTO;
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import com.ClassCraft.site.dto.ClassroomDTO;
+import com.ClassCraft.site.dto.GroupDTO;
+import com.ClassCraft.site.dto.ModuleDTO;
+import com.ClassCraft.site.dto.ProfessorDTO;
+import com.ClassCraft.site.dto.SeanceDTO;
+import com.ClassCraft.site.dto.SubModuleDTO;
+import com.ClassCraft.site.models.Classroom;
+import com.ClassCraft.site.models.Group;
+import com.ClassCraft.site.models.Module;
+import com.ClassCraft.site.models.Professor;
+import com.ClassCraft.site.models.Sceance;
+import com.ClassCraft.site.models.SubModule;
+import com.ClassCraft.site.repository.ClassroomRepository;
+import com.ClassCraft.site.repository.SeanceRepository;
 
 @Service
 public class SeanceServiceImpl {
@@ -73,14 +73,13 @@ public class SeanceServiceImpl {
     // Méthode pour convertir l'entité Sceance en DTO
     private SeanceDTO convertToSeanceDTO(Sceance sceance) {
         SeanceDTO dto = new SeanceDTO();
-        Sceance session = new Sceance();
         dto.setId(sceance.getId());
         dto.setDayOfWeek(sceance.getDayOfWeek());
         dto.setStartTime(sceance.getStartTime());
         dto.setEndTime(sceance.getEndTime());
         dto.setFrequency(sceance.getFrequency());
         dto.setWasAttended(sceance.getWasAttended());
-
+    
         // Remplir SubModuleDTO
         if (sceance.getSubModule() != null) {
             SubModuleDTO subModuleDTO = new SubModuleDTO();
@@ -89,7 +88,7 @@ public class SeanceServiceImpl {
             subModuleDTO.setNbrHours(sceance.getSubModule().getNbrHours());
             dto.setSubModule(subModuleDTO);
         }
-
+    
         // Remplir GroupDTO
         if (sceance.getGroup() != null) {
             GroupDTO groupDTO = new GroupDTO();
@@ -97,7 +96,7 @@ public class SeanceServiceImpl {
             groupDTO.setName(sceance.getGroup().getName());
             dto.setGroup(groupDTO);
         }
-
+    
         // Remplir ClassroomDTO
         if (sceance.getClassroom() != null) {
             ClassroomDTO classroomDTO = new ClassroomDTO();
@@ -106,7 +105,7 @@ public class SeanceServiceImpl {
             classroomDTO.setCapacity(sceance.getClassroom().getCapacity());
             dto.setClassroom(classroomDTO);
         }
-
+    
         // Remplir ModuleDTO
         if (sceance.getSubModule() != null && sceance.getSubModule().getModule() != null) {
             ModuleDTO moduleDTO = new ModuleDTO();
@@ -114,21 +113,26 @@ public class SeanceServiceImpl {
             moduleDTO.setName(sceance.getSubModule().getModule().getName());
             dto.setModule(moduleDTO);
         }
-
+    
         // Remplir ProfessorDTO
         if (sceance.getSubModule() != null && sceance.getSubModule().getTeacher() != null) {
             ProfessorDTO professorDTO = new ProfessorDTO();
             professorDTO.setId(sceance.getSubModule().getTeacher().getId());
             professorDTO.setSpecialty(sceance.getSubModule().getTeacher().getSpecialty());
-            // Nom et prénom du professeur directement depuis l'entité Professor
-            professorDTO.setFirstName(session.getProfessor().getFirstName());
-            professorDTO.setLastName(session.getProfessor().getLastName()); 
+            
+            // Vérifier que le professeur existe dans le sous-module
+            if (sceance.getSubModule().getTeacher() != null) {
+                professorDTO.setFirstName(sceance.getSubModule().getTeacher().getFirstName());
+            } else {
+                professorDTO.setFirstName("Nom non disponible"); // Message par défaut
+            }
+            professorDTO.setLastName(sceance.getSubModule().getTeacher().getLastName()); 
             dto.setProfessor(professorDTO);
         }
-
+    
         return dto;
     }
-
+    
     // Méthode pour convertir le DTO en entité Sceance
     private Sceance convertToEntity(SeanceDTO seanceDTO) {
         Sceance session = new Sceance();
