@@ -224,20 +224,23 @@ export const useApiData = () => {
   }, []);
 
   // ----- CRUD: Students -----
-  const addStudent = useCallback(async (student: Student) => {
-    const res = await api.post("/api/students", student);
-    setStudents((prev) => [...prev, res.data]);
+  const addStudent = useCallback(async (student: Omit<Student, "id">): Promise<Student> => {
+    const res = await api.post<Student>("/api/students", student);
+    setStudents(prev => [...prev, res.data]);
     return res.data;
   }, []);
-
-  const updateStudent = useCallback(async (student: Student) => {
-    await api.put(`/api/students/${student.id}`, student);
-    setStudents((prev) => prev.map((s) => (s.id === student.id ? student : s)));
+  
+  const updateStudent = useCallback(async (student: Student): Promise<Student> => {
+    const res = await api.put<Student>(`/api/students/${student.id}`, student);
+    setStudents(prev => 
+      prev.map(s => s.id === student.id ? res.data : s)
+    );
+    return res.data;
   }, []);
-
-  const deleteStudent = useCallback(async (studentId: number) => {
+  
+  const deleteStudent = useCallback(async (studentId: number): Promise<void> => {
     await api.delete(`/api/students/${studentId}`);
-    setStudents((prev) => prev.filter((s) => s.id !== studentId));
+    setStudents(prev => prev.filter(s => s.id !== studentId));
   }, []);
 
   return {

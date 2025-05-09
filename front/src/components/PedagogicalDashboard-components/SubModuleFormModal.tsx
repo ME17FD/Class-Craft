@@ -99,7 +99,7 @@ const SubModuleFormModal: React.FC<SubModuleFormModalProps> = ({
 
         {selectedModule && (
           <div className={styles.fieldInfo}>
-            Filière: {fields.find(f => f.id === selectedModule.fieldId)?.name}
+            Filière: {fields.find(f => f.id === selectedModule.filiereId)?.name}
           </div>
         )}
 

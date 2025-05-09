@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import styles from "../../styles/PedagogicalDashboard-components/StudentTab.module.css";
 import Table from "./TableActions";
 import Button from "./Button";
@@ -9,20 +9,25 @@ import DeleteConfirmationModal from "./DeleteConfirmationModal";
 interface StudentsTabProps {
   students: Student[];
   groups: Group[];
+  onAdd: (student: Omit<Student, "id">) => void;
   onEdit: (student: Student) => void;
   onDelete: (student: Student) => void;
 }
 
+type ModalType = "add" | "edit";
+
 const StudentsTab: React.FC<StudentsTabProps> = ({
   students,
   groups,
+  onAdd,
   onEdit,
   onDelete,
 }) => {
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
+    type: ModalType | null;
     student: Student | null;
-  }>({ isOpen: false, student: null });
+  }>({ isOpen: false, type: null, student: null });
 
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -36,6 +41,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   const handleOpenAddModal = () => {
     setModalState({
       isOpen: true,
+      type: "add",
       student: {
         id: 0,
         cne: "",
@@ -48,20 +54,25 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   };
 
   const handleOpenEditModal = (student: Student) => {
-    setModalState({ isOpen: true, student });
+    setModalState({ isOpen: true, type: "edit", student });
   };
 
   const handleCloseModal = () => {
-    setModalState({ isOpen: false, student: null });
+    setModalState({ isOpen: false, type: null, student: null });
   };
 
-  const handleSave = (studentData: Omit<Student, "id">) => {
-    onEdit({
-      ...studentData,
-      id: modalState.student?.id || 0,
-    });
-    handleCloseModal();
-  };
+  const handleSave = useCallback(
+    (studentData: Student) => {
+      if (modalState.type === "add") {
+        const { id, ...addData } = studentData;
+        onAdd(addData);
+      } else if (modalState.type === "edit") {
+        onEdit(studentData);
+      }
+      handleCloseModal();
+    },
+    [modalState.type, onAdd, onEdit]
+  );
 
   const handleDeleteClick = (student: Student) => {
     setSelectedStudent(student);
@@ -105,11 +116,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         </Button>
       </div>
 
-      <Table
-        data={students}
-        columns={columns}
-        emptyMessage="Aucun étudiant trouvé"
-      />
+      <Table data={students} columns={columns} emptyMessage="Aucun étudiant trouvé" />
 
       {modalState.isOpen && modalState.student && (
         <StudentFormModal
@@ -124,7 +131,11 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        entityName={selectedStudent ? `${selectedStudent.firstName} ${selectedStudent.lastName}` : "cet étudiant"}
+        entityName={
+          selectedStudent
+            ? `${selectedStudent.firstName} ${selectedStudent.lastName}`
+            : "cet étudiant"
+        }
       />
     </div>
   );

@@ -14,9 +14,6 @@ import Sidebar from "./Sidebar";
 import {
   TabType,
   Field,
-  Module,
-  SubModule,
-  Professor,
   ExtendedModule,
 } from "../types/type";
 import { useApiData } from "../hooks/useApiData";
@@ -115,8 +112,9 @@ const PedagogicalDashboard: React.FC = () => {
             <StudentsTab
               students={data.allStudents}
               groups={data.groups}
-              onEdit={(student) => handleEdit("students", student)}
-              onDelete={(student) => handleDelete("students", student)}
+              onAdd={(student) => handleSave("students", { ...student, id: 0 }, "add")}
+              onEdit={(student) => handleSave("students", student, "edit")}
+              onDelete={(student) => handleSave("students", student, "delete")}
             />
           )}
           {activeTab === "fields" && (

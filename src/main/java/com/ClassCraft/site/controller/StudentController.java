@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -66,5 +67,12 @@ public class StudentController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    // ... keep the delete method unchanged ...
+    @DeleteMapping("/{id}")
+public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
+    if (studentRepository.existsById(id)) {
+        studentRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+    return ResponseEntity.notFound().build();
+}
 }

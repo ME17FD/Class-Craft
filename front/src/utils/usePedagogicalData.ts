@@ -2,7 +2,8 @@ import { useState, useCallback, useEffect } from "react";
 import {
   TabType,
   ModalState,
-  Student
+  Student,
+  CrudModalType
 } from "../types/type";
 //import { useMockData } from '../hooks/useMockData';
 import { useApiData } from "../hooks/useApiData";
@@ -101,63 +102,61 @@ const usePedagogicalData = () => {
     [assignStudentsToGroup, removeStudentsFromGroup]
   );
 
-
+  type SaveOperation = 'add' | 'edit';
+  type DeleteOperation = 'delete';
+  type CrudOperation = SaveOperation | DeleteOperation;
+  
   const handleSave = useCallback(
-    (entityType: TabType, entity: any) => {
-      switch (entityType) {
-        case "fields":
-          if (modalState.type === "add") {
-            addField(entity);
-          } else if (modalState.type === "edit") {
-            updateField(entity);
-          } else if (modalState.type === "delete") {
+    (entityType: TabType, entity: any, operation: CrudModalType = modalState.type) => {
+      // First handle delete operations since they're different
+      if (operation === 'delete') {
+        switch (entityType) {
+          case 'fields':
             deleteField(entity.id);
-          }
-          break;
-        case "modules":
-          if (modalState.type === "add") {
-            addModule(entity);
-          } else if (modalState.type === "edit") {
-            updateModule(entity);
-          } else if (modalState.type === "delete") {
+            break;
+          case 'modules':
             deleteModule(entity.id);
-          }
-          break;
-        case "submodules":
-          if (modalState.type === "add") {
-            addSubModule(entity);
-          } else if (modalState.type === "edit") {
-            updateSubModule(entity);
-          } else if (modalState.type === "delete") {
+            break;
+          case 'submodules':
             deleteSubModule(entity.id);
-          }
-          break;
-        case "groups":
-          if (modalState.type === "add") {
-            addGroup(entity);
-          } else if (modalState.type === "edit") {
-            updateGroup(entity);
-          } else if (modalState.type === "delete") {
+            break;
+          case 'groups':
             deleteGroup(entity.id);
-          }
-          break;
-        case "professors":
-          if (modalState.type === "add") {
-            addProfessor(entity);
-          } else if (modalState.type === "edit") {
-            updateProfessor(entity);
-          } else if (modalState.type === "delete") {
+            break;
+          case 'professors':
             deleteProfessor(entity.id);
-          }
-          break;
-        case "students":
-          if (modalState.type === "add") {
-            addStudent(entity);
-          } else if (modalState.type === "edit") {
-            updateStudent(entity);
-          } else if (modalState.type === "delete") {
+            break;
+          case 'students':
+            console.log('Deleting student');
             deleteStudent(entity.id);
-          }
+            break;
+        }
+        handleCloseModal();
+        return;
+      }
+  
+      // Then handle save operations (add/edit)
+      const saveOperation = operation as SaveOperation;
+      console.log(`${entityType} ${saveOperation} action`);
+  
+      switch (entityType) {
+        case 'fields':
+          saveOperation === 'add' ? addField(entity) : updateField(entity);
+          break;
+        case 'modules':
+          saveOperation === 'add' ? addModule(entity) : updateModule(entity);
+          break;
+        case 'submodules':
+          saveOperation === 'add' ? addSubModule(entity) : updateSubModule(entity);
+          break;
+        case 'groups':
+          saveOperation === 'add' ? addGroup(entity) : updateGroup(entity);
+          break;
+        case 'professors':
+          saveOperation === 'add' ? addProfessor(entity) : updateProfessor(entity);
+          break;
+        case 'students':
+          saveOperation === 'add' ? addStudent(entity) : updateStudent(entity);
           break;
       }
       handleCloseModal();

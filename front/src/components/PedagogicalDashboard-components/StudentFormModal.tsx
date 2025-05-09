@@ -6,7 +6,7 @@ import Button from "./Button";
 interface StudentFormModalProps {
   student: Student;
   groups: Group[];
-  onSave: (studentData: Omit<Student, "id">) => void;
+  onSave: (studentData: Student) => void;
   onClose: () => void;
 }
 
@@ -45,7 +45,7 @@ const StudentFormModal: React.FC<StudentFormModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    onSave({ ...formData, id: student.id });
   };
 
   return (
