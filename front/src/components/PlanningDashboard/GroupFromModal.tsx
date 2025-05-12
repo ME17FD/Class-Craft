@@ -4,6 +4,8 @@ import { Session } from "../../types/schedule";
 import { GroupScheduleModal } from "./GroupScheduleModal";
 import styles from "../../styles/PlanningDashboard/GroupFormModal.module.css";
 import { useApiData } from "../../hooks/useApiData";
+import { usePlanning } from "../../context/PlanningContext";
+import { SessionFormModal } from "./SessionFormModal";
 
 type Props = {
   show: boolean;
@@ -20,7 +22,15 @@ export const GroupFormModal = ({
   onSave,
   onSaveSession,
 }: Props) => {
-  const { modules, subModules, professors, rooms, seances } = useApiData();
+  const {
+    modules = [],
+    subModules = [],
+    professors = [],
+    rooms = [],
+    seances = [],
+    groups = [],
+  } = useApiData();
+  const { sessions } = usePlanning();
   const [name, setName] = useState(group?.name || "");
   const [filiereId, setFiliereId] = useState(group?.filiereId || 0);
   const [showSessionModal, setShowSessionModal] = useState(false);
@@ -40,14 +50,40 @@ export const GroupFormModal = ({
   };
 
   const handleTimeSlotClick = (day: string, time: string) => {
-    const existingSession = sessions.find(
-      (s) => s.day === day && s.startTime === time && s.group.id === group?.id
+    const normalizedTime = time.padStart(5, "0");
+
+    const existingSession = [...sessions, ...seances].find(
+      (s) =>
+        s.day === day &&
+        s.startTime.padStart(5, "0") === normalizedTime &&
+        s.group?.id === group?.id
     );
 
     setSelectedDay(day);
-    setSelectedTime(time);
+    setSelectedTime(normalizedTime);
     setSelectedSession(existingSession || null);
     setShowSessionModal(true);
+  };
+
+  const handleAddSession = async (newSession: Session) => {
+    try {
+      const sessionToSave = {
+        ...newSession,
+        startTime: formatTimeForBackend(newSession.startTime),
+        endTime: formatTimeForBackend(newSession.endTime),
+        group: group || { id: 0, name: "", filiereId: 0, students: [] },
+      };
+
+      await onSaveSession(sessionToSave); // This now uses the provided prop
+      setShowSessionModal(false);
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de la séance:", error);
+    }
+  };
+  const formatTimeForBackend = (time: string): string => {
+    if (!time) return "08:00:00";
+    if (time.split(":").length === 3) return time;
+    return `${time}:00`;
   };
 
   useEffect(() => {
@@ -84,7 +120,9 @@ export const GroupFormModal = ({
             <label>Filière</label>
             <select
               value={filiereId}
-              onChange={(e) => setFiliereId(Number(e.target.value))}>
+              onChange={(e) => setFiliereId(Number(e.target.value))}
+              required>
+              <option value={0}>Sélectionnez une filière</option>
               <option value={1}>Informatique</option>
               <option value={2}>Mathématiques</option>
             </select>
@@ -92,9 +130,29 @@ export const GroupFormModal = ({
 
           {group && (
             <div className={styles.scheduleSection}>
+              <h3>Emploi du temps</h3>
+              <button
+                type="button"
+                className={styles.addSessionButton}
+                onClick={() => {
+                  setSelectedSession(null);
+                  setShowSessionModal(true);
+                }}>
+                + Ajouter une séance
+              </button>
               <GroupScheduleModal
                 group={group}
-                sessions={sessions.filter((s) => s.group.id === group.id)}
+                sessions={[...sessions, ...seances]
+                  .filter((s) => s.group?.id === group.id)
+                  .map((s) => ({
+                    ...s,
+                    startTime: s.startTime.includes(":")
+                      ? s.startTime
+                      : `${s.startTime}:00`,
+                    endTime: s.endTime.includes(":")
+                      ? s.endTime
+                      : `${s.endTime}:00`,
+                  }))}
                 onClose={onHide}
                 onTimeSlotClick={handleTimeSlotClick}
               />
@@ -119,197 +177,16 @@ export const GroupFormModal = ({
             session={selectedSession}
             day={selectedDay}
             time={selectedTime}
+            modules={modules}
+            subModules={subModules}
+            professors={professors}
+            rooms={rooms}
+            groups={groups}
+            existingSessions={[...sessions, ...seances]}
             onClose={() => setShowSessionModal(false)}
-            onSave={onSaveSession}
+            onSave={handleAddSession}
           />
         )}
-      </div>
-    </div>
-  );
-};
-
-const SessionFormModal = ({
-  session,
-  day,
-  time,
-  onClose,
-  onSave,
-}: {
-  session: Session | null;
-  day: string;
-  time: string;
-  onClose: () => void;
-  onSave: (session: Session) => void;
-}) => {
-  const { modules, subModules, professors, rooms } = useApiData();
-  const [selectedModule, setSelectedModule] = useState(
-    session?.module?.id || ""
-  );
-  const [selectedSubModule, setSelectedSubModule] = useState(
-    session?.subModule?.id || ""
-  );
-  const [selectedProfessor, setSelectedProfessor] = useState(
-    session?.professor.id || ""
-  );
-  const [selectedRoom, setSelectedRoom] = useState(session?.room || "");
-  const [selectedType, setSelectedType] = useState(session?.type || "CM");
-  const [duration, setDuration] = useState(session?.duration || 1);
-
-  useEffect(() => {
-    if (selectedSubModule) {
-      const subMod = subModules.find(
-        (sm) => sm.id === Number(selectedSubModule)
-      );
-      setDuration(subMod?.hours || 1);
-    }
-  }, [selectedSubModule]);
-
-  const calculateEndTime = (start: string, hours: number) => {
-    const [h, m] = start.split(":").map(Number);
-    const totalMinutes = h * 60 + m + hours * 60;
-    const endH = Math.floor(totalMinutes / 60);
-    const endM = totalMinutes % 60;
-    return `${endH.toString().padStart(2, "0")}:${endM
-      .toString()
-      .padStart(2, "0")}`;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const newSession: Session = {
-      ...(session || {}),
-      id: session?.id || Date.now(),
-      day,
-      startTime: time,
-      endTime: calculateEndTime(time, duration),
-      professor: professors.find((p) => p.id === Number(selectedProfessor))!,
-      module: modules.find((m) => m.id === Number(selectedModule)),
-      subModule: subModules.find((sm) => sm.id === Number(selectedSubModule)),
-      room: selectedRoom,
-      type: selectedType,
-      group: session?.group || ({} as Group),
-      professorPresent: false,
-      duration,
-    };
-
-    onSave(newSession);
-  };
-
-  return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.modalHeader}>
-          <h3>
-            {session ? "Modifier" : "Créer"} une séance - {day} {time}
-          </h3>
-          <button className={styles.closeButton} onClick={onClose}>
-            &times;
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.formGrid}>
-            <div className={styles.formGroup}>
-              <label>Type de séance</label>
-              <select
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
-                required>
-                <option value="CM">CM</option>
-                <option value="TD">TD</option>
-                <option value="TP">TP</option>
-                <option value="EXAM">Examen</option>
-                <option value="RATTRAPAGE">Rattrapage</option>
-              </select>
-            </div>
-
-            <div className={styles.formGroup}>
-              <label>Module</label>
-              <select
-                value={selectedModule}
-                onChange={(e) => setSelectedModule(e.target.value)}
-                required>
-                <option value="">Sélectionner un module</option>
-                {modules.map((module) => (
-                  <option key={module.id} value={module.id}>
-                    {module.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.formGroup}>
-              <label>Sous-module</label>
-              <select
-                value={selectedSubModule}
-                onChange={(e) => setSelectedSubModule(e.target.value)}>
-                <option value="">Sélectionner un sous-module</option>
-                {subModules
-                  .filter((sm) => sm.moduleId === Number(selectedModule))
-                  .map((subModule) => (
-                    <option key={subModule.id} value={subModule.id}>
-                      {subModule.name} ({subModule.hours}h)
-                    </option>
-                  ))}
-              </select>
-            </div>
-
-            <div className={styles.formGroup}>
-              <label>Professeur</label>
-              <select
-                value={selectedProfessor}
-                onChange={(e) => setSelectedProfessor(e.target.value)}
-                required>
-                <option value="">Sélectionner un professeur</option>
-                {professors.map((prof) => (
-                  <option key={prof.id} value={prof.id}>
-                    {prof.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.formGroup}>
-              <label>Salle</label>
-              <select
-                value={selectedRoom}
-                onChange={(e) => setSelectedRoom(e.target.value)}
-                required>
-                <option value="">Sélectionner une salle</option>
-                {rooms.map((room) => (
-                  <option key={room.id} value={room.name}>
-                    {room.name} ({room.type})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.formGroup}>
-              <label>Durée (heures)</label>
-              <input
-                type="number"
-                value={duration}
-                onChange={(e) =>
-                  setDuration(Math.max(1, Math.min(55, Number(e.target.value))))
-                }
-                className={styles.durationInput}
-              />
-            </div>
-          </div>
-
-          <div className={styles.modalFooter}>
-            <button
-              type="button"
-              className={styles.cancelButton}
-              onClick={onClose}>
-              Annuler
-            </button>
-            <button type="submit" className={styles.saveButton}>
-              {session ? "Mettre à jour" : "Créer"}
-            </button>
-          </div>
-        </form>
       </div>
     </div>
   );

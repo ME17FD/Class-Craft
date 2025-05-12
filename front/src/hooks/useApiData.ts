@@ -11,7 +11,8 @@ import {
 } from "../types/type";
 
 import{
-  Sceance
+  Room,
+  Session
 } from "../types/schedule";
 
 export const useApiData = () => {
@@ -21,8 +22,8 @@ export const useApiData = () => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [professors, setProfessors] = useState<Professor[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
-  const [seances, setSeances] = useState<Sceance[]>([]);
-
+  const [seances, setSeances] = useState<Session[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]); 
   
 
 
@@ -38,6 +39,7 @@ export const useApiData = () => {
         { name: "professors", url: "/api/professors" },
         { name: "students", url: "/api/students" },
         { name: "seances", url: "/api/seances" },
+        { name: "classrooms", url: "/api/classrooms" },
       ];
 
       const requests = endpoints.map(endpoint => 
@@ -83,6 +85,7 @@ export const useApiData = () => {
           case "professors": setProfessors(result.value.data); break;
           case "students": setStudents(result.value.data); break;
           case "seances": setSeances(result.value.data); break;
+          case "classrooms": setRooms(result.value.data); break;
         }
       });
 
@@ -97,16 +100,51 @@ export const useApiData = () => {
     fetchData();
   }, []);
 
+  // ----- CRUD: Classrooms -----
+  const addClassroom = useCallback(async (classroom: Omit<Room, 'id'>) => {
+    try {
+      const res = await api.post("/api/classrooms", classroom);
+      setRooms(prev => [...prev, res.data]);
+      return res.data;
+    } catch (error) {
+      console.error("Failed to create classroom:", error);
+      throw error;
+    }
+  }, []);
+
+  const updateClassroom = useCallback(async (classroom: Room) => {
+    try {
+      const res = await api.put(`/api/classrooms/${classroom.id}`, classroom);
+      setRooms(prev => prev.map(r => r.id === classroom.id ? res.data : r));
+      return true;
+    } catch (error) {
+      console.error("Failed to update classroom:", error);
+      return false;
+    }
+  }, []);
+
+  const deleteClassroom = useCallback(async (classroomId: number) => {
+    try {
+      await api.delete(`/api/classrooms/${classroomId}`);
+      setRooms(prev => prev.filter(r => r.id !== classroomId));
+      return true;
+    } catch (error) {
+      console.error("Failed to delete classroom:", error);
+      return false;
+    }
+  }, []);
+
 // ----- CRUD: Seances -----
-const addSceance = useCallback(async (sceance: Sceance) => {
+const addSceance = useCallback(async (sceance: Omit<Session, 'id'>) => {
   const res = await api.post("/api/seances", sceance);
   setSeances(prev => [...prev, res.data]);
   return res.data;
 }, []);
 
-const updateSceance = useCallback(async (sceance: Sceance) => {
-  await api.put(`/api/seances/${sceance.id}`, sceance);
-  setSeances(prev => prev.map(s => s.id === sceance.id ? sceance : s));
+const updateSceance = useCallback(async (sceance: Session) => {
+  const res = await api.put(`/api/seances/${sceance.id}`, sceance);
+  setSeances(prev => prev.map(s => s.id === sceance.id ? res.data : s));
+  return res.data;
 }, []);
 
 const deleteSceance = useCallback(async (sceanceId: number) => {
@@ -242,6 +280,10 @@ const deleteSceance = useCallback(async (sceanceId: number) => {
   }, []);
 
   return {
+        rooms, 
+    addClassroom,
+    updateClassroom,
+    deleteClassroom,
     seances,
     addSceance,
     deleteSceance,

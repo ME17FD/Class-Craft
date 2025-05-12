@@ -35,12 +35,16 @@ export type ExtendedModule = Module & {
 
 export type Professor = {
   id: number;
-  name: string;
+  firstName: string; // Changé ici
+  lastName: string;  // Changé ici
   email: string;
-  modules: number[];
-  subModules: number[];
+  password?: string;
+  approved: boolean;
+  grade: string;
+  specialty: string;
+  modules?: number[];
+  subModules?: number[];
 };
-
 export type Group = {
   id ?: number;
   name ?: string;
@@ -56,7 +60,7 @@ export interface ModalState {
   isOpen: boolean;
   type: CrudModalType;
   entityType: TabType;
-  entity: any;
+  entity: unknown;
 }
 
 export interface PedagogicalData {

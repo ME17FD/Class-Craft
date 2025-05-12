@@ -2,10 +2,15 @@ package com.ClassCraft.site.dto;
 
 import java.sql.Time;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 public class SeanceDTO {
     private Long id;
     private String dayOfWeek;
+       @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private Time startTime;
+    
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private Time endTime;
     private int frequency;
     private Boolean wasAttended;
