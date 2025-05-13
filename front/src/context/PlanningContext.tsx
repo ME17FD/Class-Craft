@@ -35,7 +35,9 @@ export const PlanningProvider = ({ children }: { children: ReactNode }) => {
   const [weeklySchedules, setWeeklySchedules] = useState<WeeklySchedule[]>([]);
   const [dailyReports, setDailyReports] = useState<DailyReport[]>([]);
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
-
+  console.log("0Raw seances:", seances); 
+  console.log("0Context sessions:", sessions);
+  
   // Synchronise les sessions avec les données de l'API
   useEffect(() => {
     setSessions(seances);
@@ -54,6 +56,7 @@ export const PlanningProvider = ({ children }: { children: ReactNode }) => {
     },
     [addSceance]
   );
+  // Add these debug logs right after your hooks
 
   const updateSession = useCallback(
     async (session: Session) => {

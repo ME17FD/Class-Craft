@@ -101,6 +101,12 @@ export const useApiData = () => {
           case "students":
             setStudents(result.value.data);
             break;
+          case "seances":  // ADD THIS CASE
+            setSeances(result.value.data);
+            break;
+          case "classrooms":  // ALSO ADD THIS CASE FOR ROOMS
+            setRooms(result.value.data);
+            break;
         }
       });
     } catch (error) {
