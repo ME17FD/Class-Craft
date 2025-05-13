@@ -71,7 +71,7 @@ export const SessionFormModal = ({
       const subMod = subModules.find(
         (sm) => sm.id === Number(selectedSubModule)
       );
-      setDuration(subMod?.hours || 1);
+      setDuration(subMod?.nbrHours || 1);
     }
   }, [selectedSubModule, subModules]);
 
@@ -236,7 +236,7 @@ export const SessionFormModal = ({
                   .filter((sm) => sm.moduleId === Number(selectedModule))
                   .map((subModule) => (
                     <option key={subModule.id} value={subModule.id}>
-                      {subModule.name} ({subModule.hours}h)
+                      {subModule.name} ({subModule.nbrHours}h)
                     </option>
                   ))}
               </select>

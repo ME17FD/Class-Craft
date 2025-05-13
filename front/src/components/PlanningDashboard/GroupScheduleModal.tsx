@@ -2,10 +2,9 @@ import { Session } from "../../types/schedule";
 import { Group } from "../../types/type";
 import styles from "../../styles/PlanningDashboard/PlanningGroup.module.css";
 import * as XLSX from "xlsx";
-import { PDFGenerator } from "./PDFGenerator";
 import { usePlanning } from "../../context/PlanningContext";
 import { useApiData } from "../../hooks/useApiData";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 
 type Props = {
   group: Group | null;
@@ -21,7 +20,7 @@ const exportToExcel = (sessions: Session[], groupName: string) => {
       Module: s.module?.name || s.subModule?.name,
       Type: s.type,
       Professeur: s.professor.firstName,
-      Salle: s.classroom?.name || "Non spécifiée", // Changé ici
+      Salle: s.classroom?.name || "Non spécifiée",
       Durée: `${s.duration}h`,
     }))
   );
@@ -31,21 +30,14 @@ const exportToExcel = (sessions: Session[], groupName: string) => {
   XLSX.writeFile(workbook, `emploi-du-temps-${groupName}.xlsx`);
 };
 
-export const GroupScheduleModal = ({
-  group,
-  onClose,
-  onTimeSlotClick,
-}: Props) => {
+export const GroupScheduleModal = ({ group, onClose, onTimeSlotClick }: Props) => {
   const { seances } = useApiData();
   const { sessions } = usePlanning();
 
   const normalizeTime = (time: string) => {
-    if (!time) return "00:00";
-    return time
-      .split(":")
-      .slice(0, 2)
-      .map((t) => t.padStart(2, "0"))
-      .join(":");
+    if (!time || !time.includes(":")) return "00:00";
+    const [h, m] = time.split(":").map((t) => t.padStart(2, "0"));
+    return `${h}:${m}`;
   };
 
   const groupSessions = useMemo(() => {
@@ -55,23 +47,12 @@ export const GroupScheduleModal = ({
   }, [seances, sessions, group]);
 
   const timeSlots = useMemo(
-    () => [
-      "",
-      ...Array.from({ length: 11 }, (_, i) => `${8 + i}:00`.padStart(5, "0")), // 08:00 - 19:00
-    ],
+    () => ["", ...Array.from({ length: 11 }, (_, i) => `${(8 + i).toString().padStart(2, "0")}:00`)],
     []
   );
 
-  const weekDays = [
-    "MONDAY",
-    "TUESDAY",
-    "WEDNESDAY",
-    "THURSDAY",
-    "FRIDAY",
-    "SATURDAY",
-  ];
-
-  const dayTranslations = {
+  const weekDays = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+  const dayTranslations: Record<string, string> = {
     MONDAY: "Lundi",
     TUESDAY: "Mardi",
     WEDNESDAY: "Mercredi",
@@ -80,16 +61,21 @@ export const GroupScheduleModal = ({
     SATURDAY: "Samedi",
   };
 
+  useEffect(() => {
+    console.log("Seances:", seances);
+    console.log("Sessions:", sessions);
+    console.log("Group:", group);
+    console.log("GroupSessions:", groupSessions);
+  }, [seances, sessions, groupSessions, group]);
+
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
-          <h2>
-            Emploi du temps - {group.name} (ID: {group.id})
-          </h2>
+          <h2>Emploi du temps - {group?.name} (ID: {group?.id})</h2>
           <div className={styles.exportButtons}>
             <button
-              onClick={() => exportToExcel(groupSessions, group.name)}
+              onClick={() => exportToExcel(groupSessions, group?.name || "Groupe")}
               className={styles.excelButton}>
               Export Excel
             </button>
@@ -110,7 +96,9 @@ export const GroupScheduleModal = ({
 
           {weekDays.map((day) => {
             const daySessions = groupSessions.filter(
-              (s) => s.day === day || s.dayOfWeek === day
+              (s) =>
+                s.day?.toUpperCase() === day ||
+                s.dayOfWeek?.toUpperCase() === day
             );
 
             return (
@@ -124,41 +112,32 @@ export const GroupScheduleModal = ({
                   const session = daySessions.find((s) => {
                     const start = normalizeTime(s.startTime);
                     const end = normalizeTime(s.endTime);
-                    return start <= normalizedTime && end > normalizedTime;
+                    return start <= normalizedTime && normalizedTime < end;
                   });
+
                   const slotKey = session
-                    ? `sess-${session.id}-${day}-${normalizedTime.replace(
-                        ":",
-                        ""
-                      )}`
+                    ? `sess-${session.id}-${day}-${normalizedTime.replace(":", "")}`
                     : `empty-${day}-${normalizedTime.replace(":", "")}`;
 
                   return (
                     <div
                       key={slotKey}
-                      className={`${styles.timeSlot} ${
-                        session ? styles.occupied : ""
-                      }`}
+                      className={`${styles.timeSlot} ${session ? styles.occupied : ""}`}
                       onClick={() => onTimeSlotClick(day, time)}>
-                      {session && (
+                      {session ? (
                         <div className={styles.sessionContent}>
                           <div className={styles.sessionTitle}>
-                            {session.module?.name ||
-                              session.subModule?.name ||
-                              "Cours"}
-                            {"\n"}
+                            {session.module?.name || session.subModule?.name || "Cours"}
                             <span className={styles.sessionType}>
-                              {session.type}
+                              {" - " + session.type}
                             </span>
                           </div>
                           <div className={styles.sessionDetails}>
                             <div>
-                              <strong>Salle:</strong>{" "}
-                              {session.classroom?.name || "Non spécifiée"}
+                              <strong>Salle:</strong> {session.classroom?.name || "Non spécifiée"}
                             </div>
                             <div>
-                              <strong>Prof:</strong>{" "}
-                              {session.professor?.firstName || ""}{" "}
+                              <strong>Prof:</strong> {session.professor?.firstName || ""}{" "}
                               {session.professor?.lastName || ""}
                               <span
                                 className={
@@ -166,12 +145,14 @@ export const GroupScheduleModal = ({
                                     ? styles.present
                                     : styles.absent
                                 }>
-                                <strong>Présence:</strong>{" "}
-                                {session.professorPresent ? " ✔" : " ✖"}
+                                <strong> Présence:</strong>{" "}
+                                {session.professorPresent ? "✔" : "✖"}
                               </span>
                             </div>
                           </div>
                         </div>
+                      ) : (
+                        <span className={styles.debugText}>{/* optionnel debug */}</span>
                       )}
                     </div>
                   );
