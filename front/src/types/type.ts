@@ -9,21 +9,24 @@ export type Student = {
 };
 
 export type Module = {
-  id: number;
+  id?: number;
   name: string;
   code: string;
+  professor?: Professor;
   filiereId: number | null;
+  subModules?: SubModule[];
 };
 
 export type SubModule = {
   id: number;
   name: string;
-  hours: number;
+  nbrHours: number;
   moduleId: number;
+  professor?: Professor;
 };
 
 export type Field = {
-  id: number;
+  id?: number;
   name: string;
   description: string;
   modules?: ExtendedModule[];

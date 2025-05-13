@@ -38,7 +38,7 @@ const SubModulesTab: React.FC<SubModulesTabProps> = ({
     const module = modules.find((m) => m.id === moduleId);
     if (!module) return "Non spécifié";
     
-    const field = fields.find((f) => f.id === module.fieldId);
+    const field = fields.find((f) => f.id === module.filiereId);
     return field?.name || "Non spécifié";
   };
 
@@ -48,8 +48,10 @@ const SubModulesTab: React.FC<SubModulesTabProps> = ({
     const subModule = subModules.find(sm => sm.id === subModuleId);
     if (!subModule) return "Aucun professeur";
     
-    const moduleProfessors = professors.filter(p => p.subModules && p.subModules.includes(subModuleId));
-    return moduleProfessors.map(p => p.name).join(", ") || "Aucun professeur";
+    const moduleProfessors = professors.filter(p =>
+      p.subModules && p.subModules.some(subModule => subModule.id === subModuleId)
+    );
+        return moduleProfessors.map(p => p.firstName + " "+ p.lastName).join(", ") || "Aucun professeur";
   };
 
   const handleDeleteClick = (subModule: SubModule) => {
@@ -67,7 +69,7 @@ const SubModulesTab: React.FC<SubModulesTabProps> = ({
 
   const columns = [
     { header: "Nom", accessor: "name" as keyof SubModule },
-    { header: "Heures", accessor: "hours" as keyof SubModule },
+    { header: "Heures", accessor: "nbrHours" as keyof SubModule },
     {
       header: "Module parent",
       render: (subModule: SubModule) => getModuleName(subModule.moduleId),
@@ -119,7 +121,7 @@ const SubModulesTab: React.FC<SubModulesTabProps> = ({
           const newSubModule: SubModule = {
             id: 0,
             name: subModuleData.name || "",
-            hours: subModuleData.hours || 0,
+            nbrHours: subModuleData.nbrHours || 0,
             moduleId: subModuleData.moduleId || 0
           };
           onEdit(newSubModule);

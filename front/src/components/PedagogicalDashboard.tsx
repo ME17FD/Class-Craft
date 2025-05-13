@@ -36,7 +36,18 @@ const PedagogicalDashboard: React.FC = () => {
     handleAssignStudents,
     handleSave,
     handleCloseModal,
+    
   } = usePedagogicalData();
+
+  const {
+    addField,
+    updateField,
+    deleteField,
+    updateModule,
+    addModule,
+    updateSubModule,
+    addSubModule
+  } = useApiData();
 
   const handleFieldEdit = (field: Field) => {
     // Find the modules associated with this field
@@ -64,15 +75,48 @@ const PedagogicalDashboard: React.FC = () => {
     });
   };
 
-  const handleFieldSave = (
-    fieldData: Omit<Field, "id"> & { modules: ExtendedModule[] }
-  ) => {
-    handleSave("fields", {
-      ...fieldData,
-      id: fieldModalState.field?.id || 0,
+  const handleFieldSave = async (fieldData: Omit<Field, "id"> & { modules: ExtendedModule[] }) => {
+    // Save the field and modules
+    const fieldId = fieldModalState.field?.id || 0;
+  
+    // Step 1: Save or update the field (Filière)
+    const savedField = fieldId
+      ? await updateField({ ...fieldData, id: fieldId })
+      : await addField(fieldData);
+  
+    // Step 2: Save or update modules linked to the field
+    for (const module of fieldData.modules) {
+      const savedModule = module.id
+        ? await updateModule({ ...module })
+        : await addModule({ ...module, filiereId: savedField.id });
+    }
+  
+    // Step 3: Save or update submodules linked to each module
+    for (const module of fieldData.modules) {
+      for (const sub of module.subModules || []) {
+        if (sub.id) {
+          await updateSubModule({ ...sub });
+        } else {
+          await addSubModule({ ...sub });
+        }
+      }
+    }
+  
+    // Update the fields state after save
+    setFieldModalState({
+      isOpen: false,
+      field: {
+        ...savedField,
+        modules: fieldData.modules,
+      },
     });
+  
+    // Close the modal
     handleFieldClose();
   };
+  
+  
+  
   const { deleteGroup } = useApiData();
 
   const tabs = [
@@ -125,7 +169,13 @@ const PedagogicalDashboard: React.FC = () => {
               groups={data.groups}
               professors={data.professors}
               onEdit={handleFieldEdit}
-              onDelete={(field) => handleDelete("fields", field)}
+              onAdd={() => {
+                setFieldModalState({
+                  isOpen: true,
+                  field: undefined, // no field -> this is "add"
+                });
+              }}
+              onDelete={(field) => handleSave("fields", field, "delete")}
             />
           )}
           {activeTab === "modules" && (

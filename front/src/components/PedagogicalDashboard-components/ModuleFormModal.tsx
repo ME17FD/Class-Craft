@@ -21,30 +21,38 @@ export const ModuleFormModal: React.FC<ModuleFormModalProps> = ({
 }) => {
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
-  const [fieldId, setFieldId] = useState<number>(0);
-  const [subModules, setSubModules] = useState<{ name: string; hours: number }[]>([]);
+  const [filiereId, setFiliereId] = useState<number | null>(null);
+  const [subModules, setSubModules] = useState<Omit<SubModule, 'id' | 'moduleId'>[]>([]);
   const [newSubModuleName, setNewSubModuleName] = useState("");
-  const [newSubModuleHours, setNewSubModuleHours] = useState<number>(0);
+  const [newSubModuleHours, setNewSubModuleHours] = useState<number>(1);
 
   useEffect(() => {
     if (module) {
       setName(module.name);
       setCode(module.code);
-      setFieldId(module.fieldId);
+      setFiliereId(module.filiereId);
       setSubModules(module.subModules.map(sm => ({
         name: sm.name,
-        hours: sm.hours
+        nbrHours: sm.nbrHours
       })));
     } else {
-      setName("");
-      setCode("");
-      setFieldId(0);
-      setSubModules([]);
+      resetForm();
     }
   }, [module]);
 
-  const handleSubmit = () => {
-    if (!name || !code || !fieldId) {
+  const resetForm = () => {
+    setName("");
+    setCode("");
+    setFiliereId(null);
+    setSubModules([]);
+    setNewSubModuleName("");
+    setNewSubModuleHours(1);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!name || !code || !filiereId) {
       alert('Veuillez remplir tous les champs obligatoires');
       return;
     }
@@ -52,24 +60,25 @@ export const ModuleFormModal: React.FC<ModuleFormModalProps> = ({
     onSubmit({
       name,
       code,
-      fieldId,
+      filiereId,
       subModules
     });
+    resetForm();
   };
 
   const addSubModule = () => {
-    if (!newSubModuleName || newSubModuleHours <= 0) {
-      alert('Veuillez remplir tous les champs du sous-module');
-      return;
-    }
+  if (!newSubModuleName.trim() || newSubModuleHours <= 0) {
+    alert('Veuillez remplir tous les champs du sous-module avec des valeurs valides');
+    return;
+  }
 
-    setSubModules([...subModules, {
-      name: newSubModuleName,
-      hours: newSubModuleHours
-    }]);
-    setNewSubModuleName('');
-    setNewSubModuleHours(0);
-  };
+  setSubModules([...subModules, {
+    name: newSubModuleName.trim(),
+    nbrHours: newSubModuleHours
+  }]);
+  setNewSubModuleName('');
+  setNewSubModuleHours(1);
+};
 
   const removeSubModule = (index: number) => {
     setSubModules(subModules.filter((_, i) => i !== index));
@@ -78,8 +87,8 @@ export const ModuleFormModal: React.FC<ModuleFormModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal">
-      <div className="modal-content">
+    <Modal title="title" isOpen={isOpen} onClose={onClose}>
+      <div className={styles.modalContent}>
         <h2>{module ? 'Modifier le module' : 'Ajouter un module'}</h2>
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
@@ -108,8 +117,8 @@ export const ModuleFormModal: React.FC<ModuleFormModalProps> = ({
             <label htmlFor="field">Filière *</label>
             <select
               id="field"
-              value={fieldId}
-              onChange={(e) => setFieldId(Number(e.target.value))}
+              value={filiereId || ""}
+              onChange={(e) => setFiliereId(e.target.value ? Number(e.target.value) : null)}
               required
             >
               <option value="">Sélectionnez une filière</option>
@@ -123,21 +132,26 @@ export const ModuleFormModal: React.FC<ModuleFormModalProps> = ({
 
           <div className={styles.section}>
             <h3>Sous-modules</h3>
-            <div className={styles.subModulesList}>
-              <ul>
-                {subModules.map((subModule, index) => (
-                  <li key={index}>
-                    <span>{subModule.name} ({subModule.hours}h)</span>
-                    <Button
-                      variant="secondary"
-                      onClick={() => removeSubModule(index)}
-                    >
-                      Supprimer
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {subModules.length > 0 ? (
+              <div className={styles.subModulesList}>
+                <ul>
+                  {subModules.map((subModule, index) => (
+                    <li key={index}>
+                      <span>{subModule.name} ({subModule.nbrHours}h)</span>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={() => removeSubModule(index)}
+                      >
+                        Supprimer
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p>Aucun sous-module ajouté</p>
+            )}
 
             <div className={styles.subModuleForm}>
               <h4>Ajouter un sous-module</h4>
@@ -157,27 +171,27 @@ export const ModuleFormModal: React.FC<ModuleFormModalProps> = ({
                   type="number"
                   min="1"
                   value={newSubModuleHours}
-                  onChange={(e) => setNewSubModuleHours(Number(e.target.value))}
+                  onChange={(e) => setNewSubModuleHours(Math.max(1, Number(e.target.value)))}
                 />
               </div>
-              <Button variant="secondary" onClick={addSubModule}>
+              <Button type="button" variant="secondary" onClick={addSubModule}>
                 Ajouter le sous-module
               </Button>
             </div>
           </div>
 
           <div className={styles.buttons}>
-            <Button variant="secondary" onClick={onClose}>
+            <Button type="button" variant="secondary" onClick={onClose}>
               Annuler
             </Button>
-            <Button variant="primary" onClick={handleSubmit}>
+            <Button type="submit" variant="primary">
               {module ? 'Modifier' : 'Ajouter'}
             </Button>
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   );
 };
 
-export default ModuleFormModal; 
+export default ModuleFormModal;

@@ -42,16 +42,40 @@ public ResponseEntity<List<FiliereDTO>> getAllFilieres() {
     
     return ResponseEntity.ok(dtos);
 }
-    @PostMapping
-    public ResponseEntity<Filiere> createFiliere(@RequestBody Filiere filiere) {
-        return ResponseEntity.ok(filiereRepository.save(filiere));
-    }
+@PostMapping
+public ResponseEntity<FiliereDTO> createFiliere(@RequestBody FiliereDTO filiereDTO) {
+    Filiere filiere = new Filiere();
+    filiere.setName(filiereDTO.getName());
+    filiere.setDescription(filiereDTO.getDescription());
+    // Assuming you have a way to get the session by its ID
+    // filiere.setSession(sessionRepository.findById(filiereDTO.getSessionId()).orElse(null));
+    
+    Filiere savedFiliere = filiereRepository.save(filiere);
+    FiliereDTO savedDTO = new FiliereDTO();
+    savedDTO.setId(savedFiliere.getId());
+    savedDTO.setName(savedFiliere.getName());
+    savedDTO.setDescription(savedFiliere.getDescription());
+    savedDTO.setSessionId(savedFiliere.getSession() != null ? savedFiliere.getSession().getId() : null);
+    
+    return ResponseEntity.ok(savedDTO);
+}
 
     @PutMapping("/{id}")
-    public ResponseEntity<Filiere> updateFiliere(@PathVariable Long id, @RequestBody Filiere updated) {
+    public ResponseEntity<FiliereDTO> updateFiliere(@PathVariable Long id, @RequestBody FiliereDTO updatedDTO) {
         return filiereRepository.findById(id).map(f -> {
-            f.setName(updated.getName());
-            return ResponseEntity.ok(filiereRepository.save(f));
+            f.setName(updatedDTO.getName());
+            f.setDescription(updatedDTO.getDescription());
+            // Assuming you have a way to get the session by its ID
+            // f.setSession(sessionRepository.findById(updatedDTO.getSessionId()).orElse(null));
+
+            Filiere updatedFiliere = filiereRepository.save(f);
+            FiliereDTO updatedResponseDTO = new FiliereDTO();
+            updatedResponseDTO.setId(updatedFiliere.getId());
+            updatedResponseDTO.setName(updatedFiliere.getName());
+            updatedResponseDTO.setDescription(updatedFiliere.getDescription());
+            updatedResponseDTO.setSessionId(updatedFiliere.getSession() != null ? updatedFiliere.getSession().getId() : null);
+            
+            return ResponseEntity.ok(updatedResponseDTO);
         }).orElse(ResponseEntity.notFound().build());
     }
 

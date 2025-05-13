@@ -68,7 +68,7 @@ const FieldDetailsModal: React.FC<FieldDetailsModalProps> = ({
                           {subModule.name}
                         </span>
                         <span className={styles.subModuleHours}>
-                          {subModule.hours}h
+                          {subModule.nbrHours}h
                         </span>
                       </div>
                     ))}

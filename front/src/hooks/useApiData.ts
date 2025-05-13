@@ -235,6 +235,7 @@ export const useApiData = () => {
     setStudents(prev => 
       prev.map(s => s.id === student.id ? res.data : s)
     );
+    console.log(res.data);
     return res.data;
   }, []);
   

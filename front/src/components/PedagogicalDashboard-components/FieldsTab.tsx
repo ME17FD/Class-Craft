@@ -14,6 +14,7 @@ interface FieldsTabProps {
   professors: Professor[];
   onEdit: (field: Field) => void;
   onDelete: (field: Field) => void;
+  onAdd: () => void;
 }
 
 const FieldsTab: React.FC<FieldsTabProps> = ({
@@ -24,9 +25,11 @@ const FieldsTab: React.FC<FieldsTabProps> = ({
   professors,
   onEdit,
   onDelete,
+  onAdd,
 }) => {
   const [selectedField, setSelectedField] = useState<Field | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [fieldToDelete, setFieldToDelete] = useState<Field | null>(null);
 
   const handleOpenDetails = (field: Field) => {
     setSelectedField(field);
@@ -37,15 +40,24 @@ const FieldsTab: React.FC<FieldsTabProps> = ({
   };
 
   const handleDeleteClick = (field: Field) => {
-    setSelectedField(field);
+    setFieldToDelete(field);
     setIsDeleteModalOpen(true);
   };
 
   const handleConfirmDelete = () => {
-    if (selectedField) {
-      onDelete(selectedField);
+    if (fieldToDelete) {
+      onDelete(fieldToDelete);
       setIsDeleteModalOpen(false);
-      setSelectedField(null);
+      setFieldToDelete(null);
+    }
+  };
+
+  const handleAddField = () => {
+    if (onAdd) {
+      onAdd();
+    } else {
+      // Fallback to edit with empty field if onAdd not provided
+      onEdit({ id: 0, name: "", description: "" });
     }
   };
 
@@ -59,7 +71,8 @@ const FieldsTab: React.FC<FieldsTabProps> = ({
           <Button
             variant="primary"
             onClick={() => handleOpenDetails(field)}
-            small>
+            small
+          >
             Détails
           </Button>
           <Button variant="secondary" onClick={() => onEdit(field)} small>
@@ -76,9 +89,7 @@ const FieldsTab: React.FC<FieldsTabProps> = ({
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <Button
-          variant="primary"
-          onClick={() => onEdit({ id: 0, name: "", description: "" })}>
+        <Button variant="primary" onClick={handleAddField}>
           + Ajouter une filière
         </Button>
       </div>
@@ -92,11 +103,15 @@ const FieldsTab: React.FC<FieldsTabProps> = ({
       {selectedField && (
         <FieldDetailsModal
           field={selectedField}
-          modules={modules.filter(m => m.filiereId === selectedField.id)}
-          subModules={subModules.filter(sm => modules.some(m => m.id === sm.moduleId && m.filiereId === selectedField.id))}
-          groups={groups.filter(g => g.filiereId === selectedField.id)}
+          modules={modules.filter((m) => m.filiereId === selectedField.id)}
+          subModules={subModules.filter((sm) =>
+            modules.some(
+              (m) => m.id === sm.moduleId && m.filiereId === selectedField.id
+            )
+          )}
+          groups={groups.filter((g) => g.filiereId === selectedField.id)}
           professors={professors}
-          onClose={() => setSelectedField(null)}
+          onClose={handleCloseDetails}
         />
       )}
 
@@ -104,7 +119,7 @@ const FieldsTab: React.FC<FieldsTabProps> = ({
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        entityName={selectedField?.name || "cette filière"}
+        entityName={fieldToDelete?.name || "cette filière"}
       />
     </div>
   );

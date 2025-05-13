@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ClassCraft.site.dto.StudentDTO;
 import com.ClassCraft.site.models.Student;
+import com.ClassCraft.site.repository.GroupRepository;
 import com.ClassCraft.site.repository.StudentRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class StudentController {
 
     private final StudentRepository studentRepository;
+    private final GroupRepository groupRepository;
 
     @GetMapping
     public ResponseEntity<List<StudentDTO>> getAllStudents() {
@@ -51,7 +53,7 @@ public class StudentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<StudentDTO> updateStudent(@PathVariable Long id, @RequestBody Student updated) {
+    public ResponseEntity<StudentDTO> updateStudent(@PathVariable Long id, @RequestBody StudentDTO updated) {
         return studentRepository.findById(id)
             .map(student -> {
                 student.setFirstName(updated.getFirstName());
@@ -59,7 +61,7 @@ public class StudentController {
                 student.setEmail(updated.getEmail());
                 student.setCNE(updated.getCNE());
                 student.setRegistrationNumber(updated.getRegistrationNumber());
-                student.setGroup(updated.getGroup());
+                groupRepository.findById(updated.getGroupId()).ifPresent(group -> student.setGroup(group));
                 
                 Student saved = studentRepository.save(student);
                 return ResponseEntity.ok(StudentDTO.fromEntity(saved));

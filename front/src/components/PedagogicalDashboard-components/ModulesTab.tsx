@@ -32,20 +32,27 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
   };
 
   const getProfessorNames = (moduleId: number) => {
-    const moduleProfessors = professors.filter(p => p.modules && p.modules.includes(moduleId));
-    return moduleProfessors.map(p => p.firstName).join(", ") || "Aucun professeur";
+    const moduleProfessors = professors.filter(p =>
+      p.modules?.some(m => m.id === moduleId)
+    );
+    return moduleProfessors.map(p => `${p.firstName} ${p.lastName}`).join(", ") || "Aucun professeur";
   };
 
   const getSubModuleNames = (moduleId: number) => {
     const moduleSubModules = subModules.filter(sm => sm.moduleId === moduleId);
-    return moduleSubModules.map(sm => `${sm.name} (${sm.hours}h)`).join(", ") || "Aucun sous-module";
+    return moduleSubModules.map(sm => `${sm.name} (${sm.nbrHours}h)`).join(", ") || "Aucun sous-module";
   };
 
   const filteredModules = useMemo(() => {
     return modules.filter(module => {
       const matchesField = selectedField === 0 || module.filiereId === selectedField;
+      
       const matchesProfessor = selectedProfessor === 0 || 
-        professors.find(p => p.id === selectedProfessor)?.modules?.includes(module);
+        professors.some(p => 
+          p.id === selectedProfessor && 
+          p.modules?.some(m => m.id === module.id)
+        );
+      
       return matchesField && matchesProfessor;
     });
   }, [modules, selectedField, selectedProfessor, professors]);
@@ -67,15 +74,15 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
     { header: "Nom", accessor: "name" as keyof Module },
     {
       header: "Filière",
-      render: (module: Module) => getFieldName(module.filiereId),
+      render: (module: Module) => getFieldName(module.filiereId || 0),
     },
     {
       header: "Professeur(s)",
-      render: (module: Module) => getProfessorNames(module.id),
+      render: (module: Module) => getProfessorNames(module.id??0),
     },
     {
       header: "Sous-modules",
-      render: (module: Module) => getSubModuleNames(module.id),
+      render: (module: Module) => getSubModuleNames(module.id??0),
     },
     {
       header: "Actions",
@@ -100,7 +107,8 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
             <label>Filière</label>
             <select
               value={selectedField}
-              onChange={(e) => setSelectedField(Number(e.target.value))}>
+              onChange={(e) => setSelectedField(Number(e.target.value))}
+            >
               <option value={0}>Toutes les filières</option>
               {fields.map((field) => (
                 <option key={field.id} value={field.id}>
@@ -113,11 +121,12 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
             <label>Professeur</label>
             <select
               value={selectedProfessor}
-              onChange={(e) => setSelectedProfessor(Number(e.target.value))}>
+              onChange={(e) => setSelectedProfessor(Number(e.target.value))}
+            >
               <option value={0}>Tous les professeurs</option>
               {professors.map((professor) => (
                 <option key={professor.id} value={professor.id}>
-                  {professor.firstName}
+                  {professor.firstName} {professor.lastName}
                 </option>
               ))}
             </select>
@@ -125,7 +134,8 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
         </div>
         <Button
           variant="primary"
-          onClick={() => onEdit({ id: 0, name: "", code: "", filiereId: 0 })}>
+          onClick={() => onEdit({ id: 0, name: "", code: "", filiereId: 0 })}
+        >
           + Ajouter un module
         </Button>
       </div>
