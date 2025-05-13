@@ -1,7 +1,6 @@
 package com.ClassCraft.site.service;
 
 import java.sql.Date;
-import java.sql.Time;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +15,6 @@ import com.ClassCraft.site.models.Filiere;
 import com.ClassCraft.site.models.Group;
 import com.ClassCraft.site.models.Module;
 import com.ClassCraft.site.models.Professor;
-import com.ClassCraft.site.models.Sceance;
 import com.ClassCraft.site.models.Session;
 import com.ClassCraft.site.models.Student;
 import com.ClassCraft.site.models.SubModule;
@@ -126,7 +124,6 @@ public class DatabaseSeeder implements CommandLineRunner {
         // --- Create Students ---
         List<Student> students = createStudents(groups);
         //---- Create Sceance ---
-        List<Sceance> sceances = createSceances(groups, modules, subModules, professors, classrooms);
 
         System.out.println("Database has been seeded successfully with:");
         System.out.println("- " + sessions.size() + " sessions");
@@ -137,7 +134,6 @@ public class DatabaseSeeder implements CommandLineRunner {
         System.out.println("- " + modules.size() + " modules");
         System.out.println("- " + subModules.size() + " sub-modules");
         System.out.println("- " + students.size() + " students");
-        System.out.println("- " + sceances.size() + " séances");
     }
 
     private List<Session> createSessions() {
@@ -174,44 +170,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         return sessions;
     }
-    private List<Sceance> createSceances(List<Group> groups, List<Module> modules, List<SubModule> subModules,
-        List<Professor> professors, List<Classroom> classrooms) {
-        List<Sceance> sceances = new ArrayList<>();
-        String[] daysOfWeek = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" }; // Correction de "Thursday"
-        final int NUMBER_OF_SESSIONS = 11; // Constante pour plus de clarté
-
-        for (int i = 0; i < NUMBER_OF_SESSIONS; i++) {
-            Sceance sceance = new Sceance();
-
-            sceance.setDayOfWeek(daysOfWeek[random.nextInt(daysOfWeek.length)]);
-            sceance.setStartTime(Time.valueOf("08:30:00")); // Correction de valueof -> valueOf
-            sceance.setEndTime(Time.valueOf("18:30:00"));
-            sceance.setFrequency(random.nextInt(3) + 1); // Exemple : fréquence aléatoire entre 1 et 3
-            sceance.setWasAttended(true);
-
-    // Assignations cohérentes avec des vérifications de taille
-            SubModule randomSubModule = getRandomElement(subModules);
-            sceance.setSubModule(randomSubModule);
-            sceance.setModule(randomSubModule.getModule()); // Module cohérent avec le submodule
-            sceance.setGroup(getRandomElement(groups));
-            sceance.setClassroom(getRandomElement(classrooms));
-            sceance.setProfessor(randomSubModule.getTeacher());
-            sceanceRepository.save(sceance);
-            sceances.add(sceance);
-
-
-            sceanceRepository.save(sceance);
-            sceances.add(sceance);
-        }
-    return sceances;
-}
-
-private <T> T getRandomElement(List<T> list) {
-    if (list == null || list.isEmpty()) {
-        throw new IllegalArgumentException("La liste ne peut pas être vide ou null");
-    }
-    return list.get(random.nextInt(list.size()));
-}
+    
 
 
     private List<Classroom> createClassrooms() {

@@ -1,27 +1,29 @@
 import React, { useState } from "react";
-import { useStaticData } from "../../hooks/useStaticData";
+import { useApiData } from "../../hooks/useApiData";
+import { usePlanning } from "../../context/PlanningContext";
 import { GroupCard } from "./GroupCard";
 import { GroupScheduleModal } from "./GroupScheduleModal";
 import { GroupFormModal } from "./GroupFromModal"; // Correction de l'orthographe
 import { ConfirmationModal } from "./ConfirmationModal";
 import styles from "../../styles/PlanningDashboard/PlanningGroup.module.css";
-import { Group, Professor, Field } from "../../types/type";
+import { Group, Professor } from "../../types/type";
 import { Room, Session } from "../../types/schedule";
 
 export const GroupPlanning = () => {
   const {
-    groups,
-    sessions,
-    rooms,
-    professors,
-    fields,
+    groups = [],
+    professors = [] as Professor[],
+    fields = [],
+    rooms = [],
     addGroup,
     updateGroup,
     deleteGroup,
-    addSession,
-    updateSession,
-  } = useStaticData();
+    seances = [],
+    addSceance,
+    updateSceance,
+  } = useApiData();
 
+  const { sessions = [] } = usePlanning();
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
@@ -31,8 +33,14 @@ export const GroupPlanning = () => {
     null
   );
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
+  const allSessions = [...seances, ...sessions];
 
-  const filteredGroups = groups.filter((group) => {
+  // Filtrer les groupes pour ne garder que ceux avec au moins une séance
+  const groupsWithSessions = groups.filter((group) =>
+    allSessions.some((session) => session.group?.id === group.id)
+  );
+
+  const filteredGroups = groupsWithSessions.filter((group) => {
     const matchesField = selectedField
       ? group.filiereId === selectedField
       : true;
@@ -40,31 +48,44 @@ export const GroupPlanning = () => {
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
     const matchesProfessor = selectedProfessor
-      ? sessions.some(
-          (s) => s.group.id === group.id && s.professor.id === selectedProfessor
+      ? allSessions.some(
+          (s) =>
+            s.group?.id === group.id && s.professor?.id === selectedProfessor
         )
       : true;
     const matchesRoom = selectedRoom
-      ? sessions.some((s) => s.group.id === group.id && s.room === selectedRoom)
+      ? allSessions.some(
+          (s) => s.group?.id === group.id && s.room === selectedRoom
+        )
       : true;
 
     return matchesField && matchesSearch && matchesProfessor && matchesRoom;
   });
 
-  const handleSaveGroup = (group: Group) => {
-    if (group.id) {
-      updateGroup(group);
-    } else {
-      addGroup(group);
+  const handleSaveGroup = async (group: Group) => {
+    try {
+      if (group.id) {
+        await updateGroup(group);
+      } else {
+        await addGroup(group);
+      }
+      setEditingGroup(null);
+    } catch (error) {
+      console.error("Error saving group:", error);
     }
-    setEditingGroup(null);
   };
 
-  const handleSaveSession = (session: Session) => {
-    if (session.id) {
-      updateSession(session);
-    } else {
-      addSession(session);
+  const handleSaveSession = async (session: Session) => {
+    try {
+      if (session.id && seances.some((s) => s.id === session.id)) {
+        await updateSceance(session);
+      } else {
+        const { id, ...newSession } = session;
+        await addSceance(newSession);
+      }
+    } catch (error) {
+      console.error("Error saving session:", error);
+      throw error;
     }
   };
 
@@ -86,7 +107,7 @@ export const GroupPlanning = () => {
             setSelectedField(e.target.value ? Number(e.target.value) : null)
           }>
           <option value="">Toutes les filières</option>
-          {fields.map((field) => (
+          {fields?.map((field) => (
             <option key={field.id} value={field.id}>
               {field.name}
             </option>
@@ -100,11 +121,17 @@ export const GroupPlanning = () => {
             setSelectedProfessor(e.target.value ? Number(e.target.value) : null)
           }>
           <option value="">Tous les professeurs</option>
-          {professors.map((prof) => (
-            <option key={prof.id} value={prof.id}>
-              {prof.firstName}
-            </option>
-          ))}
+          {professors.length > 0 ? (
+            professors.map((prof: Professor) => {
+              return (
+                <option key={prof.id} value={prof.id}>
+                  {prof.firstName} {prof.lastName}
+                </option>
+              );
+            })
+          ) : (
+            <option disabled>Aucun professeur chargé</option>
+          )}
         </select>
 
         <select
@@ -112,11 +139,17 @@ export const GroupPlanning = () => {
           value={selectedRoom ?? ""}
           onChange={(e) => setSelectedRoom(e.target.value || null)}>
           <option value="">Toutes les salles</option>
-          {rooms.map((room) => (
-            <option key={room.id} value={room.name}>
-              {room.name}
+          {rooms && rooms.length > 0 ? (
+            rooms.map((room: Room) => (
+              <option key={room.id} value={room.name}>
+                {room.name} ({room.capacity} places)
+              </option>
+            ))
+          ) : (
+            <option disabled>
+              {rooms ? "Aucune salle disponible" : "Chargement..."}
             </option>
-          ))}
+          )}
         </select>
 
         <button
@@ -134,23 +167,26 @@ export const GroupPlanning = () => {
       </div>
 
       <div className={styles.groupsGrid}>
-        {filteredGroups.map((group) => (
+        {filteredGroups?.map((group) => (
           <GroupCard
             key={group.id}
             group={group}
-            sessions={sessions.filter((s) => s.group.id === group.id)}
-            onOpenSchedule={() => setSelectedGroup(group)}
+            sessions={allSessions.filter((s) => s.group?.id === group.id)}
             onEdit={() => setEditingGroup(group)}
             onDelete={() => setDeletingGroup(group)}
+            onOpenSchedule={() => setSelectedGroup(group)}
+            onSaveSession={handleSaveSession}
           />
         ))}
       </div>
 
-      <GroupScheduleModal
-        group={selectedGroup}
-        sessions={sessions}
-        onClose={() => setSelectedGroup(null)}
-      />
+      {selectedGroup && (
+        <GroupScheduleModal
+          group={selectedGroup}
+          sessions={allSessions.filter((s) => s.group?.id === selectedGroup.id)}
+          onClose={() => setSelectedGroup(null)}
+        />
+      )}
 
       <GroupFormModal
         show={!!editingGroup}

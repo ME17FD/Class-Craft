@@ -2,7 +2,7 @@ import { Group, Professor, Module, SubModule, Field } from './type';
 
 // Type pour une séance
 export interface Session {
-    startDate: string | number | Date;
+    dayOfWeek: string;
     id: number;
     startTime: string;
     endTime: string;
@@ -10,7 +10,7 @@ export interface Session {
     professor: Professor;
     module?: Module;
     subModule?: SubModule;
-    room: string;
+    classroom: Room;
     group: Group;
     type: 'CM' | 'TD' | 'TP' | 'EXAM' | 'RATTRAPAGE' | 'EVENT';
     professorPresent: boolean;
@@ -36,23 +36,33 @@ export interface FieldSchedule {
     academicYear: string;
 }
 
-// Type pour un rapport quotidien
 export interface DailyReport {
     id: number;
-    date: string; // Format: "YYYY-MM-DD"
+    date: string; // Format: "YYYY-MM-DD" (ex: "2023-03-15")
     sessions: Session[];
+    validated?: boolean; // Si le rapport a été validé
+    createdAt?: string; // Date de création du rapport
+    updatedAt?: string; // Date de modification
 }
-
-// Type pour les créneaux horaires
-export interface TimeSlot {
-    startTime: string;
-    endTime: string;
+export interface DailyPlanning {
+    date: string;
+    rooms: RoomOccupation[];
 }
-
+export interface RoomOccupation {
+    room: string;
+    timeSlots: {
+        start: string;
+        end: string;
+        session: Session | null;
+    }[];
+}
 // Type pour les salles
 export interface Room {
     id: number;
     name: string;
     capacity: number;
-    type: 'Salle de cours' | 'Laboratoire' | 'Salle informatique';
+    type: 'Salle de cours' | 'Laboratoire' | 'Salle informatique' |null;
 } 
+
+
+

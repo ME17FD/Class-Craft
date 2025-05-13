@@ -2,6 +2,8 @@ package com.ClassCraft.site.models;
 
 import java.sql.Time;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,14 +19,23 @@ public class Sceance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+    public enum SceanceType {
+        CM, TD, TP, EXAM, RATTRAPAGE, EVENT
+    }
     private String dayOfWeek;
-    private Time startTime;
-    private Time endTime;
-    private int frequency;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
+    private Time startTime;
+    
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
+    private Time endTime;
+
+    private int frequency;
+    private SceanceType type;
     private Boolean wasAttended = false;
     
+
+
     @ManyToOne
     private SubModule subModule;
      
@@ -39,4 +50,7 @@ public class Sceance {
 
     @ManyToOne
     private Professor professor;
+
+
+  
 }

@@ -2,14 +2,20 @@ package com.ClassCraft.site.dto;
 
 import java.sql.Time;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 public class SeanceDTO {
     private Long id;
     private String dayOfWeek;
+       @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private Time startTime;
+    
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private Time endTime;
     private int frequency;
     private Boolean wasAttended;
 
+    private String type;
     private GroupDTO group;
     private SubModuleDTO subModule;
     private ModuleDTO module;
@@ -17,7 +23,15 @@ public class SeanceDTO {
     private ClassroomDTO classroom;
 
     // Getters & Setters
+    
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
     public Long getId() {
         return id;
     }

@@ -3,7 +3,7 @@ import { PlanningProvider } from "../../context/PlanningContext";
 import GroupPlanning from "./GroupPlanning";
 import SemesterPlanning from "./SemesterPlanning";
 import ProfessorPlanning from "./ProfessorPlanning";
-import RoomReport from "./RoomReport";
+import DailyReportsPage from "./DailyReportsPage";
 import RattrapagePlanning from "./RattrapagePlanning";
 import ExamPlanning from "./ExamPlanning";
 import styles from "../../styles/PlanningDashboard/PlanningDashboard.module.css";
@@ -55,7 +55,7 @@ const PlanningDashboard: React.FC = () => {
               {activeTab === "group" && <GroupPlanning />}
               {activeTab === "semester" && <SemesterPlanning />}
               {activeTab === "professor" && <ProfessorPlanning />}
-              {activeTab === "room" && <RoomReport />}
+              {activeTab === "room" && <DailyReportsPage />}
               {activeTab === "rattrapage" && <RattrapagePlanning />}
               {activeTab === "exam" && <ExamPlanning />}
             </div>
