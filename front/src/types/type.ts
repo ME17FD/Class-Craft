@@ -84,3 +84,10 @@ export type Reservation = {
   groupId: number;        // Reference to the Group associated with the reservation
   classroomId: number;    // Reference to the Classroom being reserved
 };
+export type Classroom = {
+  id: number;
+  name: string;
+  capacity: number;
+  type:String;
+ // Equipment available in the classroom (e.g., projector, whiteboard)
+};
