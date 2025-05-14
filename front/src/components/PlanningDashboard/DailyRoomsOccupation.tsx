@@ -1,55 +1,91 @@
-import React, { useEffect, useState } from "react";
-import { usePlanningData } from "../../hooks/usePlanningData";
-import { format, parse, isSameDay, addDays, startOfDay, endOfDay } from "date-fns";
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin from "@fullcalendar/interaction";
-import { Classroom, Reservation } from "../../types/type";
+import React, { useEffect } from "react";
+import { usePlanning } from "../../context/PlanningContext";
 import styles from "../../styles/PlanningDashboard/DailyRoomsOccupation.module.css";
+import { usePlanningData } from "../../hooks/usePlanningData";
+import { format, parse, isSameDay } from "date-fns";
+import { Room } from "../../types/schedule";
+import { Professor, SubModule, Group } from "../../types/type";
 
-// Helper function to get hourly time slots (example: every hour)
-const getTimeSlots = (startOfWeek: Date, endOfWeek: Date) => {
-  let timeSlots = [];
-  let currentTime = startOfDay(startOfWeek);
-  while (currentTime <= endOfWeek) {
-    timeSlots.push(format(currentTime, "HH:mm"));
-    currentTime = addDays(currentTime, 1);
-  }
-  return timeSlots;
-};
+interface Reservation {
+  id: number;
+  startDateTime: string;
+  endDateTime: string;
+  wasAttended: boolean;
+  subModuleId: number;
+  groupId: number;
+  classroomId: number;
+  subModule?: SubModule & { professor?: Professor };
+  group?: Group;
+  classroom?: Room;
+}
 
-// Helper function to check if a reservation overlaps with a time slot
-const isReservationDuringTimeSlot = (reservation: Reservation, timeSlot: string) => {
-  const reservationStart = new Date(reservation.startDateTime);
-  const reservationEnd = new Date(reservation.endDateTime);
-  const slotStart = parse(timeSlot, "HH:mm", new Date());
-  const slotEnd = addDays(slotStart, 1);
+interface DailyRoomsOccupationProps {
+  date: string;
+}
 
-  return reservationStart <= slotEnd && reservationEnd >= slotStart;
-};
+const timeSlots = [
+  { start: "08:00", end: "10:00", label: "08:00-10:00" },
+  { start: "10:15", end: "12:15", label: "10:15-12:15" },
+  { start: "13:00", end: "15:00", label: "13:00-15:00" },
+  { start: "15:15", end: "17:15", label: "15:15-17:15" },
+] as const;
 
-const WeeklyRoomsOccupation: React.FC = () => {
-  const { classrooms, reservations, loading, error } = usePlanningData();
-  const [weekReservations, setWeekReservations] = useState<Reservation[]>([]);
-  const [timeSlots, setTimeSlots] = useState<string[]>([]);
+const DailyRoomsOccupation: React.FC<DailyRoomsOccupationProps> = ({ date }) => {
+  const { rooms, reservations, loading, error, updatePresence } = usePlanningData();
+  const selectedDate = new Date(date);
 
   useEffect(() => {
-    // Set the time slots for the current week
-    const startOfWeek = new Date();
-    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Adjust to start of the week (Sunday)
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(endOfWeek.getDate() + 6); // Set to Saturday
+    console.log("Current reservations:", reservations);
+    console.log("Selected date:", date);
+    console.log("Rooms data:", rooms);
+  }, [reservations, date, rooms]);
 
-    setTimeSlots(getTimeSlots(startOfWeek, endOfWeek));
+  const dayReservations = React.useMemo(() => {
+    const filtered = reservations.filter(reservation =>
+      isSameDay(new Date(reservation.startDateTime), selectedDate)
+    );
+    console.log("Filtered reservations for date:", date, filtered);
+    return filtered;
+  }, [reservations, date]);
 
-    // Filter reservations for the current week
-    const filteredReservations = reservations.filter((reservation) => {
-      const reservationStart = new Date(reservation.startDateTime);
-      return reservationStart >= startOfWeek && reservationStart <= endOfWeek;
-    });
+  const isReservationInTimeSlot = (reservation: Reservation, slotStart: string, slotEnd: string): boolean => {
+    const parseTime = (time: string): number => parse(time, 'HH:mm', new Date()).getTime();
 
-    setWeekReservations(filteredReservations);
-  }, [reservations]);
+    const slotStartTime = parseTime(slotStart);
+    const slotEndTime = parseTime(slotEnd);
+
+    const reservationStart = format(new Date(reservation.startDateTime), 'HH:mm');
+    const reservationEnd = format(new Date(reservation.endDateTime), 'HH:mm');
+
+    const resStartTime = parseTime(reservationStart);
+    const resEndTime = parseTime(reservationEnd);
+
+    const isInSlot = (
+      (resStartTime >= slotStartTime && resStartTime < slotEndTime) ||
+      (resEndTime > slotStartTime && resEndTime <= slotEndTime) ||
+      (resStartTime <= slotStartTime && resEndTime >= slotEndTime)
+    );
+
+    console.log(`Checking reservation ${reservation.id} (${reservationStart}-${reservationEnd}) against slot ${slotStart}-${slotEnd}:`, isInSlot);
+    return isInSlot;
+  };
+
+  const getReservationStatus = (reservation: Reservation | null): 'empty' | 'absent' | 'occupied' => {
+    if (!reservation) return 'empty';
+    if (reservation.wasAttended === false) return 'absent';
+    return 'occupied';
+  };
+
+  const handlePresenceChange = async (reservationId: number, currentValue: boolean) => {
+    console.log("Updating presence for reservation:", reservationId, "from", currentValue, "to", !currentValue);
+    try {
+      await updatePresence(reservationId, !currentValue);
+      console.log("Presence updated successfully");
+    } catch (err) {
+      console.error("Failed to update presence:", err);
+      alert("Failed to update presence. Check console for details.");
+    }
+  };
 
   if (loading) {
     return (
@@ -69,69 +105,97 @@ const WeeklyRoomsOccupation: React.FC = () => {
     );
   }
 
+  if (!rooms || rooms.length === 0) {
+    return (
+      <div className={styles["empty-state"]}>
+        <p>Aucune salle n'est disponible.</p>
+        <button onClick={() => window.location.reload()}>Refresh Page</button>
+      </div>
+    );
+  }
+
   return (
-    <div className={styles["weekly-rooms-planning"]}>
-      <h1>Planning hebdomadaire - Occupation des salles</h1>
+    <div className={styles["daily-rooms-planning"]}>
+      <h1>Planning journalier - Occupation des salles</h1>
+      <h2>{format(selectedDate, 'dd MMMM yyyy')}</h2>
 
-      {/* Table with classrooms and their reservation status */}
-      <div className={styles["rooms-table-container"]}>
-        <table className={styles["rooms-table"]}>
-          <thead>
-            <tr>
-              <th>Classrooms</th>
-              {timeSlots.map((slot) => (
-                <th key={slot}>{slot}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {classrooms.map((classroom) => {
-              return (
-                <tr key={classroom.id}>
-                  <td>{classroom.name}</td>
-                  {timeSlots.map((slot) => {
-                    const reservation = weekReservations.find((reservation) =>
-                      reservation.classroomId === classroom.id &&
-                      isReservationDuringTimeSlot(reservation, slot)
-                    );
-
-                    return (
-                      <td key={slot}>
-                        {reservation ? (
-                          <div>
-                            <strong>Group: {reservation.groupId}</strong>
-                            <br />
-                            SubModule: {reservation.subModuleId}
-                          </div>
-                        ) : (
-                          <span>(empty)</span>
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      <div className={styles["debug-info"]}>
+        <p>Showing {dayReservations.length} reservations for this date</p>
+        <button onClick={() => console.log("Current state:", { rooms, reservations, dayReservations })}>
+          Log Current State
+        </button>
       </div>
 
-      {/* FullCalendar for weekly overview */}
-      <FullCalendar
-        plugins={[dayGridPlugin, interactionPlugin]}
-        initialView="dayGridWeek"
-        events={weekReservations.map((reservation) => ({
-          title: `Group ${reservation.groupId} | SubModule ${reservation.subModuleId}`,
-          start: reservation.startDateTime,
-          end: reservation.endDateTime,
-          description: `Group: ${reservation.groupId} | SubModule: ${reservation.subModuleId}`,
-        }))}
-        eventClick={(info) => {
-          alert(`Event clicked: ${info.event.title}\nDetails: ${info.event.extendedProps.description}`);
-        }}
-      />
+      <div className={styles["planning-grid"]}>
+        <div className={`${styles["grid-row"]} ${styles["header"]}`}>
+          <div className={`${styles["room-cell"]} ${styles["header-cell"]}`}>SALLE</div>
+          {timeSlots.map((slot) => (
+            <div key={slot.label} className={`${styles["time-slot-cell"]} ${styles["header-cell"]}`}>
+              {slot.label}
+            </div>
+          ))}
+        </div>
+
+        {rooms.map((room) => (
+          <div key={room.id} className={styles["grid-row"]}>
+            <div className={styles["room-cell"]}>
+              {room.name}
+              <div className={styles["room-info"]}>
+                {room.capacity} places • {room.type || 'Non spécifié'}
+              </div>
+            </div>
+
+            {timeSlots.map((slot) => {
+              const reservation = dayReservations.find(
+                (r) =>
+                  r.classroomId === room.id &&
+                  isReservationInTimeSlot(r, slot.start, slot.end)
+              );
+
+              const status = getReservationStatus(reservation || null);
+
+              return (
+                <div
+                  key={`${room.id}-${slot.start}`}
+                  className={`${styles["session-cell"]} ${styles[status]}`}
+                  data-testid={`cell-${room.id}-${slot.start.replace(':', '')}`}
+                >
+                  {reservation ? (
+                    <div className={styles["session-content"]}>
+                      <div className={styles["session-title"]}>
+                        {reservation.subModule?.name || "Réservation"}
+                      </div>
+                      {reservation.subModule?.professor && (
+                        <div className={styles["session-professor"]}>
+                          {reservation.subModule.professor.firstName} {reservation.subModule.professor.lastName}
+                        </div>
+                      )}
+                      <div className={styles["session-details"]}>
+                        {reservation.group?.name
+                          ? `Groupe ${reservation.group.name}`
+                          : `Groupe ID: ${reservation.groupId}`}
+                      </div>
+                      <label className={styles["checkbox-label"]}>
+                        <input
+                          type="checkbox"
+                          checked={reservation.wasAttended}
+                          onChange={() => handlePresenceChange(reservation.id, reservation.wasAttended)}
+                          data-testid={`checkbox-${reservation.id}`}
+                        />
+                        Prof. présent
+                      </label>
+                    </div>
+                  ) : (
+                    <div className={styles["empty-label"]}>Libre</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
 
-export default WeeklyRoomsOccupation;
+export default DailyRoomsOccupation;

@@ -1,34 +1,23 @@
 import { useState, useEffect } from "react";
 import api from "../services/api";
-import { Classroom, Reservation, Group, SubModule } from "../types/type";  // Assuming these types exist in your types file
+import { Room } from "../types/schedule";
 
 export const usePlanningData = () => {
-  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
-  const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [subModules, setSubModules] = useState<SubModule[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [reservations, setReservations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchPlanningData = async () => {
     try {
       setLoading(true);
-      const [
-        classroomsResponse,
-        reservationsResponse,
-        groupsResponse,
-        subModulesResponse,
-      ] = await Promise.all([
+      const [roomsResponse, reservationsResponse] = await Promise.all([
         api.get("/api/classrooms"),
-        api.get("/api/reservations?include=subModule,subModule.teacher,group"),
-        api.get("/api/groups"), // Fetch groups if needed
-        api.get("/api/submodules"), // Fetch submodules if needed
+        api.get("/api/reservations?include=subModule,subModule.teacher,group")
       ]);
 
-      setClassrooms(classroomsResponse.data);
+      setRooms(roomsResponse.data);
       setReservations(reservationsResponse.data);
-      setGroups(groupsResponse.data); // Assuming you have this endpoint
-      setSubModules(subModulesResponse.data); // Assuming you have this endpoint
       setError(null);
     } catch (err) {
       console.error("Failed to fetch planning data:", err);
@@ -45,11 +34,11 @@ export const usePlanningData = () => {
   const updatePresence = async (reservationId: number, wasAttended: boolean) => {
     try {
       await api.put(`/api/reservations/${reservationId}/mark-attended`, {
-        wasAttended,
+        wasAttended
       });
-      setReservations((prev) =>
-        prev.map((reservation) =>
-          reservation.id === reservationId
+      setReservations(prev => 
+        prev.map(reservation => 
+          reservation.id === reservationId 
             ? { ...reservation, wasAttended }
             : reservation
         )
@@ -61,13 +50,11 @@ export const usePlanningData = () => {
   };
 
   return {
-    classrooms,
+    rooms,
     reservations,
-    groups,
-    subModules,
     loading,
     error,
     updatePresence,
-    refreshData: fetchPlanningData,
+    refreshData: fetchPlanningData
   };
 };

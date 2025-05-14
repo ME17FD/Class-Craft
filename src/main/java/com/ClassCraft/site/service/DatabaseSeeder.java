@@ -2,7 +2,9 @@ package com.ClassCraft.site.service;
 
 
 import java.sql.Time;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -355,20 +357,42 @@ public class DatabaseSeeder implements CommandLineRunner {
     }
 
     private List<Reservation> createReservations(List<Sceance> sceances) {
-        List<Reservation> reservations = new ArrayList<>();
+    List<Reservation> reservations = new ArrayList<>();
 
-        for (Sceance sceance : sceances) {
-            if (random.nextDouble() < 0.7) { // 70% chance to create a reservation for each sceance
-                Reservation reservation = new Reservation();
-                reservation.setStartDateTime(LocalDateTime.now().plusDays(random.nextInt(30)));
-                reservation.setEndDateTime(reservation.getStartDateTime().plusHours(2));
-                reservation.setWasAttended(random.nextBoolean());
-                reservation.setSubModule(sceance.getSubModule());
-                reservation.setGroup(sceance.getGroup());
-                reservation.setClassroom(sceance.getClassroom());
-                reservations.add(reservation);
-            }
+    // Define the possible time slots
+    String[][] timeSlots = {
+        {"08:00", "10:00"},
+        {"10:15", "12:15"},
+        {"13:00", "15:00"},
+        {"15:15", "17:15"}
+    };
+
+    for (Sceance sceance : sceances) {
+        if (random.nextDouble() < 0.7) { // 70% chance to create a reservation
+            Reservation reservation = new Reservation();
+
+            // Randomly choose a day within the next 30 days
+            LocalDate date = LocalDate.now().plusDays(random.nextInt(30));
+
+            // Pick a random time slot
+            String[] slot = timeSlots[random.nextInt(timeSlots.length)];
+            LocalTime startTime = LocalTime.parse(slot[0]);
+            LocalTime endTime = LocalTime.parse(slot[1]);
+
+            // Combine date and time to get LocalDateTime
+            reservation.setStartDateTime(LocalDateTime.of(date, startTime));
+            reservation.setEndDateTime(LocalDateTime.of(date, endTime));
+
+            reservation.setWasAttended(random.nextBoolean());
+            reservation.setSubModule(sceance.getSubModule());
+            reservation.setGroup(sceance.getGroup());
+            reservation.setClassroom(sceance.getClassroom());
+
+            reservations.add(reservation);
         }
-        return reservations;
     }
+
+    return reservations;
+}
+
 }
