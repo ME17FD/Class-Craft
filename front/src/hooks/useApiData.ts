@@ -46,7 +46,7 @@ export const useApiData = () => {
         api
           .get(endpoint.url)
           .then((response) => {
-            console.log(`✅ Success [${endpoint.name}]:`, response.data);
+            //console.log(`✅ Success [${endpoint.name}]:`, response.data);
             return response;
           })
           .catch((error) => {
