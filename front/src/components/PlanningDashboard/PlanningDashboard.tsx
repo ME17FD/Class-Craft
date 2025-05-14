@@ -4,7 +4,6 @@ import GroupPlanning from "./GroupPlanning";
 import SemesterPlanning from "./SemesterPlanning";
 import ProfessorPlanning from "./ProfessorPlanning";
 import DailyReportsPage from "./DailyReportsPage";
-import RattrapagePlanning from "./RattrapagePlanning";
 import ExamPlanning from "./ExamPlanning";
 import styles from "../../styles/PlanningDashboard/PlanningDashboard.module.css";
 import Sidebar from "../Sidebar";
@@ -14,7 +13,6 @@ const tabs = [
   { id: "semester", label: "Planning des semestres", icon: "📅" },
   { id: "professor", label: "Planning des professeurs", icon: "👨‍🏫" },
   { id: "room", label: "Rapport des salles", icon: "🏫" },
-  { id: "rattrapage", label: "Séances de rattrapage", icon: "🔄" },
   { id: "exam", label: "Examens", icon: "📝" },
 ];
 
@@ -56,7 +54,6 @@ const PlanningDashboard: React.FC = () => {
               {activeTab === "semester" && <SemesterPlanning />}
               {activeTab === "professor" && <ProfessorPlanning />}
               {activeTab === "room" && <DailyReportsPage />}
-              {activeTab === "rattrapage" && <RattrapagePlanning />}
               {activeTab === "exam" && <ExamPlanning />}
             </div>
           </section>

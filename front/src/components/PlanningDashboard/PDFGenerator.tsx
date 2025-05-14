@@ -74,8 +74,10 @@ const PdfDocument = ({
             <Text style={styles.tableCell}>
               {session.module?.name || session.subModule?.name}
             </Text>
-            <Text style={styles.tableCell}>{session.professor.name}</Text>
-            <Text style={styles.tableCell}>{session.room}</Text>
+            <Text style={styles.tableCell}>
+              {session.professor.firstName} {session.professor.lastName}
+            </Text>
+            <Text style={styles.tableCell}>{session.classroom.name}</Text>
           </View>
         ))}
       </View>

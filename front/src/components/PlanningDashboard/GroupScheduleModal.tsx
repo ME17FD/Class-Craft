@@ -30,7 +30,11 @@ const exportToExcel = (sessions: Session[], groupName: string) => {
   XLSX.writeFile(workbook, `emploi-du-temps-${groupName}.xlsx`);
 };
 
-export const GroupScheduleModal = ({ group, onClose, onTimeSlotClick }: Props) => {
+export const GroupScheduleModal = ({
+  group,
+  onClose,
+  onTimeSlotClick,
+}: Props) => {
   const { seances } = useApiData();
   const { sessions } = usePlanning();
 
@@ -47,11 +51,24 @@ export const GroupScheduleModal = ({ group, onClose, onTimeSlotClick }: Props) =
   }, [seances, sessions, group]);
 
   const timeSlots = useMemo(
-    () => ["", ...Array.from({ length: 11 }, (_, i) => `${(8 + i).toString().padStart(2, "0")}:00`)],
+    () => [
+      "",
+      ...Array.from(
+        { length: 11 },
+        (_, i) => `${(8 + i).toString().padStart(2, "0")}:00`
+      ),
+    ],
     []
   );
 
-  const weekDays = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+  const weekDays = [
+    "MONDAY",
+    "TUESDAY",
+    "WEDNESDAY",
+    "THURSDAY",
+    "FRIDAY",
+    "SATURDAY",
+  ];
   const dayTranslations: Record<string, string> = {
     MONDAY: "Lundi",
     TUESDAY: "Mardi",
@@ -72,10 +89,14 @@ export const GroupScheduleModal = ({ group, onClose, onTimeSlotClick }: Props) =
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
-          <h2>Emploi du temps - {group?.name} (ID: {group?.id})</h2>
+          <h2>
+            Emploi du temps - {group?.name} (ID: {group?.id})
+          </h2>
           <div className={styles.exportButtons}>
             <button
-              onClick={() => exportToExcel(groupSessions, group?.name || "Groupe")}
+              onClick={() =>
+                exportToExcel(groupSessions, group?.name || "Groupe")
+              }
               className={styles.excelButton}>
               Export Excel
             </button>
@@ -116,28 +137,37 @@ export const GroupScheduleModal = ({ group, onClose, onTimeSlotClick }: Props) =
                   });
 
                   const slotKey = session
-                    ? `sess-${session.id}-${day}-${normalizedTime.replace(":", "")}`
+                    ? `sess-${session.id}-${day}-${normalizedTime.replace(
+                        ":",
+                        ""
+                      )}`
                     : `empty-${day}-${normalizedTime.replace(":", "")}`;
 
                   return (
                     <div
                       key={slotKey}
-                      className={`${styles.timeSlot} ${session ? styles.occupied : ""}`}
+                      className={`${styles.timeSlot} ${
+                        session ? styles.occupied : ""
+                      }`}
                       onClick={() => onTimeSlotClick(day, time)}>
                       {session ? (
                         <div className={styles.sessionContent}>
                           <div className={styles.sessionTitle}>
-                            {session.module?.name || session.subModule?.name || "Cours"}
+                            {session.module?.name ||
+                              session.subModule?.name ||
+                              "Cours"}
                             <span className={styles.sessionType}>
                               {" - " + session.type}
                             </span>
                           </div>
                           <div className={styles.sessionDetails}>
                             <div>
-                              <strong>Salle:</strong> {session.classroom?.name || "Non spécifiée"}
+                              <strong>Salle:</strong>{" "}
+                              {session.classroom?.name || "Non spécifiée"}
                             </div>
                             <div>
-                              <strong>Prof:</strong> {session.professor?.firstName || ""}{" "}
+                              <strong>Prof:</strong>{" "}
+                              {session.professor?.firstName || ""}{" "}
                               {session.professor?.lastName || ""}
                               <span
                                 className={
@@ -152,7 +182,9 @@ export const GroupScheduleModal = ({ group, onClose, onTimeSlotClick }: Props) =
                           </div>
                         </div>
                       ) : (
-                        <span className={styles.debugText}>{/* optionnel debug */}</span>
+                        <span className={styles.debugText}>
+                          {/* optionnel debug */}
+                        </span>
                       )}
                     </div>
                   );

@@ -60,7 +60,7 @@ const DailyRoomsOccupation: React.FC<DailyRoomsOccupationProps> = ({
             {timeSlots.map((slot) => {
               const session = daySessions.find(
                 (s) =>
-                  s.room === room.name &&
+                  s.classroom?.name === room.name &&
                   s.startTime === slot.start &&
                   s.endTime === slot.end
               );
@@ -79,7 +79,8 @@ const DailyRoomsOccupation: React.FC<DailyRoomsOccupationProps> = ({
                           "Autre"}
                       </div>
                       <div className={styles["session-professor"]}>
-                        {session.professor.name}
+                        {session.professor.firstName}{" "}
+                        {session.professor.lastName}
                       </div>
                       <div className={styles["session-details"]}>
                         {session.type} • {session.group.name}

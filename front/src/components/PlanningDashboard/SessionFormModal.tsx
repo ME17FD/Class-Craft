@@ -144,9 +144,9 @@ export const SessionFormModal = ({
     } catch (error) {
       console.error("Erreur lors de l'enregistrement de la séance:", error);
       alert(
-        `Erreur lors de l'enregistrement: ${
-          error.response?.data?.message || error.message
-        }`
+        `Erreur lors de l'enregistrement: 
+        
+        `
       );
     }
   };
