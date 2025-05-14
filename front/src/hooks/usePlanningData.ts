@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import api from "../services/api";
-import { Room, Session } from "../types/schedule";
-import { format } from "date-fns";
+import { Room } from "../types/schedule";
 
 export const usePlanningData = () => {
   const [rooms, setRooms] = useState<Room[]>([]);
-  const [seances, setSeances] = useState<Session[]>([]);
+  const [reservations, setReservations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -14,34 +13,11 @@ export const usePlanningData = () => {
       setLoading(true);
       const [roomsResponse, reservationsResponse] = await Promise.all([
         api.get("/api/classrooms"),
-        api.get("/api/reservations")
+        api.get("/api/reservations?include=subModule,subModule.teacher,group")
       ]);
 
       setRooms(roomsResponse.data);
-      
-      // Map reservations to sessions format
-      const mappedSessions: Session[] = reservationsResponse.data.map((reservation: any) => ({
-        id: reservation.id,
-        startTime: format(new Date(reservation.startDateTime), 'HH:mm'),
-        endTime: format(new Date(reservation.endDateTime), 'HH:mm'),
-        day: format(new Date(reservation.startDateTime), 'yyyy-MM-dd'),
-        dayOfWeek: format(new Date(reservation.startDateTime), 'EEEE').toUpperCase(),
-        professor: reservation.subModule?.teacher,
-        module: reservation.subModule?.module,
-        subModule: reservation.subModule,
-        classroom: {
-          id: reservation.classroomId,
-          name: reservation.classroom?.name,
-          capacity: reservation.classroom?.capacity,
-          type: reservation.classroom?.type
-        },
-        group: reservation.group,
-        type: 'CM', // Default type, adjust based on your needs
-        professorPresent: reservation.wasAttended,
-        duration: Math.ceil((new Date(reservation.endDateTime).getTime() - new Date(reservation.startDateTime).getTime()) / (1000 * 60 * 60))
-      }));
-
-      setSeances(mappedSessions);
+      setReservations(reservationsResponse.data);
       setError(null);
     } catch (err) {
       console.error("Failed to fetch planning data:", err);
@@ -55,14 +31,16 @@ export const usePlanningData = () => {
     fetchPlanningData();
   }, []);
 
-  const updatePresence = async (sessionId: number, wasAttended: boolean) => {
+  const updatePresence = async (reservationId: number, wasAttended: boolean) => {
     try {
-      await api.put(`/api/reservations/${sessionId}/mark-attended`);
-      setSeances(prev => 
-        prev.map(session => 
-          session.id === sessionId 
-            ? { ...session, professorPresent: wasAttended }
-            : session
+      await api.put(`/api/reservations/${reservationId}/mark-attended`, {
+        wasAttended
+      });
+      setReservations(prev => 
+        prev.map(reservation => 
+          reservation.id === reservationId 
+            ? { ...reservation, wasAttended }
+            : reservation
         )
       );
     } catch (err) {
@@ -73,10 +51,10 @@ export const usePlanningData = () => {
 
   return {
     rooms,
-    seances,
+    reservations,
     loading,
     error,
     updatePresence,
     refreshData: fetchPlanningData
   };
-}; 
+};
