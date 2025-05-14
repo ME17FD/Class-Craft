@@ -75,3 +75,12 @@ export interface PedagogicalData {
   subModules: SubModule[];
   professors: Professor[];
 }
+export type Reservation = {
+  id: number;
+  startDateTime: string;  // ISO format date-time string for the start of the reservation
+  endDateTime: string;    // ISO format date-time string for the end of the reservation
+  wasAttended: boolean;   // Indicates whether the reservation was attended
+  subModuleId: number;    // Reference to the SubModule being reserved
+  groupId: number;        // Reference to the Group associated with the reservation
+  classroomId: number;    // Reference to the Classroom being reserved
+};
