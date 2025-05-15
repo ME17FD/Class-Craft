@@ -1,16 +1,14 @@
 package com.ClassCraft.site.repository;
 
 
-import com.ClassCraft.site.controller.SeanceController;
-import com.ClassCraft.site.models.Group;
-import com.ClassCraft.site.models.Sceance;
-
 import java.sql.Time;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import com.ClassCraft.site.models.Sceance;
 
 
 @Repository
@@ -23,7 +21,7 @@ public interface SeanceRepository extends JpaRepository<Sceance, Long> {
     List<Sceance> findBySubModuleId(Long subModuleId);
 
     // Trouver toutes les séances par leur fréquence
-    List<Sceance> findByFrequency(String frequency);
+    List<Sceance> findByFrequency(Integer frequency);
 
     // Vérifier si une séance a été suivie (boolean)
     List<Sceance> findByWasAttended(Boolean wasAttended);
