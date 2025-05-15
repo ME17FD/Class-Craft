@@ -154,6 +154,7 @@ const DailyRoomsOccupation: React.FC<DailyRoomsOccupationProps> = ({ date }) => 
 
               const status = getReservationStatus(reservation || null);
 
+
               return (
                 <div
                   key={`${room.id}-${slot.start}`}
@@ -163,26 +164,27 @@ const DailyRoomsOccupation: React.FC<DailyRoomsOccupationProps> = ({ date }) => 
                   {reservation ? (
                     <div className={styles["session-content"]}>
                       <div className={styles["session-title"]}>
-                        {reservation.subModule?.name || "Réservation"}
+                        {reservation.submodule?.name || "Réservation"}
                       </div>
-                      {reservation.subModule?.professor && (
+                      {reservation.submodule?.teacher && (
                         <div className={styles["session-professor"]}>
-                          {reservation.subModule.professor.firstName} {reservation.subModule.professor.lastName}
+                          Prof:  {reservation.submodule.teacher.firstName} {reservation.submodule.teacher.lastName}
                         </div>
                       )}
                       <div className={styles["session-details"]}>
-                        {reservation.group?.name
-                          ? `Groupe ${reservation.group.name}`
+                        {reservation.groupName
+                          ? `Groupe ${reservation.groupName}`
                           : `Groupe ID: ${reservation.groupId}`}
                       </div>
                       <label className={styles["checkbox-label"]}>
+                        Prof. présent:
                         <input
                           type="checkbox"
                           checked={reservation.wasAttended}
                           onChange={() => handlePresenceChange(reservation.id, reservation.wasAttended)}
                           data-testid={`checkbox-${reservation.id}`}
                         />
-                        Prof. présent
+                        
                       </label>
                     </div>
                   ) : (

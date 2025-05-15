@@ -10,6 +10,9 @@ public class ReservationDTO {
     private Long subModuleId;
     private Long groupId;
     private Long classroomId;
+    private SubModuleDTO submodule;
+    private String groupName;
+
     public Long getId() {
         return id;
     }
@@ -54,4 +57,23 @@ public class ReservationDTO {
     }
 
     // Getters and setters
+
+    public SubModuleDTO getSubmodule() {
+        return submodule;
+    }
+
+    public void setSubmodule(SubModuleDTO submodule) {
+        this.submodule = submodule;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
+
+
+    
 }
