@@ -5,6 +5,8 @@ import { usePlanningData } from "../../hooks/usePlanningData";
 import { format, parse, isSameDay } from "date-fns";
 import { Room } from "../../types/schedule";
 import { Professor, SubModule, Group } from "../../types/type";
+import * as XLSX from "xlsx";
+
 
 interface Reservation {
   id: number;
@@ -87,6 +89,104 @@ const DailyRoomsOccupation: React.FC<DailyRoomsOccupationProps> = ({ date }) => 
     }
   };
 
+const exportToExcel = () => {
+  const workbook = XLSX.utils.book_new();
+  const data: (string | number)[][] = [];
+
+  // Header row
+  data.push([
+    "Salle",
+    ...timeSlots.map(slot => slot.label),
+    "Capacité"
+  ]);
+
+  rooms.forEach(room => {
+    const row: (string | number)[] = [room.name];
+
+    for (const slot of timeSlots) {
+      const reservation = dayReservations.find(
+        r => r.classroomId === room.id && isReservationInTimeSlot(r, slot.start, slot.end)
+      );
+
+      if (reservation) {
+        const moduleName = reservation.submodule?.name || "N/A";
+        const groupName = reservation.groupName || `ID: ${reservation.groupId}` || "N/A";
+        const profName = reservation.submodule?.teacher
+          ? `${reservation.submodule.teacher.firstName} ${reservation.submodule.teacher.lastName}`
+          : "N/A";
+        const presence = reservation.wasAttended === true
+          ? "Présent"
+          : reservation.wasAttended === false
+          ? "Absent"
+          : "N/A";
+
+        // multiline text to force Excel auto row height
+        const cellContent =
+          `Module: ${moduleName}\n` +
+          `Groupe: ${groupName}\n` +
+          `Prof: ${profName}\n` +
+          `Présence: ${presence}`;
+
+        row.push(cellContent);
+      } else {
+        row.push("-"); // fill libre cells with "-"
+      }
+    }
+
+    row.push(room.capacity);
+
+    data.push(row);
+  });
+
+  const worksheet = XLSX.utils.aoa_to_sheet(data);
+
+  // Bold headers
+  const range = XLSX.utils.decode_range(worksheet['!ref'] || "");
+  for (let C = range.s.c; C <= range.e.c; ++C) {
+    const cellAddress = XLSX.utils.encode_cell({ r: 0, c: C });
+    if (!worksheet[cellAddress]) continue;
+    if (!worksheet[cellAddress].s) worksheet[cellAddress].s = {};
+    worksheet[cellAddress].s.font = { bold: true };
+  }
+
+  // Wrap text & auto column width
+  const colWidths = data[0].map((_, colIndex) => {
+    let maxLength = 10;
+    for (let rowIndex = 0; rowIndex < data.length; rowIndex++) {
+      const cell = data[rowIndex][colIndex];
+      if (cell) {
+        const cellLines = String(cell).split("\n");
+        const longestLineLength = cellLines.reduce((max, line) => Math.max(max, line.length), 0);
+        maxLength = Math.max(maxLength, longestLineLength);
+      }
+    }
+    return { wch: maxLength + 2 };
+  });
+  worksheet['!cols'] = colWidths;
+
+  // Apply wrapText & vertical alignment top to all cells except header
+  for (let R = 1; R <= range.e.r; ++R) {
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+      const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+      const cell = worksheet[cellAddress];
+      if (cell) {
+        if (!cell.s) cell.s = {};
+        if (!cell.s.alignment) cell.s.alignment = {};
+        cell.s.alignment.wrapText = true;
+        cell.s.alignment.vertical = "top";
+      }
+    }
+  }
+
+  XLSX.utils.book_append_sheet(workbook, worksheet, `Occupation Salles`);
+
+  XLSX.writeFile(workbook, `occupation-salles-${format(selectedDate, "yyyy-MM-dd")}.xlsx`);
+};
+
+
+
+
+
   if (loading) {
     return (
       <div className={styles["loading-container"]}>
@@ -123,6 +223,9 @@ const DailyRoomsOccupation: React.FC<DailyRoomsOccupationProps> = ({ date }) => 
         <p>Showing {dayReservations.length} reservations for this date</p>
         <button onClick={() => console.log("Current state:", { rooms, reservations, dayReservations })}>
           Log Current State
+        </button>
+        <button onClick={exportToExcel} style={{ marginLeft: '10px' }}>
+          Export to Excel
         </button>
       </div>
 
