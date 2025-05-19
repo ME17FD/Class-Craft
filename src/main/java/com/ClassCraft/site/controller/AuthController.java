@@ -61,7 +61,7 @@ public class AuthController {
             
             // Find user based on their role
             User user;
-            String role = "USER";
+            String role ;
 
             // Determine user type and find user with respective service
             if (adminService.existsByEmail(loginDTO.getEmail())) {
@@ -101,7 +101,8 @@ public class AuthController {
             // Handle errors and provide a more friendly message
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("message", "Login failed! Please check your credentials and try again.");
-            e.printStackTrace();
+            //e.printStackTrace();
+            System.out.println("AuthController: Login failed! Please check your credentials and try again.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
