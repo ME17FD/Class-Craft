@@ -103,8 +103,6 @@ const usePedagogicalData = () => {
   );
 
   type SaveOperation = 'add' | 'edit';
-  type DeleteOperation = 'delete';
-  type CrudOperation = SaveOperation | DeleteOperation;
   
   const handleSave = useCallback(
     (entityType: TabType, entity: any, operation: CrudModalType = modalState.type) => {

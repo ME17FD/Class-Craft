@@ -40,7 +40,7 @@ export const SessionFormModal = ({
   const [selectedProfessor, setSelectedProfessor] = useState(
     session?.professor?.id?.toString() || ""
   );
-  const [selectedRoom, setSelectedRoom] = useState(session?.classroom || "");
+  const [selectedRoom, setSelectedRoom] = useState(session?.classroom.id || "");
   const [selectedType, setSelectedType] = useState(session?.type || "CM");
   const [selectedGroup, setSelectedGroup] = useState<string>(
     session?.group?.id?.toString() || ""

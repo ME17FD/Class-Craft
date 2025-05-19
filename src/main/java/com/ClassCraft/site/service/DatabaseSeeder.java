@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +39,7 @@ import com.ClassCraft.site.repository.SessionRepository;
 import com.ClassCraft.site.repository.StudentRepository;
 import com.ClassCraft.site.repository.SubModuleRepository;
 
+
 @Component
 public class DatabaseSeeder implements CommandLineRunner {
 
@@ -54,6 +56,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final StudentRepository studentRepository;
     private final ProfessorRepository professorRepository;
     private final AdminRepository adminRepository;
+    private final PasswordEncoder passwordEncoder;
 
     private final Random random = new Random();
 
@@ -67,7 +70,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                         ReservationRepository reservationRepository,
                         StudentRepository studentRepository,
                         ProfessorRepository professorRepository,
-                        AdminRepository adminRepository) {
+                        AdminRepository adminRepository,
+                        PasswordEncoder passwordEncoder) {
         this.sessionRepository = sessionRepository;
         this.filiereRepository = filiereRepository;
         this.groupRepository = groupRepository;
@@ -79,6 +83,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         this.studentRepository = studentRepository;
         this.professorRepository = professorRepository;
         this.adminRepository = adminRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -121,7 +126,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private boolean isDatabaseSeeded() {
         // Check using admin repository instead of userRepository
-        return adminRepository.count() > 0;
+        return adminRepository.count() > 1;
     }
 
     private List<Session> createSessions() {
@@ -213,8 +218,8 @@ public class DatabaseSeeder implements CommandLineRunner {
             Professor professor = new Professor();
             professor.setFirstName(firstNames[i % firstNames.length]);
             professor.setLastName(lastNames[i % lastNames.length]);
-            professor.setEmail(professor.getFirstName().toLowerCase() + "." + professor.getLastName().toLowerCase() + "@university.edu");
-            professor.setPassword("prof" + (i + 1));
+            professor.setEmail(professor.getFirstName().toLowerCase() + "." + professor.getLastName().toLowerCase() + "@classcraft.com");
+            professor.setPassword(passwordEncoder.encode("prof" + (i + 1)));
             professor.setApproved(true);
             professor.setSpecialty(specialties[i % specialties.length]);
             professor.setGrade(grades[i % grades.length]);
@@ -232,8 +237,8 @@ public class DatabaseSeeder implements CommandLineRunner {
             Student student = new Student();
             student.setFirstName(firstNames[i % firstNames.length]);
             student.setLastName(lastNames[i % lastNames.length]);
-            student.setEmail("student" + (i + 1) + "@university.edu");
-            student.setPassword("student" + (i + 1));
+            student.setEmail("student" + (i + 1) + "@classcraft.com");
+            student.setPassword(passwordEncoder.encode("student"+ (i + 1)));
             student.setApproved(true);
             student.setCNE("C" + String.format("%05d", i + 1));
             student.setRegistrationNumber("R" + String.format("%05d", i + 1));
@@ -249,16 +254,16 @@ public class DatabaseSeeder implements CommandLineRunner {
         Admin admin1 = new Admin();
         admin1.setFirstName("Admin");
         admin1.setLastName("System");
-        admin1.setEmail("admin@university.edu");
-        admin1.setPassword("admin123");
+        admin1.setEmail("admin@classcraft.com");
+        admin1.setPassword(passwordEncoder.encode("admin123"));
         admin1.setApproved(true);
         admin1.setRole("SUPER_ADMIN");
 
         Admin admin2 = new Admin();
         admin2.setFirstName("Manager");
         admin2.setLastName("Department");
-        admin2.setEmail("manager@university.edu");
-        admin2.setPassword("manager123");
+        admin2.setEmail("manager@classcraft.com");
+        admin2.setPassword(passwordEncoder.encode("manager123"));
         admin2.setApproved(true);
         admin2.setRole("DEPARTMENT_ADMIN");
 

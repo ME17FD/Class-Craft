@@ -152,7 +152,7 @@ export const MakeupModal = ({ makeup, onClose, onSave }: MakeupModalProps) => {
             <div className={styles.formGroup}>
               <label>Salle</label>
               <select
-                value={selectedRoom}
+                value={selectedRoom.id}
                 onChange={(e) => setSelectedRoom(e.target.value)}
                 required>
                 <option value="">Sélectionner une salle</option>
