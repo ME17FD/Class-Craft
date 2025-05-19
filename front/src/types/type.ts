@@ -88,6 +88,6 @@ export type Classroom = {
   id: number;
   name: string;
   capacity: number;
-  type:String;
+  type:string;
  // Equipment available in the classroom (e.g., projector, whiteboard)
 };

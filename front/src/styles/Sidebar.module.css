@@ -130,9 +130,8 @@
 
 .logoutButton {
     position: absolute;
-    bottom: 70px;
+    top: 70px;
     left: 50%;
-    transform: translateX(-50%);
     background: var(--secondary-blue);
     color: white;
     border: none;
