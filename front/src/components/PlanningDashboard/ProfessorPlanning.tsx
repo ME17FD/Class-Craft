@@ -49,9 +49,7 @@ const ProfessorPlanning = () => {
       {selectedProfessor && (
         <ProfessorScheduleModal
           professor={selectedProfessor}
-          sessions={allSessions.filter(
-            (s) => s.professor?.id === selectedProfessor.id
-          )}
+          onTimeSlotClick={(day, time) => console.log(day, time)}
           onClose={() => setSelectedProfessor(null)}
         />
       )}
