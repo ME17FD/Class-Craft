@@ -214,12 +214,15 @@ public class DatabaseSeeder implements CommandLineRunner {
         };
         String[] grades = {"Professor", "Associate Professor", "Assistant Professor", "Lecturer"};
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 8; i++) {
             Professor professor = new Professor();
             professor.setFirstName(firstNames[i % firstNames.length]);
             professor.setLastName(lastNames[i % lastNames.length]);
             professor.setEmail(professor.getFirstName().toLowerCase() + "." + professor.getLastName().toLowerCase() + "@classcraft.com");
+            System.out.println(professor.getFirstName().toLowerCase() + "." + professor.getLastName().toLowerCase() + "@classcraft.com");
             professor.setPassword(passwordEncoder.encode("prof" + (i + 1)));
+            System.out.println(passwordEncoder.encode("prof" + (i + 1)));
+            System.out.println("prof" + (i + 1));
             professor.setApproved(true);
             professor.setSpecialty(specialties[i % specialties.length]);
             professor.setGrade(grades[i % grades.length]);
