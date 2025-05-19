@@ -254,7 +254,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         Admin admin1 = new Admin();
         admin1.setFirstName("Admin");
         admin1.setLastName("System");
-        admin1.setEmail("admin@classcraft.com");
+        admin1.setEmail("sadmin@classcraft.com");
         admin1.setPassword(passwordEncoder.encode("admin123"));
         admin1.setApproved(true);
         admin1.setRole("SUPER_ADMIN");
