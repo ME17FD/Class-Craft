@@ -16,11 +16,10 @@ export const ExamModal = ({ exam, onClose, onSave }: ExamModalProps) => {
     professors = [],
     modules = [],
     subModules = [],
-    groups = [],
     rooms = [],
   } = useApiData();
   const [editedExam, setEditedExam] = useState(exam);
-  const [selectedRoom, setSelectedRoom] = useState(exam?.classroom || "");
+  const [selectedRoom, setSelectedRoom] = useState<string>(typeof exam?.classroom === 'string' ? exam.classroom : exam?.classroom?.name || "");
   const handleChange = (field: keyof Session, value: any) => {
     setEditedExam((prev) => ({
       ...prev,
@@ -44,7 +43,7 @@ export const ExamModal = ({ exam, onClose, onSave }: ExamModalProps) => {
     // Calcul automatique de l'heure de fin si la durée ou l'heure de début change
     const updatedExam = {
       ...editedExam,
-      endTime: calculateEndTime(editedExam.startTime, editedExam.duration),
+      endTime: calculateEndTime(editedExam.startTime||"", editedExam.duration||0),
     };
 
     onSave(updatedExam);
@@ -151,7 +150,7 @@ export const ExamModal = ({ exam, onClose, onSave }: ExamModalProps) => {
                   // Recalculer l'heure de fin automatiquement
                   handleChange(
                     "endTime",
-                    calculateEndTime(e.target.value, editedExam.duration)
+                    calculateEndTime(e.target.value, editedExam.duration||0)
                   );
                 }}
                 required
@@ -173,7 +172,7 @@ export const ExamModal = ({ exam, onClose, onSave }: ExamModalProps) => {
                   // Recalculer l'heure de fin automatiquement
                   handleChange(
                     "endTime",
-                    calculateEndTime(editedExam.startTime, duration)
+                    calculateEndTime(editedExam.startTime || "", duration)
                   );
                 }}
                 required

@@ -8,7 +8,7 @@ import { ExamScheduleModal } from "./ExamScheduleModal";
 import { MakeupScheduleModal } from "./RattrapageScheduleModal";
 import { Session } from "../../types/schedule";
 import styles from "../../styles/PlanningDashboard/PlanningGroup.module.css";
-import { Group, Professor } from "../../types/type";
+import { Group } from "../../types/type";
 
 export const ExamPlanning = () => {
   const { groups = [] } = useApiData();

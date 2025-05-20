@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useApiData } from "../../hooks/useApiData";
 import { usePlanning } from "../../context/PlanningContext";
 import { GroupCard } from "./GroupCard";
 import { GroupScheduleModal } from "./GroupScheduleModal";
-import { GroupFormModal } from "./GroupFromModal"; // Correction de l'orthographe
+import { GroupFormModal } from "./GroupFromModal";
 import { ConfirmationModal } from "./ConfirmationModal";
 import styles from "../../styles/PlanningDashboard/PlanningGroup.module.css";
 import { Group, Professor } from "../../types/type";
@@ -29,9 +29,7 @@ export const GroupPlanning = () => {
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
   const [deletingGroup, setDeletingGroup] = useState<Group | null>(null);
   const [selectedField, setSelectedField] = useState<number | null>(null);
-  const [selectedProfessor, setSelectedProfessor] = useState<number | null>(
-    null
-  );
+  const [selectedProfessor, setSelectedProfessor] = useState<number | null>(null);
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
   const allSessions = [...seances, ...sessions];
 
@@ -45,8 +43,8 @@ export const GroupPlanning = () => {
       ? group.filiereId === selectedField
       : true;
     const matchesSearch = group.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
+      ? group.name.toLowerCase().includes(searchTerm.toLowerCase())
+      : false;
     const matchesProfessor = selectedProfessor
       ? allSessions.some(
           (s) =>
@@ -55,7 +53,7 @@ export const GroupPlanning = () => {
       : true;
     const matchesRoom = selectedRoom
       ? allSessions.some(
-          (s) => s.group?.id === group.id && s.room === selectedRoom
+          (s) => s.group?.id === group.id && s.classroom?.name === selectedRoom
         )
       : true;
 
@@ -87,6 +85,11 @@ export const GroupPlanning = () => {
       console.error("Error saving session:", error);
       throw error;
     }
+  };
+
+  const handleTimeSlotClick = (day: string, time: string) => {
+    // Implement time slot click handling logic here
+    console.log(`Time slot clicked: ${day} at ${time}`);
   };
 
   return (
@@ -171,7 +174,6 @@ export const GroupPlanning = () => {
           <GroupCard
             key={group.id}
             group={group}
-            sessions={allSessions.filter((s) => s.group?.id === group.id)}
             onEdit={() => setEditingGroup(group)}
             onDelete={() => setDeletingGroup(group)}
             onOpenSchedule={() => setSelectedGroup(group)}
@@ -185,12 +187,13 @@ export const GroupPlanning = () => {
           group={selectedGroup}
           sessions={allSessions.filter((s) => s.group?.id === selectedGroup.id)}
           onClose={() => setSelectedGroup(null)}
+          onTimeSlotClick={handleTimeSlotClick}
         />
       )}
 
       <GroupFormModal
         show={!!editingGroup}
-        group={editingGroup}
+        group={editingGroup || undefined}
         onHide={() => setEditingGroup(null)}
         onSave={handleSaveGroup}
         onSaveSession={handleSaveSession}
@@ -201,7 +204,7 @@ export const GroupPlanning = () => {
         title="Confirmer la suppression"
         message={`Êtes-vous sûr de vouloir supprimer le groupe "${deletingGroup?.name}" ?`}
         onConfirm={() => {
-          if (deletingGroup) {
+          if (deletingGroup?.id) {
             deleteGroup(deletingGroup.id);
             setDeletingGroup(null);
           }

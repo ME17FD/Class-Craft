@@ -18,7 +18,9 @@ export const MakeupModal = ({ makeup, onClose, onSave }: MakeupModalProps) => {
     rooms = [],
   } = useApiData();
   const [editedMakeup, setEditedMakeup] = useState(makeup);
-  const [selectedRoom, setSelectedRoom] = useState(makeup?.classroom || "");
+  const [, setSelectedRoom] = useState<Room | null>(
+    makeup?.classroom ? rooms.find(r => r.id === Number(makeup.classroom)) || null : null
+  );
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleChange = (field: keyof Session, value: any) => {
     setEditedMakeup((prev) => ({
@@ -152,8 +154,12 @@ export const MakeupModal = ({ makeup, onClose, onSave }: MakeupModalProps) => {
             <div className={styles.formGroup}>
               <label>Salle</label>
               <select
-                value={selectedRoom.id}
-                onChange={(e) => setSelectedRoom(e.target.value)}
+                
+                onChange={(e) => {
+                  const room = rooms.find(r => r.id === Number(e.target.value));
+                  setSelectedRoom(room || null);
+                  handleChange("classroom", room?.id || null);
+                }}
                 required>
                 <option value="">Sélectionner une salle</option>
                 {rooms.map((room) => (
