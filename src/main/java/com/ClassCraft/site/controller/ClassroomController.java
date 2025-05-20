@@ -4,10 +4,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.ClassCraft.site.dto.ClassroomDTO;
 import com.ClassCraft.site.models.Classroom;
-import com.ClassCraft.site.models.Classroom.ClassroomType;
 import com.ClassCraft.site.repository.ClassroomRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -77,24 +84,17 @@ public class ClassroomController {
 
     // Convertir un DTO en entité Classroom
     private Classroom convertToEntity(ClassroomDTO dto) {
-        // Créer la salle en fonction du type
-        Classroom classroom;
-        if (dto.getType() == ClassroomType.AMPHI) {
-            classroom = new Classroom();
-        } 
-        else if (dto.getType() == ClassroomType.SALLE_TD) {
-            classroom = new Classroom(); // Classe qui correspond à "Salle TD" (exemple)
-        } else if (dto.getType() == ClassroomType.SALLE_TP) {
-            classroom = new Classroom(); // Classe qui correspond à "Salle TP" (exemple)
-        } else {
-            throw new IllegalArgumentException("Unknown classroom type: " + dto.getType());
+        if (dto.getType() == null) {
+            throw new IllegalArgumentException("Classroom type cannot be null");
         }
 
+        Classroom classroom = new Classroom();
         classroom.setName(dto.getName());
         classroom.setCapacity(dto.getCapacity());
         classroom.setType(dto.getType());
         return classroom;
     }
+
 
     // Mettre à jour l'entité Classroom existante
     private Classroom updateEntity(Classroom existing, ClassroomDTO dto) {
