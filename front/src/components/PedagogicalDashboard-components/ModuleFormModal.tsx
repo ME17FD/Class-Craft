@@ -7,7 +7,12 @@ import { Module, Field, SubModule } from "../../types/type";
 interface ModuleFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (moduleData: Omit<Module, 'id'> & { subModules: Omit<SubModule, 'id' | 'moduleId'>[] }) => void;
+  onSubmit: (moduleData: {
+    name: string;
+    code: string;
+    filiereId: number;
+    subModules: Omit<SubModule, 'id' | 'moduleId'>[];
+  }) => void;
   fields: Field[];
   module?: Module & { subModules: SubModule[] };
 }
@@ -57,12 +62,19 @@ export const ModuleFormModal: React.FC<ModuleFormModalProps> = ({
       return;
     }
 
-    onSubmit({
+    const moduleData: {
+      name: string;
+      code: string;
+      filiereId: number;
+      subModules: Omit<SubModule, 'id' | 'moduleId'>[];
+    } = {
       name,
       code,
       filiereId,
       subModules
-    });
+    };
+
+    onSubmit(moduleData);
     resetForm();
   };
 

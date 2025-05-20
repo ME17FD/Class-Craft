@@ -63,9 +63,8 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
     if (selectedProfessor) {
       const professor = professors.find(p => p.id === selectedProfessor);
       if (!professor) return false;
-  
       // Get all module IDs that this professor teaches
-      const professorModuleIds = professor.modules.map(m => m.id);
+      const professorModuleIds = professor.modules;
   
       // Get all modules in this group's field
       const field = fields.find(f => f.id === group.filiereId);
@@ -75,9 +74,8 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
       const fieldModuleIds = modules
         .filter(m => m.filiereId === field.id)
         .map(m => m.id);
-  
       // Check if professor teaches any module in this group's field
-      const professorTeachesInField = professorModuleIds.some(moduleId => 
+      const professorTeachesInField = professorModuleIds?.some(moduleId => 
         fieldModuleIds.includes(moduleId)
       );
   

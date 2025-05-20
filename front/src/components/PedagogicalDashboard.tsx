@@ -42,7 +42,6 @@ const PedagogicalDashboard: React.FC = () => {
   const {
     addField,
     updateField,
-    deleteField,
     updateModule,
     addModule,
     updateSubModule,
@@ -89,15 +88,13 @@ const PedagogicalDashboard: React.FC = () => {
       const savedModule = module.id
         ? await updateModule({ ...module })
         : await addModule({ ...module, filiereId: savedField.id });
-    }
-  
-    // Step 3: Save or update submodules linked to each module
-    for (const module of fieldData.modules) {
+
+      // Step 3: Save or update submodules linked to this module
       for (const sub of module.subModules || []) {
         if (sub.id) {
           await updateSubModule({ ...sub });
         } else {
-          await addSubModule({ ...sub });
+          await addSubModule({ ...sub, moduleId: savedModule.id });
         }
       }
     }

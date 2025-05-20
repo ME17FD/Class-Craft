@@ -8,6 +8,7 @@ import { useMemo, useEffect } from "react";
 
 type Props = {
   group: Group | null;
+  sessions: Session[];
   onClose: () => void;
   onTimeSlotClick: (day: string, time: string) => void;
 };
@@ -19,7 +20,7 @@ const exportToExcel = (sessions: Session[], groupName: string) => {
       Heure: `${s.startTime} - ${s.endTime}`,
       Module: s.module?.name || s.subModule?.name,
       Type: s.type,
-      Professeur: s.professor.firstName,
+      Professeur: s.professor?.firstName,
       Salle: s.classroom?.name || "Non spécifiée",
       Durée: `${s.duration}h`,
     }))
@@ -36,7 +37,7 @@ export const GroupScheduleModal = ({
   onTimeSlotClick,
 }: Props) => {
   const { seances } = useApiData();
-  const { sessions } = usePlanning();
+  const { sessions: planningSessions } = usePlanning();
 
   const normalizeTime = (time: string) => {
     if (!time || !time.includes(":")) return "00:00";
@@ -45,10 +46,10 @@ export const GroupScheduleModal = ({
   };
 
   const groupSessions = useMemo(() => {
-    const allSessions = [...seances, ...sessions];
+    const allSessions = [...seances, ...planningSessions];
     if (!group) return [];
     return allSessions.filter((s) => s.group?.id === group.id);
-  }, [seances, sessions, group]);
+  }, [seances, planningSessions, group]);
 
   const timeSlots = useMemo(
     () => [
@@ -80,10 +81,10 @@ export const GroupScheduleModal = ({
 
   useEffect(() => {
     console.log("Seances:", seances);
-    console.log("Sessions:", sessions);
+    console.log("Sessions:", planningSessions);
     console.log("Group:", group);
     console.log("GroupSessions:", groupSessions);
-  }, [seances, sessions, groupSessions, group]);
+  }, [seances, planningSessions, groupSessions, group]);
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -118,8 +119,8 @@ export const GroupScheduleModal = ({
           {weekDays.map((day) => {
             const daySessions = groupSessions.filter(
               (s) =>
-                s.day?.toUpperCase() === day ||
-                s.dayOfWeek?.toUpperCase() === day
+                (s.day || "").toUpperCase() === day ||
+                (s.dayOfWeek || "").toUpperCase() === day
             );
 
             return (
@@ -131,8 +132,8 @@ export const GroupScheduleModal = ({
                 {timeSlots.slice(1).map((time) => {
                   const normalizedTime = normalizeTime(time);
                   const session = daySessions.find((s) => {
-                    const start = normalizeTime(s.startTime);
-                    const end = normalizeTime(s.endTime);
+                    const start = normalizeTime(s.startTime || "");
+                    const end = normalizeTime(s.endTime || "");
                     return start <= normalizedTime && normalizedTime < end;
                   });
 
@@ -167,25 +168,26 @@ export const GroupScheduleModal = ({
                             </div>
                             <div>
                               <strong>Prof:</strong>{" "}
-                              {session.professor?.firstName || ""}{" "}
-                              {session.professor?.lastName || ""}
-                              <span
-                                className={
-                                  session.professorPresent
-                                    ? styles.present
-                                    : styles.absent
-                                }>
-                                <strong> Présence:</strong>{" "}
-                                {session.professorPresent ? "✔" : "✖"}
-                              </span>
+                              {session.professor ? (
+                                <>
+                                  {session.professor.firstName} {session.professor.lastName}
+                                  <span
+                                    className={
+                                      session.professorPresent
+                                        ? styles.present
+                                        : styles.absent
+                                    }>
+                                    <strong> Présence:</strong>{" "}
+                                    {session.professorPresent ? "✔" : "✖"}
+                                  </span>
+                                </>
+                              ) : (
+                                "Non assigné"
+                              )}
                             </div>
                           </div>
                         </div>
-                      ) : (
-                        <span className={styles.debugText}>
-                          {/* optionnel debug */}
-                        </span>
-                      )}
+                      ) : null}
                     </div>
                   );
                 })}

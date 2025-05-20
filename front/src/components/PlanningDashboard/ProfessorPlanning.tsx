@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import { useApiData } from "../../hooks/useApiData";
 import { usePlanning } from "../../context/PlanningContext";
 import ProfessorCard from "./ProfessorCard";

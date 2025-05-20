@@ -23,7 +23,7 @@ const SubModuleFormModal: React.FC<SubModuleFormModalProps> = ({
 }) => {
   const [formData, setFormData] = useState<Partial<SubModule>>({
     name: "",
-    hours: 0,
+    nbrHours: 0,
     moduleId: 0,
   });
 
@@ -73,8 +73,8 @@ const SubModuleFormModal: React.FC<SubModuleFormModalProps> = ({
           <input
             type="number"
             id="hours"
-            value={formData.hours}
-            onChange={(e) => setFormData(prev => ({ ...prev, hours: parseInt(e.target.value) }))}
+            value={formData.nbrHours}
+            onChange={(e) => setFormData(prev => ({ ...prev, nbrHours: parseInt(e.target.value) }))}
             required
             min="0"
           />
