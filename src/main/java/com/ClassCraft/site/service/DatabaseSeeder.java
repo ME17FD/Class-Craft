@@ -230,13 +230,27 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private List<Student> createStudents(List<Group> groups) {
         List<Student> students = new ArrayList<>();
-        String[] firstNames = {"Yassine", "Sara", "Mehdi", "Nadia", "Omar", "Lina", "Adil", "Hanae"};
-        String[] lastNames = {"Bennani", "Chraibi", "Daoudi", "El Khatib", "Fahmi", "Ghazi", "Haddad", "Ibrahim"};
+        String[] firstNames = {
+            "Yassine", "Sara", "Mehdi", "Nadia", "Omar", "Lina", "Adil", "Hanae",
+            "Karim", "Fatima", "Amine", "Layla", "Rachid", "Samira", "Hassan", "Amina",
+            "Bilal", "Yasmine", "Tarek", "Nour", "Zakaria", "Salma", "Reda", "Imane",
+            "Anas", "Ghita", "Younes", "Houda", "Hamza", "Meriem", "Ayoub", "Soukaina"
+        };
+        String[] lastNames = {
+            "Bennani", "Chraibi", "Daoudi", "El Khatib", "Fahmi", "Ghazi", "Haddad", "Ibrahim",
+            "Alaoui", "Benjelloun", "Cherkaoui", "El Fassi", "Idrissi", "Mansouri", "Rahmani", "Saidi",
+            "Bouazza", "El Malki", "Hakimi", "Kabbaj", "Lahlou", "Mouline", "Naciri", "Ouali",
+            "Rami", "Slimani", "Tazi", "Zeroual", "Benali", "El Ouazzani", "Hassani", "Khalil"
+        };
 
         for (int i = 0; i < 100; i++) {
             Student student = new Student();
-            student.setFirstName(firstNames[i % firstNames.length]);
-            student.setLastName(lastNames[i % lastNames.length]);
+            // Use a different combination of names for each student
+            int firstNameIndex = (i + random.nextInt(32)) % firstNames.length;
+            int lastNameIndex = (i + random.nextInt(32)) % lastNames.length;
+            
+            student.setFirstName(firstNames[firstNameIndex]);
+            student.setLastName(lastNames[lastNameIndex]);
             student.setEmail("student" + (i + 1) + "@classcraft.com");
             student.setPassword(passwordEncoder.encode("student"+ (i + 1)));
             student.setApproved(true);

@@ -18,7 +18,6 @@ const GroupStudentsModal: React.FC<GroupStudentsModalProps> = ({
   onAssignStudents,
 }) => {
   if (!isOpen) return null;
-console.log(students);
   return (
     <Modal 
       isOpen={isOpen} 
@@ -36,7 +35,6 @@ console.log(students);
                 <th>Prénom</th>
                 <th>CNE</th>
                 <th>Apogee</th>
-                <th>email</th>
               </tr>
             </thead>
             <tbody>
@@ -46,7 +44,6 @@ console.log(students);
                   <td>{student.firstName}</td>
                   <td>{student.cne}</td>
                   <td>{student.registrationNumber}</td>
-                  <td>{student.email}</td>
                 </tr>
               ))}
             </tbody>
