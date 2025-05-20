@@ -12,6 +12,8 @@ public class ReservationDTO {
     private Long classroomId;
     private SubModuleDTO submodule;
     private String groupName;
+    private String type;
+    private ClassroomDTO classroom;
 
     public Long getId() {
         return id;
@@ -72,6 +74,22 @@ public class ReservationDTO {
 
     public void setGroupName(String groupName) {
         this.groupName = groupName;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public ClassroomDTO getClassroom() {
+        return classroom;
+    }
+
+    public void setClassroom(ClassroomDTO classroom) {
+        this.classroom = classroom;
     }
 
 

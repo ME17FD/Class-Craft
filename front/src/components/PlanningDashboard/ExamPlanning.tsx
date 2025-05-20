@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useApiData } from "../../hooks/useApiData";
-import { usePlanning } from "../../context/PlanningContext";
+import { usePlanningData } from "../../hooks/usePlanningData";
 import { ExamsCard } from "./ExamsCard";
 import { ExamModal } from "./ExamModal";
 import { MakeupModal } from "./RattrapageModal";
@@ -11,8 +11,8 @@ import styles from "../../styles/PlanningDashboard/PlanningGroup.module.css";
 import { Group, Professor } from "../../types/type";
 
 export const ExamPlanning = () => {
-  const { groups = [], seances = [] } = useApiData();
-  const { sessions = [] } = usePlanning();
+  const { groups = [] } = useApiData();
+  const { reservations = [] } = usePlanningData();
   const [selectedExam, setSelectedExam] = useState<Session | null>(null);
   const [selectedMakeup, setSelectedMakeup] = useState<Session | null>(null);
   const [selectedGroupForExamSchedule, setSelectedGroupForExamSchedule] =
@@ -24,8 +24,6 @@ export const ExamPlanning = () => {
     time: string;
     type: "EXAM" | "RATTRAPAGE";
   } | null>(null);
-
-  const allSessions = [...seances, ...sessions];
 
   const handleTimeSlotClick = (
     day: string,
@@ -39,12 +37,12 @@ export const ExamPlanning = () => {
       type === "EXAM"
         ? selectedGroupForExamSchedule
         : selectedGroupForMakeupSchedule;
-    const existingSession = allSessions.find(
+    const existingSession = reservations.find(
       (s) =>
-        s.group?.id === group?.id &&
+        s.groupId === group?.id &&
         s.type === type &&
-        (s.day === day || s.dayOfWeek === day) &&
-        s.startTime === time
+        new Date(s.startDateTime!).toLocaleDateString('fr-FR', { weekday: 'long' }).toLowerCase() === day.toLowerCase() &&
+        new Date(s.startDateTime!).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) === time
     );
 
     if (existingSession) {
@@ -53,32 +51,28 @@ export const ExamPlanning = () => {
         : setSelectedMakeup(existingSession);
     } else {
       // Créer une nouvelle session
-      const newSession = {
+      const startDate = new Date();
+      startDate.setHours(parseInt(time.split(':')[0]));
+      startDate.setMinutes(parseInt(time.split(':')[1]));
+      
+      const endDate = new Date(startDate);
+      endDate.setHours(endDate.getHours() + (type === "EXAM" ? 2 : 1.5));
+
+      const newSession: Session = {
         id: 0,
         type,
-        day,
-        startTime: time,
-        endTime: calculateEndTime(time, type === "EXAM" ? 2 : 1.5),
-        duration: type === "EXAM" ? 2 : 1.5,
-        professor: {} as Professor,
-        group: group!,
-        classroom: "",
-        professorPresent: false,
+        startDateTime: startDate.toISOString(),
+        endDateTime: endDate.toISOString(),
+        wasAttended: false,
+        groupId: group?.id || null,
+        groupName: group?.name || null,
+        classroomId: 0,
+        subModuleId: 0
       };
       type === "EXAM"
         ? setSelectedExam(newSession)
         : setSelectedMakeup(newSession);
     }
-  };
-
-  const calculateEndTime = (start: string, hours: number) => {
-    const [h, m] = start.split(":").map(Number);
-    const totalMinutes = h * 60 + m + hours * 60;
-    const endH = Math.floor(totalMinutes / 60);
-    const endM = totalMinutes % 60;
-    return `${endH.toString().padStart(2, "0")}:${endM
-      .toString()
-      .padStart(2, "0")}`;
   };
 
   return (
@@ -87,8 +81,8 @@ export const ExamPlanning = () => {
 
       <div className={styles.groupExamsGrid}>
         {groups.map((group) => {
-          const groupSessions = allSessions.filter(
-            (s) => s.group?.id === group.id
+          const groupSessions = reservations.filter(
+            (s) => s.groupId === group.id
           );
           const exams = groupSessions.filter((s) => s.type === "EXAM");
           const makeups = groupSessions.filter((s) => s.type === "RATTRAPAGE");
@@ -110,9 +104,9 @@ export const ExamPlanning = () => {
       {selectedGroupForExamSchedule && (
         <ExamScheduleModal
           group={selectedGroupForExamSchedule}
-          sessions={allSessions.filter(
+          sessions={reservations.filter(
             (s) =>
-              s.group?.id === selectedGroupForExamSchedule.id &&
+              s.groupId === selectedGroupForExamSchedule.id &&
               s.type === "EXAM"
           )}
           onClose={() => setSelectedGroupForExamSchedule(null)}
@@ -126,9 +120,9 @@ export const ExamPlanning = () => {
       {selectedGroupForMakeupSchedule && (
         <MakeupScheduleModal
           group={selectedGroupForMakeupSchedule}
-          sessions={allSessions.filter(
+          sessions={reservations.filter(
             (s) =>
-              s.group?.id === selectedGroupForMakeupSchedule.id &&
+              s.groupId === selectedGroupForMakeupSchedule.id &&
               s.type === "RATTRAPAGE"
           )}
           onClose={() => setSelectedGroupForMakeupSchedule(null)}
@@ -142,6 +136,7 @@ export const ExamPlanning = () => {
       {selectedExam && (
         <ExamModal
           exam={selectedExam}
+          rooms={[]}
           onClose={() => {
             setSelectedExam(null);
             setSelectedTimeSlot(null);
@@ -158,6 +153,7 @@ export const ExamPlanning = () => {
       {selectedMakeup && (
         <MakeupModal
           makeup={selectedMakeup}
+          rooms={[]}
           onClose={() => {
             setSelectedMakeup(null);
             setSelectedTimeSlot(null);

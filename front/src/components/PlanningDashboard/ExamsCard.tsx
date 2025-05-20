@@ -17,6 +17,38 @@ export const ExamsCard = ({
   onExamClick,
   onMakeupClick,
 }: GroupExamsCardProps) => {
+  const formatDateTime = (session: Session) => {
+    // If we have startDateTime (new reservation format)
+    if ('startDateTime' in session && session.startDateTime) {
+      const date = new Date(session.startDateTime);
+      const dayName = date.toLocaleDateString('fr-FR', { weekday: 'long' });
+      const formattedDate = date.toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+      const time = date.toLocaleTimeString('fr-FR', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      return `${dayName} ${formattedDate} ${time}`;
+    }
+
+    // Fallback to old format
+    const dayTranslation: Record<string, string> = {
+      MONDAY: "Lundi",
+      TUESDAY: "Mardi",
+      WEDNESDAY: "Mercredi",
+      THURSDAY: "Jeudi",
+      FRIDAY: "Vendredi",
+      SATURDAY: "Samedi",
+    };
+    const dayOfWeek = session.dayOfWeek?.toUpperCase() || '';
+    const dayName = dayTranslation[dayOfWeek] || session.dayOfWeek || '';
+    const time = session.startTime?.split(":").slice(0, 2).join(":") || "";
+    return `${dayName} ${time}`;
+  };
+
   return (
     <div className={styles.groupExamCard}>
       <div className={styles.cardHeader}>
@@ -35,11 +67,11 @@ export const ExamsCard = ({
               className={styles.examItem}
               onClick={() => onExamClick(exam)}>
               <div>
-                <strong>{exam.module?.name || "Examen"}</strong>
+                <strong>{exam.submodule?.name || "Examen"}</strong>
                 <span className={styles.examBadge}>Examen</span>
               </div>
               <div>
-                {exam.day} à {exam.startTime} - Salle {exam.classroom?.name}
+                {formatDateTime(exam)} - Salle {exam.classroom?.type} {exam.classroom?.name}
               </div>
             </div>
           ))
@@ -54,12 +86,11 @@ export const ExamsCard = ({
           makeups.map((makeup) => (
             <div key={`makeup-${makeup.id}`} className={styles.makeupItem}>
               <div>
-                <strong>{makeup.module?.name || "Rattrapage"}</strong>
+                <strong>{makeup.submodule?.name || "Rattrapage"}</strong>
                 <span className={styles.makeupBadge}>Rattrapage</span>
               </div>
               <div>
-                {makeup.day} à {makeup.startTime} - Salle{" "}
-                {makeup.classroom?.name}
+                {formatDateTime(makeup)} - Salle {makeup.classroom?.name}
               </div>
             </div>
           ))

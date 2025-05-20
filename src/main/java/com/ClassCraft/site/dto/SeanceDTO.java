@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 public class SeanceDTO {
     private Long id;
     private String dayOfWeek;
-       @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private Time startTime;
     
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")

@@ -21,7 +21,10 @@ public class Reservation {
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
     private Boolean wasAttended = false;
-    
+    private ReservationType type;
+    public enum ReservationType {
+        CM, TD, TP, EXAM, RATTRAPAGE, EVENT
+    }
     @ManyToOne
     private SubModule subModule;
     
