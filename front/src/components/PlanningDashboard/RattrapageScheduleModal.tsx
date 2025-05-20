@@ -84,8 +84,8 @@ export const MakeupScheduleModal = ({
                 {timeSlots.slice(1).map((time) => {
                   const normalizedTime = normalizeTime(time);
                   const session = daySessions.find((s) => {
-                    const start = normalizeTime(s.startTime);
-                    const end = normalizeTime(s.endTime);
+                    const start = normalizeTime(s.startTime || "");
+                    const end = normalizeTime(s.endTime || "");
                     return start <= normalizedTime && end > normalizedTime;
                   });
 

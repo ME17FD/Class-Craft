@@ -55,7 +55,7 @@ export const GroupFormModal = ({
     const existingSession = [...sessions, ...seances].find(
       (s) =>
         s.day === day &&
-        s.startTime.padStart(5, "0") === normalizedTime &&
+        (s.startTime || "").padStart(5, "0") === normalizedTime &&
         s.group?.id === group?.id
     );
 
@@ -69,17 +69,18 @@ export const GroupFormModal = ({
     try {
       const sessionToSave = {
         ...newSession,
-        startTime: formatTimeForBackend(newSession.startTime),
-        endTime: formatTimeForBackend(newSession.endTime),
+        startTime: formatTimeForBackend(newSession.startTime || "08:00"),
+        endTime: formatTimeForBackend(newSession.endTime || "09:00"),
         group: group || { id: 0, name: "", filiereId: 0, students: [] },
       };
 
-      await onSaveSession(sessionToSave); // This now uses the provided prop
+      await onSaveSession(sessionToSave);
       setShowSessionModal(false);
     } catch (error) {
       console.error("Erreur lors de l'ajout de la séance:", error);
     }
   };
+
   const formatTimeForBackend = (time: string): string => {
     if (!time) return "08:00:00";
     if (time.split(":").length === 3) return time;
@@ -146,12 +147,12 @@ export const GroupFormModal = ({
                   .filter((s) => s.group?.id === group.id)
                   .map((s) => ({
                     ...s,
-                    startTime: s.startTime.includes(":")
-                      ? s.startTime
-                      : `${s.startTime}:00`,
-                    endTime: s.endTime.includes(":")
-                      ? s.endTime
-                      : `${s.endTime}:00`,
+                    startTime: (s.startTime || "").includes(":")
+                      ? s.startTime || ""
+                      : `${s.startTime || ""}:00`,
+                    endTime: (s.endTime || "").includes(":")
+                      ? s.endTime || ""
+                      : `${s.endTime || ""}:00`,
                   }))}
                 onClose={onHide}
                 onTimeSlotClick={handleTimeSlotClick}

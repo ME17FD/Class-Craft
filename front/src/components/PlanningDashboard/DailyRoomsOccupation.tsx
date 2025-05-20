@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { usePlanning } from "../../context/PlanningContext";
 import styles from "../../styles/PlanningDashboard/DailyRoomsOccupation.module.css";
 import { usePlanningData } from "../../hooks/usePlanningData";
 import { format, parse, isSameDay } from "date-fns";
