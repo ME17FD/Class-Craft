@@ -1,11 +1,11 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginForm from "./components/LoginFrom";
-import Dashboard from "./components/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PlanningDashboard from "./components/PlanningDashboard/PlanningDashboard";
 import PedagogicalDashboard from "./components/PedagogicalDashboard";
-
+import StudentDashboard from "./components/StudentDashboard/StudentDashboard";
+import ProfessorDashboard from "./components/ProfessorDashboard/ProfessorDashboard";
 const App: React.FC = () => {
   return (
     <Router>
@@ -15,7 +15,9 @@ const App: React.FC = () => {
         {/* Protected for STUDENT */}
         <Route
           path="/dashboard"
-          element={<ProtectedRoute Component={Dashboard} role="STUDENT" />}
+          element={
+            <ProtectedRoute Component={StudentDashboard} role="STUDENT" />
+          }
         />
 
         {/* Protected for ADMIN */}
@@ -36,7 +38,7 @@ const App: React.FC = () => {
         <Route
           path="/professor-dashboard"
           element={
-            <ProtectedRoute Component={PedagogicalDashboard} role="PROFESSOR" />
+            <ProtectedRoute Component={ProfessorDashboard} role="PROFESSOR" />
           }
         />
       </Routes>
