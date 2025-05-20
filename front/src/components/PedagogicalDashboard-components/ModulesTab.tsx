@@ -33,7 +33,7 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
 
   const getProfessorNames = (moduleId: number) => {
     const moduleProfessors = professors.filter(p =>
-      p.modules?.some(m => m.id === moduleId)
+      p.modules?.some(m => m === moduleId)
     );
     return moduleProfessors.map(p => `${p.firstName} ${p.lastName}`).join(", ") || "Aucun professeur";
   };
@@ -50,7 +50,7 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
       const matchesProfessor = selectedProfessor === 0 || 
         professors.some(p => 
           p.id === selectedProfessor && 
-          p.modules?.some(m => m.id === module.id)
+          p.modules?.some(m => m === module.id)
         );
       
       return matchesField && matchesProfessor;

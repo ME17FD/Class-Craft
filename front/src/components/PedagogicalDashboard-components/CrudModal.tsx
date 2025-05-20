@@ -36,7 +36,6 @@ const CrudModal: React.FC<CrudModalProps> = ({
   groups,
   onSave,
   onClose,
-  onAssignStudent,
 }) => {
   const [formData, setFormData] = useState(() => ({
     ...entity,

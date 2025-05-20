@@ -47,11 +47,10 @@ const SubModulesTab: React.FC<SubModulesTabProps> = ({
     
     const subModule = subModules.find(sm => sm.id === subModuleId);
     if (!subModule) return "Aucun professeur";
-    
     const moduleProfessors = professors.filter(p =>
-      p.subModules && p.subModules.some(subModule => subModule.id === subModuleId)
+      p.subModules && p.subModules.some(sm => sm === subModuleId)
     );
-        return moduleProfessors.map(p => p.firstName + " "+ p.lastName).join(", ") || "Aucun professeur";
+    return moduleProfessors.map(p => p.firstName + " " + p.lastName).join(", ") || "Aucun professeur";
   };
 
   const handleDeleteClick = (subModule: SubModule) => {

@@ -89,7 +89,7 @@ export const PlanningProvider = ({ children }: { children: ReactNode }) => {
   const generateWeeklySchedule = useCallback(
     (groupId: number) => {
       const groupSessions = sessions.filter((s) => s.group?.id === groupId);
-      if (groupSessions.length === 0) return;
+      if (groupSessions.length === 0 || !groupSessions[0].group) return;
 
       const newSchedule: WeeklySchedule = {
         id: Date.now(),

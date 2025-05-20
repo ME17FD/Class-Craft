@@ -54,11 +54,17 @@ const ProfessorsTab: React.FC<ProfessorsTabProps> = ({
     { header: "Email", accessor: "email" as keyof Professor },
     {
       header: "Modules enseignés",
-      render: (professor: Professor) => getModuleNames(professor.modules),
+      render: (professor: Professor) => {
+        const moduleObjects = modules.filter(m => professor.modules?.includes(m.id || 0));
+        return getModuleNames(moduleObjects);
+      },
     },
     {
-      header: "Sous-modules enseignés",
-      render: (professor: Professor) => getSubModuleNames(professor.subModules),
+      header: "Sous-modules enseignés", 
+      render: (professor: Professor) => {
+        const subModuleObjects = subModules.filter(sm => professor.subModules?.includes(sm.id));
+        return getSubModuleNames(subModuleObjects);
+      },
     },
     {
       header: "Actions",

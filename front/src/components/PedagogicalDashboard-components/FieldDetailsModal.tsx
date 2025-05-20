@@ -33,7 +33,7 @@ const FieldDetailsModal: React.FC<FieldDetailsModalProps> = ({
   const modulesWithProfessors = modulesWithSubModules.map(module => ({
     ...module,
     professors: professors.filter(professor => 
-      professor.modules?.includes(module)
+      professor.modules?.includes(module.id || 0)
     )
   }));
 
