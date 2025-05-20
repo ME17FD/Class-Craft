@@ -371,6 +371,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         {"13:00", "15:00"},
         {"15:15", "17:15"}
     };
+        Reservation.ReservationType[] types = Reservation.ReservationType.values();
 
     for (Sceance sceance : sceances) {
         if (random.nextDouble() < 0.7) { // 70% chance to create a reservation
@@ -392,6 +393,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             reservation.setSubModule(sceance.getSubModule());
             reservation.setGroup(sceance.getGroup());
             reservation.setClassroom(sceance.getClassroom());
+            reservation.setType(types[random.nextInt(types.length)]);
 
             reservations.add(reservation);
         }

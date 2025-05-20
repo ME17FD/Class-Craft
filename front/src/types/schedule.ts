@@ -2,19 +2,37 @@ import { Group, Professor, Module, SubModule, Field } from './type';
 
 // Type pour une séance
 export interface Session {
-    dayOfWeek: string;
     id: number;
-    startTime: string;
-    endTime: string;
-    day: string;
-    professor: Professor;
+    startDateTime?: string;
+    endDateTime?: string;
+    wasAttended: boolean;
+    subModuleId?: number;
+    groupId?: number | null;
+    classroomId?: number;
+    submodule?: {
+        id: number;
+        name: string;
+        nbrHours: number;
+        moduleId: number;
+        moduleName: string;
+        teacherId: number;
+        teacher: Professor;
+    };
+    groupName?: string | null;
+    type: 'CM' | 'TD' | 'TP' | 'EXAM' | 'RATTRAPAGE' | 'EVENT';
+    
+    // Legacy fields
+    dayOfWeek?: string;
+    startTime?: string;
+    endTime?: string;
+    day?: string;
+    professor?: Professor;
     module?: Module;
     subModule?: SubModule;
-    classroom: Room;
-    group: Group;
-    type: 'CM' | 'TD' | 'TP' | 'EXAM' | 'RATTRAPAGE' | 'EVENT';
-    professorPresent: boolean;
-    duration: number;
+    classroom?: Room;
+    group?: Group;
+    professorPresent?: boolean;
+    duration?: number;
 }
 
 // Type pour un emploi du temps hebdomadaire
@@ -44,10 +62,12 @@ export interface DailyReport {
     createdAt?: string; // Date de création du rapport
     updatedAt?: string; // Date de modification
 }
+
 export interface DailyPlanning {
     date: string;
     rooms: RoomOccupation[];
 }
+
 export interface RoomOccupation {
     room: string;
     timeSlots: {
@@ -56,12 +76,13 @@ export interface RoomOccupation {
         session: Session | null;
     }[];
 }
+
 // Type pour les salles
 export interface Room {
     id: number;
     name: string;
     capacity: number;
-    type: 'Salle de cours' | 'Laboratoire' | 'Salle informatique' |null;
+    type?: string;
 } 
 
 

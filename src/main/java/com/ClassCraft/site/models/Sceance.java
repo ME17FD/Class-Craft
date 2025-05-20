@@ -20,7 +20,7 @@ public class Sceance {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     public enum SceanceType {
-        CM, TD, TP, EXAM, RATTRAPAGE, EVENT
+        CM, TD, TP
     }
     private String dayOfWeek;
 
