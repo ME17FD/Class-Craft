@@ -11,11 +11,7 @@ import CrudModal from "./PedagogicalDashboard-components/CrudModal";
 import FieldFormModal from "./PedagogicalDashboard-components/FieldFormModal";
 import usePedagogicalData from "../utils/usePedagogicalData";
 import Sidebar from "./Sidebar";
-import {
-  TabType,
-  Field,
-  ExtendedModule,
-} from "../types/type";
+import { TabType, Field, ExtendedModule } from "../types/type";
 import { useApiData } from "../hooks/useApiData";
 
 const PedagogicalDashboard: React.FC = () => {
@@ -36,7 +32,6 @@ const PedagogicalDashboard: React.FC = () => {
     handleAssignStudents,
     handleSave,
     handleCloseModal,
-    
   } = usePedagogicalData();
 
   const {
@@ -45,7 +40,7 @@ const PedagogicalDashboard: React.FC = () => {
     updateModule,
     addModule,
     updateSubModule,
-    addSubModule
+    addSubModule,
   } = useApiData();
 
   const handleFieldEdit = (field: Field) => {
@@ -74,15 +69,17 @@ const PedagogicalDashboard: React.FC = () => {
     });
   };
 
-  const handleFieldSave = async (fieldData: Omit<Field, "id"> & { modules: ExtendedModule[] }) => {
+  const handleFieldSave = async (
+    fieldData: Omit<Field, "id"> & { modules: ExtendedModule[] }
+  ) => {
     // Save the field and modules
     const fieldId = fieldModalState.field?.id || 0;
-  
+
     // Step 1: Save or update the field (Filière)
     const savedField = fieldId
       ? await updateField({ ...fieldData, id: fieldId })
       : await addField(fieldData);
-  
+
     // Step 2: Save or update modules linked to the field
     for (const module of fieldData.modules) {
       const savedModule = module.id
@@ -98,7 +95,7 @@ const PedagogicalDashboard: React.FC = () => {
         }
       }
     }
-  
+
     // Update the fields state after save
     setFieldModalState({
       isOpen: false,
@@ -107,13 +104,11 @@ const PedagogicalDashboard: React.FC = () => {
         modules: fieldData.modules,
       },
     });
-  
+
     // Close the modal
     handleFieldClose();
   };
-  
-  
-  
+
   const { deleteGroup } = useApiData();
 
   const tabs = [
@@ -153,7 +148,9 @@ const PedagogicalDashboard: React.FC = () => {
             <StudentsTab
               students={data.allStudents}
               groups={data.groups}
-              onAdd={(student) => handleSave("students", { ...student, id: 0 }, "add")}
+              onAdd={(student) =>
+                handleSave("students", { ...student, id: 0 }, "add")
+              }
               onEdit={(student) => handleSave("students", student, "edit")}
               onDelete={(student) => handleSave("students", student, "delete")}
             />
@@ -181,6 +178,7 @@ const PedagogicalDashboard: React.FC = () => {
               fields={data.fields}
               professors={data.professors}
               subModules={data.subModules}
+              onAdd={() => handleAdd("modules")}
               onEdit={(module) => handleEdit("modules", module)}
               onDelete={(module) => handleDelete("modules", module)}
             />
@@ -200,6 +198,7 @@ const PedagogicalDashboard: React.FC = () => {
               professors={data.professors}
               modules={data.modules}
               subModules={data.subModules}
+              onAdd={() => handleAdd("professors")}
               onEdit={(professor) => handleEdit("professors", professor)}
               onDelete={(professor) => handleDelete("professors", professor)}
             />

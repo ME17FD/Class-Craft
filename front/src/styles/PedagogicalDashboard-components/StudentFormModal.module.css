@@ -1,5 +1,4 @@
 @import '../../styles/variable.css';
-
 .modalOverlay {
     position: fixed;
     top: 0;
@@ -75,7 +74,9 @@
     border-top: 1px solid #e2e8f0;
 }
 
+
 /* Scrollbar styling */
+
 .modal::-webkit-scrollbar {
     width: 8px;
 }
@@ -92,4 +93,25 @@
 
 .modal::-webkit-scrollbar-thumb:hover {
     background: #a0aec0;
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    line-height: 1;
+}
+
+.closeButton:hover {
+    color: #000;
 }

@@ -9,6 +9,7 @@ interface ProfessorsTabProps {
   professors: Professor[];
   modules: Module[];
   subModules: SubModule[];
+  onAdd: () => void;
   onEdit: (professor: Professor) => void;
   onDelete: (professor: Professor) => void;
 }
@@ -19,18 +20,22 @@ const ProfessorsTab: React.FC<ProfessorsTabProps> = ({
   subModules = [],
   onEdit,
   onDelete,
+  onAdd,
 }) => {
-  const [selectedProfessor, setSelectedProfessor] = useState<Professor | null>(null);
+  const [selectedProfessor, setSelectedProfessor] = useState<Professor | null>(
+    null
+  );
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const getModuleNames = (professorModules: Module[] | undefined) => {
     if (!professorModules || professorModules.length === 0) return "Aucun";
-    return professorModules.map(m => m.name).join(", ");
+    return professorModules.map((m) => m.name).join(", ");
   };
 
   const getSubModuleNames = (professorSubModules: SubModule[] | undefined) => {
-    if (!professorSubModules || professorSubModules.length === 0) return "Aucun";
-    return professorSubModules.map(sm => sm.name).join(", ");
+    if (!professorSubModules || professorSubModules.length === 0)
+      return "Aucun";
+    return professorSubModules.map((sm) => sm.name).join(", ");
   };
 
   const handleDeleteClick = (professor: Professor) => {
@@ -49,26 +54,27 @@ const ProfessorsTab: React.FC<ProfessorsTabProps> = ({
   const columns = [
     {
       header: "Nom",
-      render: (professor: Professor) => `${professor.firstName} ${professor.lastName}`,
+      render: (professor: Professor) =>
+        `${professor.firstName} ${professor.lastName}`,
     },
     { header: "Email", accessor: "email" as keyof Professor },
     {
       header: "Modules enseignés",
       render: (professor: Professor) => {
-        console.log('Professor:', professor);
-        console.log('Professor modules array:', professor.modules);
-        console.log('Available modules:', modules);
-        
+        console.log("Professor:", professor);
+        console.log("Professor modules array:", professor.modules);
+        console.log("Available modules:", modules);
+
         // If professor.modules is undefined or empty, return "Aucun"
         if (!professor.modules || professor.modules.length === 0) {
           return "Aucun";
         }
 
-        const moduleObjects = modules.filter(m => {
+        const moduleObjects = modules.filter((m) => {
           // Handle both cases: when modules array contains full objects or just IDs
-          return professor.modules?.some(profModule => {
+          return professor.modules?.some((profModule) => {
             // If profModule is a number (ID), compare directly
-            if (typeof profModule === 'number') {
+            if (typeof profModule === "number") {
               return profModule === m.id;
             }
             // If profModule is an object, compare IDs
@@ -76,27 +82,27 @@ const ProfessorsTab: React.FC<ProfessorsTabProps> = ({
             return moduleObj.id === m.id;
           });
         });
-        
-        console.log('Filtered module objects:', moduleObjects);
+
+        console.log("Filtered module objects:", moduleObjects);
         return getModuleNames(moduleObjects);
       },
     },
     {
-      header: "Sous-modules enseignés", 
+      header: "Sous-modules enseignés",
       render: (professor: Professor) => {
-        console.log('Professor submodules array:', professor.subModules);
-        console.log('Available submodules:', subModules);
-        
+        console.log("Professor submodules array:", professor.subModules);
+        console.log("Available submodules:", subModules);
+
         // If professor.subModules is undefined or empty, return "Aucun"
         if (!professor.subModules || professor.subModules.length === 0) {
           return "Aucun";
         }
 
-        const subModuleObjects = subModules.filter(sm => {
+        const subModuleObjects = subModules.filter((sm) => {
           // Handle both cases: when subModules array contains full objects or just IDs
-          return professor.subModules?.some(profSubModule => {
+          return professor.subModules?.some((profSubModule) => {
             // If profSubModule is a number (ID), compare directly
-            if (typeof profSubModule === 'number') {
+            if (typeof profSubModule === "number") {
               return profSubModule === sm.id;
             }
             // If profSubModule is an object, compare IDs
@@ -104,8 +110,8 @@ const ProfessorsTab: React.FC<ProfessorsTabProps> = ({
             return subModuleObj.id === sm.id;
           });
         });
-        
-        console.log('Filtered submodule objects:', subModuleObjects);
+
+        console.log("Filtered submodule objects:", subModuleObjects);
         return getSubModuleNames(subModuleObjects);
       },
     },
@@ -127,19 +133,7 @@ const ProfessorsTab: React.FC<ProfessorsTabProps> = ({
   return (
     <>
       <div className={styles.header}>
-        <Button
-          variant="primary"
-          onClick={() =>
-            onEdit({
-              id: 0,
-              firstName: "",
-              lastName: "",
-              email: "",
-              modules: [],
-              subModules: [],
-            })
-          }
-        >
+        <Button variant="primary" onClick={() => onAdd()}>
           + Ajouter un enseignant
         </Button>
       </div>

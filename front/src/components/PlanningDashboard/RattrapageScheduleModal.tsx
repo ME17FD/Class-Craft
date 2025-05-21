@@ -2,6 +2,7 @@ import { Session } from "../../types/schedule";
 import { Group } from "../../types/type";
 import styles from "../../styles/PlanningDashboard/PlanningGroup.module.css";
 import { useMemo } from "react";
+import { PDFGenerator } from "./PDFGenerator";
 
 interface MakeupScheduleModalProps {
   group: Group;
@@ -56,6 +57,15 @@ export const MakeupScheduleModal = ({
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <h2>Planning des Rattrapages - {group.name}</h2>
+          <div className={styles.exportButtons}>
+            <PDFGenerator
+              data={{
+                type: "makeup",
+                group: group,
+                sessions: sessions,
+              }}
+            />
+          </div>
           <button className={styles.closeButton} onClick={onClose}>
             ×
           </button>

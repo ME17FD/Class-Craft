@@ -5,6 +5,7 @@ import * as XLSX from "xlsx";
 import { usePlanning } from "../../context/PlanningContext";
 import { useApiData } from "../../hooks/useApiData";
 import { useMemo, useEffect } from "react";
+import { PDFGenerator } from "./PDFGenerator";
 
 type Props = {
   group: Group | null;
@@ -78,13 +79,18 @@ export const GroupScheduleModal = ({
     FRIDAY: "Vendredi",
     SATURDAY: "Samedi",
   };
-
   useEffect(() => {
-    console.log("Seances:", seances);
-    console.log("Sessions:", planningSessions);
-    console.log("Group:", group);
-    console.log("GroupSessions:", groupSessions);
-  }, [seances, planningSessions, groupSessions, group]);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -94,6 +100,13 @@ export const GroupScheduleModal = ({
             Emploi du temps - {group?.name} (ID: {group?.id})
           </h2>
           <div className={styles.exportButtons}>
+            <PDFGenerator
+              data={{
+                type: "group",
+                group: group,
+                sessions: groupSessions,
+              }}
+            />
             <button
               onClick={() =>
                 exportToExcel(groupSessions, group?.name || "Groupe")
@@ -170,7 +183,8 @@ export const GroupScheduleModal = ({
                               <strong>Prof:</strong>{" "}
                               {session.professor ? (
                                 <>
-                                  {session.professor.firstName} {session.professor.lastName}
+                                  {session.professor.firstName}{" "}
+                                  {session.professor.lastName}
                                   <span
                                     className={
                                       session.professorPresent

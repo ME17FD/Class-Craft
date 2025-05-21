@@ -5,6 +5,7 @@ import * as XLSX from "xlsx";
 import { usePlanning } from "../../context/PlanningContext";
 import { useApiData } from "../../hooks/useApiData";
 import { useMemo, useEffect } from "react";
+import { PDFGenerator } from "./PDFGenerator";
 
 type Props = {
   professor: Professor | null;
@@ -53,8 +54,9 @@ export const ProfessorScheduleModal = ({
   const timeSlots = useMemo(
     () => [
       "",
-      ...Array.from({ length: 11 }, (_, i) =>
-        `${(8 + i).toString().padStart(2, "0")}:00`
+      ...Array.from(
+        { length: 11 },
+        (_, i) => `${(8 + i).toString().padStart(2, "0")}:00`
       ),
     ],
     []
@@ -93,15 +95,22 @@ export const ProfessorScheduleModal = ({
             Emploi du temps - {professor?.firstName} {professor?.lastName}
           </h2>
           <div className={styles.exportButtons}>
+            <PDFGenerator
+              data={{
+                type: "professor",
+                professor: professor,
+                sessions: professorSessions,
+              }}
+            />
             <button
               onClick={() =>
                 exportToExcel(
                   professorSessions,
-                  `${professor?.firstName}-${professor?.lastName}` || "Professeur"
+                  `${professor?.firstName}${professor?.lastName}` ||
+                    "Professeur"
                 )
               }
-              className={styles.excelButton}
-            >
+              className={styles.excelButton}>
               Export Excel
             </button>
           </div>
@@ -141,15 +150,19 @@ export const ProfessorScheduleModal = ({
                   });
 
                   const slotKey = session
-                    ? `sess-${session.id}-${day}-${normalizedTime.replace(":", "")}`
+                    ? `sess-${session.id}-${day}-${normalizedTime.replace(
+                        ":",
+                        ""
+                      )}`
                     : `empty-${day}-${normalizedTime.replace(":", "")}`;
 
                   return (
                     <div
                       key={slotKey}
-                      className={`${styles.timeSlot} ${session ? styles.occupied : ""}`}
-                      onClick={() => onTimeSlotClick(day, time)}
-                    >
+                      className={`${styles.timeSlot} ${
+                        session ? styles.occupied : ""
+                      }`}
+                      onClick={() => onTimeSlotClick(day, time)}>
                       {session ? (
                         <div className={styles.sessionContent}>
                           <div className={styles.sessionTitle}>

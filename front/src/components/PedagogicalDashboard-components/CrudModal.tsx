@@ -22,7 +22,11 @@ interface CrudModalProps {
   groups: Group[];
   onSave: (entityType: TabType, data: any) => void;
   onClose: () => void;
-  onAssignStudent?: (studentId: number, studentIds: number[],assign: boolean) => Promise<boolean>;
+  onAssignStudent?: (
+    studentId: number,
+    studentIds: number[],
+    assign: boolean
+  ) => Promise<boolean>;
 }
 
 const CrudModal: React.FC<CrudModalProps> = ({
@@ -109,8 +113,7 @@ const CrudModal: React.FC<CrudModalProps> = ({
               <select
                 name="filiereId"
                 value={formData?.filiereId || ""}
-                onChange={handleChange}
-              >
+                onChange={handleChange}>
                 {fields.map((field) => (
                   <option key={field.id} value={field.id}>
                     {field.name}
@@ -146,8 +149,7 @@ const CrudModal: React.FC<CrudModalProps> = ({
               <select
                 name="filiereId"
                 value={formData?.filiereId || ""}
-                onChange={handleChange}
-              >
+                onChange={handleChange}>
                 {fields.map((field) => (
                   <option key={field.id} value={field.id}>
                     {field.name}
@@ -188,8 +190,7 @@ const CrudModal: React.FC<CrudModalProps> = ({
                     </div>
                     <Button
                       variant="delete"
-                      onClick={() => handleRemoveSubModule(index)}
-                    >
+                      onClick={() => handleRemoveSubModule(index)}>
                       Supprimer
                     </Button>
                   </div>
@@ -228,8 +229,7 @@ const CrudModal: React.FC<CrudModalProps> = ({
               <select
                 name="moduleId"
                 value={formData?.moduleId || ""}
-                onChange={handleChange}
-              >
+                onChange={handleChange}>
                 {modules.map((module) => (
                   <option key={module.id} value={module.id}>
                     {module.name}
@@ -243,11 +243,20 @@ const CrudModal: React.FC<CrudModalProps> = ({
         return (
           <>
             <div className={styles.formGroup}>
+              <label>Prénom</label>
+              <input
+                type="text"
+                name="firstName"
+                value={formData?.firstName || ""}
+                onChange={handleChange}
+              />
+            </div>
+            <div className={styles.formGroup}>
               <label>Nom</label>
               <input
                 type="text"
-                name="name"
-                value={formData?.name || ""}
+                name="lastName"
+                value={formData?.lastName || ""}
                 onChange={handleChange}
               />
             </div>
@@ -263,11 +272,9 @@ const CrudModal: React.FC<CrudModalProps> = ({
             <div className={styles.formGroup}>
               <label>Modules</label>
               <select
-                multiple
                 name="modules"
                 value={formData?.modules || []}
-                onChange={(e) => handleMultiSelect(e, "modules")}
-              >
+                onChange={(e) => handleMultiSelect(e, "modules")}>
                 {modules.map((module) => (
                   <option key={module.id} value={module.id}>
                     {module.name}
@@ -278,11 +285,9 @@ const CrudModal: React.FC<CrudModalProps> = ({
             <div className={styles.formGroup}>
               <label>Sous-modules</label>
               <select
-                multiple
                 name="subModules"
                 value={formData?.subModules || []}
-                onChange={(e) => handleMultiSelect(e, "subModules")}
-              >
+                onChange={(e) => handleMultiSelect(e, "subModules")}>
                 {subModules.map((subModule) => (
                   <option key={subModule.id} value={subModule.id}>
                     {subModule.name}
@@ -336,8 +341,7 @@ const CrudModal: React.FC<CrudModalProps> = ({
               <select
                 name="groupId"
                 value={formData?.groupId || ""}
-                onChange={handleChange}
-              >
+                onChange={handleChange}>
                 <option value="">Aucun groupe</option>
                 {groups.map((group) => (
                   <option key={group.id} value={group.id}>

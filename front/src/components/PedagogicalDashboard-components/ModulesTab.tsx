@@ -12,6 +12,7 @@ interface ModulesTabProps {
   subModules: SubModule[];
   onEdit: (module: Module) => void;
   onDelete: (module: Module) => void;
+  onAdd: () => void;
 }
 
 const ModulesTab: React.FC<ModulesTabProps> = ({
@@ -21,6 +22,7 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
   subModules,
   onEdit,
   onDelete,
+  onAdd,
 }) => {
   const [selectedField, setSelectedField] = useState<number>(0);
   const [selectedProfessor, setSelectedProfessor] = useState<number>(0);
@@ -32,10 +34,10 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
   };
 
   const getProfessorNames = (moduleId: number) => {
-    const moduleProfessors = professors.filter(p =>
-      p.modules?.some(profModule => {
+    const moduleProfessors = professors.filter((p) =>
+      p.modules?.some((profModule) => {
         // If profModule is a number (ID), compare directly
-        if (typeof profModule === 'number') {
+        if (typeof profModule === "number") {
           return profModule === moduleId;
         }
         // If profModule is an object, compare IDs
@@ -43,32 +45,43 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
         return moduleObj.id === moduleId;
       })
     );
-    return moduleProfessors.map(p => `${p.firstName} ${p.lastName}`).join(", ") || "Aucun professeur";
+    return (
+      moduleProfessors.map((p) => `${p.firstName} ${p.lastName}`).join(", ") ||
+      "Aucun professeur"
+    );
   };
 
   const getSubModuleNames = (moduleId: number) => {
-    const moduleSubModules = subModules.filter(sm => sm.moduleId === moduleId);
-    return moduleSubModules.map(sm => `${sm.name} (${sm.nbrHours}h)`).join(", ") || "Aucun sous-module";
+    const moduleSubModules = subModules.filter(
+      (sm) => sm.moduleId === moduleId
+    );
+    return (
+      moduleSubModules.map((sm) => `${sm.name} (${sm.nbrHours}h)`).join(", ") ||
+      "Aucun sous-module"
+    );
   };
 
   const filteredModules = useMemo(() => {
-    return modules.filter(module => {
-      const matchesField = selectedField === 0 || module.filiereId === selectedField;
-      
-      const matchesProfessor = selectedProfessor === 0 || 
-        professors.some(p => 
-          p.id === selectedProfessor && 
-          p.modules?.some(profModule => {
-            // If profModule is a number (ID), compare directly
-            if (typeof profModule === 'number') {
-              return profModule === module.id;
-            }
-            // If profModule is an object, compare IDs
-            const moduleObj = profModule as Module;
-            return moduleObj.id === module.id;
-          })
+    return modules.filter((module) => {
+      const matchesField =
+        selectedField === 0 || module.filiereId === selectedField;
+
+      const matchesProfessor =
+        selectedProfessor === 0 ||
+        professors.some(
+          (p) =>
+            p.id === selectedProfessor &&
+            p.modules?.some((profModule) => {
+              // If profModule is a number (ID), compare directly
+              if (typeof profModule === "number") {
+                return profModule === module.id;
+              }
+              // If profModule is an object, compare IDs
+              const moduleObj = profModule as Module;
+              return moduleObj.id === module.id;
+            })
         );
-      
+
       return matchesField && matchesProfessor;
     });
   }, [modules, selectedField, selectedProfessor, professors]);
@@ -94,11 +107,11 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
     },
     {
       header: "Professeur(s)",
-      render: (module: Module) => getProfessorNames(module.id??0),
+      render: (module: Module) => getProfessorNames(module.id ?? 0),
     },
     {
       header: "Sous-modules",
-      render: (module: Module) => getSubModuleNames(module.id??0),
+      render: (module: Module) => getSubModuleNames(module.id ?? 0),
     },
     {
       header: "Actions",
@@ -123,8 +136,7 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
             <label>Filière</label>
             <select
               value={selectedField}
-              onChange={(e) => setSelectedField(Number(e.target.value))}
-            >
+              onChange={(e) => setSelectedField(Number(e.target.value))}>
               <option value={0}>Toutes les filières</option>
               {fields.map((field) => (
                 <option key={field.id} value={field.id}>
@@ -137,8 +149,7 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
             <label>Professeur</label>
             <select
               value={selectedProfessor}
-              onChange={(e) => setSelectedProfessor(Number(e.target.value))}
-            >
+              onChange={(e) => setSelectedProfessor(Number(e.target.value))}>
               <option value={0}>Tous les professeurs</option>
               {professors.map((professor) => (
                 <option key={professor.id} value={professor.id}>
@@ -148,10 +159,7 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
             </select>
           </div>
         </div>
-        <Button
-          variant="primary"
-          onClick={() => onEdit({ id: 0, name: "", code: "", filiereId: 0 })}
-        >
+        <Button variant="primary" onClick={() => onAdd()}>
           + Ajouter un module
         </Button>
       </div>
@@ -161,7 +169,7 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
         columns={columns}
         emptyMessage="Aucun module trouvé"
       />
-      
+
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}

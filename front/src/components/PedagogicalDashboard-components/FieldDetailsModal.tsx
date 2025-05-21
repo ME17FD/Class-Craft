@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styles from "../../styles/PedagogicalDashboard-components/FieldDetailsModal.module.css";
 import { Field, Module, SubModule, Group, Professor } from "../../types/type";
 import Button from "./Button";
@@ -20,32 +20,53 @@ const FieldDetailsModal: React.FC<FieldDetailsModalProps> = ({
   professors = [],
   onClose,
 }) => {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
   // Filtrer les modules de la filière
-  const fieldModules = modules.filter(module => module.filiereId === field.id);
+  const fieldModules = modules.filter(
+    (module) => module.filiereId === field.id
+  );
 
   // Pour chaque module, trouver ses sous-modules
-  const modulesWithSubModules = fieldModules.map(module => ({
+  const modulesWithSubModules = fieldModules.map((module) => ({
     ...module,
-    subModules: subModules.filter(subModule => subModule.moduleId === module.id)
+    subModules: subModules.filter(
+      (subModule) => subModule.moduleId === module.id
+    ),
   }));
 
   // Pour chaque module, trouver les professeurs qui l'enseignent
-  const modulesWithProfessors = modulesWithSubModules.map(module => ({
+  const modulesWithProfessors = modulesWithSubModules.map((module) => ({
     ...module,
-    professors: professors.filter(professor => 
+    professors: professors.filter((professor) =>
       professor.modules?.includes(module.id || 0)
-    )
+    ),
   }));
 
   // Trouver les groupes de la filière
-  const fieldGroups = groups.filter(group => group.filiereId === field.id);
+  const fieldGroups = groups.filter((group) => group.filiereId === field.id);
 
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modal}>
         <div className={styles.modalHeader}>
-          <h2>{field.name}</h2>
-          <p className={styles.description}>{field.description}</p>
+          <div>
+            <h2>{field.name}</h2>
+            <p className={styles.description}>{field.description}</p>
+          </div>
+          <button className={styles.closeButton} onClick={onClose}>
+            &times;
+          </button>
         </div>
 
         <div className={styles.content}>
@@ -53,7 +74,7 @@ const FieldDetailsModal: React.FC<FieldDetailsModalProps> = ({
           <section className={styles.section}>
             <h3>Modules et Sous-modules</h3>
             <div className={styles.modulesList}>
-              {modulesWithProfessors.map(module => (
+              {modulesWithProfessors.map((module) => (
                 <div key={module.id} className={styles.moduleCard}>
                   <div className={styles.moduleHeader}>
                     <h4>{module.name}</h4>
@@ -62,7 +83,7 @@ const FieldDetailsModal: React.FC<FieldDetailsModalProps> = ({
 
                   {/* Sous-modules */}
                   <div className={styles.subModulesList}>
-                    {module.subModules.map(subModule => (
+                    {module.subModules.map((subModule) => (
                       <div key={subModule.id} className={styles.subModuleItem}>
                         <span className={styles.subModuleName}>
                           {subModule.name}
@@ -77,7 +98,7 @@ const FieldDetailsModal: React.FC<FieldDetailsModalProps> = ({
                   {/* Professeurs */}
                   <div className={styles.professorsList}>
                     <h5>Enseignants :</h5>
-                    {module.professors.map(professor => (
+                    {module.professors.map((professor) => (
                       <div key={professor.id} className={styles.professorItem}>
                         {professor.firstName}
                       </div>
@@ -92,7 +113,7 @@ const FieldDetailsModal: React.FC<FieldDetailsModalProps> = ({
           <section className={styles.section}>
             <h3>Groupes</h3>
             <div className={styles.groupsList}>
-              {fieldGroups.map(group => (
+              {fieldGroups.map((group) => (
                 <div key={group.id} className={styles.groupCard}>
                   <h4>{group.name}</h4>
                   <span className={styles.studentCount}>
@@ -114,4 +135,4 @@ const FieldDetailsModal: React.FC<FieldDetailsModalProps> = ({
   );
 };
 
-export default FieldDetailsModal; 
+export default FieldDetailsModal;

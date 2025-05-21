@@ -36,6 +36,19 @@ const StudentFormModal: React.FC<StudentFormModalProps> = ({
     }
   }, [student]);
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -51,8 +64,12 @@ const StudentFormModal: React.FC<StudentFormModalProps> = ({
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modal}>
-        <h2>{student.id ? "Modifier l'étudiant" : "Ajouter un étudiant"}</h2>
-
+        <div className={styles.modalHeader}>
+          <h2>{student.id ? "Modifier l'étudiant" : "Ajouter un étudiant"}</h2>
+          <button className={styles.closeButton} onClick={onClose}>
+            &times;
+          </button>
+        </div>
         <form onSubmit={handleSubmit}>
           <div className={styles.formRow}>
             <div className={styles.formGroup}>

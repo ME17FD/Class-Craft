@@ -29,7 +29,9 @@ export const GroupPlanning = () => {
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
   const [deletingGroup, setDeletingGroup] = useState<Group | null>(null);
   const [selectedField, setSelectedField] = useState<number | null>(null);
-  const [selectedProfessor, setSelectedProfessor] = useState<number | null>(null);
+  const [selectedProfessor, setSelectedProfessor] = useState<number | null>(
+    null
+  );
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
   const allSessions = [...seances, ...sessions];
 
@@ -154,19 +156,6 @@ export const GroupPlanning = () => {
             </option>
           )}
         </select>
-
-        <button
-          className={styles.addButton}
-          onClick={() =>
-            setEditingGroup({
-              id: 0,
-              name: "",
-              filiereId: 1,
-              students: [],
-            })
-          }>
-          + Nouveau groupe
-        </button>
       </div>
 
       <div className={styles.groupsGrid}>

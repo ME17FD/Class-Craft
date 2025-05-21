@@ -44,3 +44,24 @@
     gap: 0.5rem;
     margin-top: 1.5rem;
 }
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    line-height: 1;
+}
+
+.closeButton:hover {
+    color: #000;
+}

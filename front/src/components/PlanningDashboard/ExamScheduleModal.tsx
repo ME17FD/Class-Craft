@@ -2,6 +2,7 @@ import { Session } from "../../types/schedule";
 import { Group } from "../../types/type";
 import styles from "../../styles/PlanningDashboard/PlanningGroup.module.css";
 import { useMemo } from "react";
+import { PDFGenerator } from "./PDFGenerator";
 
 interface ExamScheduleModalProps {
   group: Group;
@@ -56,6 +57,16 @@ export const ExamScheduleModal = ({
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <h2>Planning des Examens - {group.name}</h2>
+          <div className={styles.exportButtons}>
+            <PDFGenerator
+              data={{
+                type: "exam",
+                group: group,
+                sessions: sessions,
+              }}
+            />
+          </div>
+
           <button className={styles.closeButton} onClick={onClose}>
             ×
           </button>
@@ -84,8 +95,8 @@ export const ExamScheduleModal = ({
                 {timeSlots.slice(1).map((time) => {
                   const normalizedTime = normalizeTime(time);
                   const session = daySessions.find((s) => {
-                    const start = normalizeTime(s.startTime||"");
-                    const end = normalizeTime(s.endTime||"");
+                    const start = normalizeTime(s.startTime || "");
+                    const end = normalizeTime(s.endTime || "");
                     return start <= normalizedTime && end > normalizedTime;
                   });
 
