@@ -10,7 +10,7 @@ type Props = {
   group: Group | null;
   student: {
     id: number;
-    groupId?: number;
+    groupId: number | null;
   };
 };
 
@@ -114,8 +114,8 @@ export const StudentSchedule = ({ group, student }: Props) => {
               {timeSlots.slice(1).map((time) => {
                 const normalizedTime = normalizeTime(time);
                 const session = daySessions.find((s) => {
-                  const start = normalizeTime(s.startTime);
-                  const end = normalizeTime(s.endTime);
+                  const start = normalizeTime(s.startTime ||"");
+                  const end = normalizeTime(s.endTime||"");
                   return start <= normalizedTime && normalizedTime < end;
                 });
 

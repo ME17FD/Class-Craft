@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useApiData } from "../../hooks/useApiData";
 import StudentSchedule from "./StudentSchedule";
 import ClassmatesList from "./ClassmatesList";
@@ -6,10 +6,19 @@ import styles from "../../styles/StudentDashboard.module.css";
 import { FiLogOut } from "react-icons/fi";
 import { PlanningProvider } from "../../context/PlanningContext";
 import { useNavigate } from "react-router-dom";
+import { Student, Group } from "../../types/type";
+
 const StudentDashboard = () => {
   // Récupération des données depuis le localStorage
-  const userData = JSON.parse(localStorage.getItem("userData") || "{}");
-  const { students = [], groups = [] } = useApiData();
+  const userData = JSON.parse(localStorage.getItem("userDetails") || "{}") as Partial<Student>;
+  const { students = [], groups = [] } = useApiData() as {
+    students: Student[];
+    groups: Group[];
+  };
+
+  console.log("Debug - userData:", userData);
+  console.log("Debug - students:", students);
+  console.log("Debug - groups:", groups);
 
   // State pour gérer l'onglet actif
   const [activeTab, setActiveTab] = useState<"schedule" | "classmates">(
@@ -27,16 +36,27 @@ const StudentDashboard = () => {
   };
 
   // Trouver l'étudiant correspondant
-  const currentStudent =
-    students.find(
-      (s) =>
-        s.id === userData.id ||
-        s.email === userData.email ||
-        s.registrationNumber === userData.registrationNumber
-    ) || userData; // Fallback sur les données de base
+  const currentStudent = students.find(
+    (s) =>
+      s.id === userData.id ||
+      s.email === userData.email ||
+      s.registrationNumber === userData.registrationNumber
+  ) || {
+    id: userData.id || 0,
+    firstName: userData.firstName || "",
+    lastName: userData.lastName || "",
+    cne: userData.cne || "",
+    registrationNumber: userData.registrationNumber || "",
+    groupId: userData.groupId || null,
+    email: userData.email || ""
+  };
+
+  console.log("Debug - currentStudent:", currentStudent);
 
   // Trouver le groupe de l'étudiant
-  const studentGroup = groups.find((g) => g.id === currentStudent?.groupId);
+  const studentGroup = groups.find((g) => g.id === currentStudent.groupId) || null;
+
+  console.log("Debug - studentGroup:", studentGroup);
 
   return (
     <PlanningProvider>
@@ -51,7 +71,7 @@ const StudentDashboard = () => {
             {currentStudent.firstName} {currentStudent.lastName}
           </h2>
           <p>
-            CNE: {currentStudent.CNE} | Groupe:{" "}
+            CNE: {currentStudent.cne} | Groupe:{" "}
             {studentGroup?.name || "Non assigné"}
           </p>
         </div>
@@ -78,7 +98,10 @@ const StudentDashboard = () => {
         <div className={styles.planingContainer}>
           {activeTab === "schedule" ? (
             <section className={styles.scheduleSection}>
-              <StudentSchedule student={currentStudent} group={studentGroup} />
+              <StudentSchedule 
+                student={{ id: currentStudent.id, groupId: currentStudent.groupId }} 
+                group={studentGroup} 
+              />
             </section>
           ) : (
             <section className={styles.classmatesSection}>

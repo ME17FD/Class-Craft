@@ -628,3 +628,100 @@
         grid-column: span 1;
     }
 }
+
+/* Classmates List Styles */
+.classmatesContainer {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.classmatesTitle {
+  color: var(--text-dark);
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.classmatesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.classmateCard {
+  background: var(--background-light);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.classmateCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.classmateAvatar {
+  width: 48px;
+  height: 48px;
+  background: var(--primary-color);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.classmateInfo {
+  flex: 1;
+}
+
+.classmateName {
+  color: var(--text-dark);
+  font-size: 1.1rem;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.classmateDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+.detailItem i {
+  width: 16px;
+  color: var(--primary-color);
+}
+
+.emptyClassmates {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-light);
+}
+
+.emptyClassmates i {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.emptyClassmates p {
+  font-size: 1.1rem;
+  margin: 0;
+}
