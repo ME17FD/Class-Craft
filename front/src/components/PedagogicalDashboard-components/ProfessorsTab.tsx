@@ -55,14 +55,57 @@ const ProfessorsTab: React.FC<ProfessorsTabProps> = ({
     {
       header: "Modules enseignés",
       render: (professor: Professor) => {
-        const moduleObjects = modules.filter(m => professor.modules?.includes(m.id || 0));
+        console.log('Professor:', professor);
+        console.log('Professor modules array:', professor.modules);
+        console.log('Available modules:', modules);
+        
+        // If professor.modules is undefined or empty, return "Aucun"
+        if (!professor.modules || professor.modules.length === 0) {
+          return "Aucun";
+        }
+
+        const moduleObjects = modules.filter(m => {
+          // Handle both cases: when modules array contains full objects or just IDs
+          return professor.modules?.some(profModule => {
+            // If profModule is a number (ID), compare directly
+            if (typeof profModule === 'number') {
+              return profModule === m.id;
+            }
+            // If profModule is an object, compare IDs
+            const moduleObj = profModule as Module;
+            return moduleObj.id === m.id;
+          });
+        });
+        
+        console.log('Filtered module objects:', moduleObjects);
         return getModuleNames(moduleObjects);
       },
     },
     {
       header: "Sous-modules enseignés", 
       render: (professor: Professor) => {
-        const subModuleObjects = subModules.filter(sm => professor.subModules?.includes(sm.id));
+        console.log('Professor submodules array:', professor.subModules);
+        console.log('Available submodules:', subModules);
+        
+        // If professor.subModules is undefined or empty, return "Aucun"
+        if (!professor.subModules || professor.subModules.length === 0) {
+          return "Aucun";
+        }
+
+        const subModuleObjects = subModules.filter(sm => {
+          // Handle both cases: when subModules array contains full objects or just IDs
+          return professor.subModules?.some(profSubModule => {
+            // If profSubModule is a number (ID), compare directly
+            if (typeof profSubModule === 'number') {
+              return profSubModule === sm.id;
+            }
+            // If profSubModule is an object, compare IDs
+            const subModuleObj = profSubModule as SubModule;
+            return subModuleObj.id === sm.id;
+          });
+        });
+        
+        console.log('Filtered submodule objects:', subModuleObjects);
         return getSubModuleNames(subModuleObjects);
       },
     },

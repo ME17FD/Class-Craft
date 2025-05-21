@@ -47,8 +47,17 @@ const SubModulesTab: React.FC<SubModulesTabProps> = ({
     
     const subModule = subModules.find(sm => sm.id === subModuleId);
     if (!subModule) return "Aucun professeur";
+
     const moduleProfessors = professors.filter(p =>
-      p.subModules && p.subModules.some(sm => sm === subModuleId)
+      p.subModules && p.subModules.some(profSubModule => {
+        // If profSubModule is a number (ID), compare directly
+        if (typeof profSubModule === 'number') {
+          return profSubModule === subModuleId;
+        }
+        // If profSubModule is an object, compare IDs
+        const subModuleObj = profSubModule as SubModule;
+        return subModuleObj.id === subModuleId;
+      })
     );
     return moduleProfessors.map(p => p.firstName + " " + p.lastName).join(", ") || "Aucun professeur";
   };

@@ -33,7 +33,15 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
 
   const getProfessorNames = (moduleId: number) => {
     const moduleProfessors = professors.filter(p =>
-      p.modules?.some(m => m === moduleId)
+      p.modules?.some(profModule => {
+        // If profModule is a number (ID), compare directly
+        if (typeof profModule === 'number') {
+          return profModule === moduleId;
+        }
+        // If profModule is an object, compare IDs
+        const moduleObj = profModule as Module;
+        return moduleObj.id === moduleId;
+      })
     );
     return moduleProfessors.map(p => `${p.firstName} ${p.lastName}`).join(", ") || "Aucun professeur";
   };
@@ -50,7 +58,15 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
       const matchesProfessor = selectedProfessor === 0 || 
         professors.some(p => 
           p.id === selectedProfessor && 
-          p.modules?.some(m => m === module.id)
+          p.modules?.some(profModule => {
+            // If profModule is a number (ID), compare directly
+            if (typeof profModule === 'number') {
+              return profModule === module.id;
+            }
+            // If profModule is an object, compare IDs
+            const moduleObj = profModule as Module;
+            return moduleObj.id === module.id;
+          })
         );
       
       return matchesField && matchesProfessor;
