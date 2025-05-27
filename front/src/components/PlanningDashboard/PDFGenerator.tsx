@@ -11,6 +11,27 @@ import { Group, Professor } from "../../types/type";
 import { Session, Room } from "../../types/schedule";
 import style from "../../styles/PlanningDashboard/PlanningGroup.module.css";
 
+interface Reservation {
+  id: number;
+  startDateTime: string;
+  endDateTime: string;
+  wasAttended: boolean;
+  subModuleId: number;
+  groupId: number;
+  classroomId: number;
+  subModule?: {
+    name: string;
+    professor?: {
+      firstName: string;
+      lastName: string;
+    };
+  };
+  group?: {
+    name: string;
+  };
+  classroom?: Room;
+}
+
 const styles = StyleSheet.create({
   page: {
     padding: 30,
@@ -236,13 +257,13 @@ const RoomsPdfDocument = ({ data }: { data: PDFData }) => (
         </View>
 
         {data.rooms?.map((room) => (
-          <View style={styles.tableRow} key={room.id}>
+          <View style={styles.tableRow} key={`room-${room.id}`}>
             <Text style={styles.tableCell}>
               {room.name} ({room.type})
             </Text>
 
             {["08:00-10:00", "10:15-12:15", "13:00-15:00", "15:15-17:15"].map(
-              (timeSlot) => {
+              (timeSlot, index) => {
                 const [start, end] = timeSlot.split("-");
                 const reservation = data.reservations?.find(
                   (r) =>
@@ -258,7 +279,10 @@ const RoomsPdfDocument = ({ data }: { data: PDFData }) => (
                 );
 
                 return (
-                  <Text style={styles.wideCell} key={`${room.id}-${timeSlot}`}>
+                  <Text 
+                    style={styles.wideCell} 
+                    key={`room-${room.id}-timeslot-${index}-${timeSlot}`}
+                  >
                     {reservation
                       ? `Module: ${reservation.subModule?.name || "N/A"}\n` +
                         `Groupe: ${reservation.group?.name || "N/A"}\n` +
@@ -285,15 +309,15 @@ const RoomsPdfDocument = ({ data }: { data: PDFData }) => (
 const PdfDocument = ({ data }: { data: PDFData }) => {
   switch (data.type) {
     case "group":
-      return <GroupPdfDocument data={data} />;
+      return <GroupPdfDocument key={`group-${data.group?.id}`} data={data} />;
     case "professor":
-      return <ProfessorPdfDocument data={data} />;
+      return <ProfessorPdfDocument key={`professor-${data.professor?.id}`} data={data} />;
     case "makeup":
-      return <MakeupPdfDocument data={data} />;
+      return <MakeupPdfDocument key={`makeup-${data.group?.id}`} data={data} />;
     case "exam":
-      return <ExamPdfDocument data={data} />;
+      return <ExamPdfDocument key={`exam-${data.group?.id}`} data={data} />;
     case "rooms":
-      return <RoomsPdfDocument data={data} />;
+      return <RoomsPdfDocument key={`rooms-${data.date}`} data={data} />;
     default:
       return null;
   }

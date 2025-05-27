@@ -9,6 +9,7 @@ export interface Session {
     subModuleId?: number;
     groupId?: number | null;
     classroomId?: number;
+    frequency?: number;
     submodule?: {
         id: number;
         name: string;
@@ -19,7 +20,7 @@ export interface Session {
         teacher: Professor;
     };
     groupName?: string | null;
-    type: 'CM' | 'TD' | 'TP' | 'EXAM' | 'RATTRAPAGE' | 'EVENT';
+    type: 'CM' | 'TD' | 'TP';
     
     // Legacy fields
     dayOfWeek?: string;

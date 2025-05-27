@@ -35,12 +35,7 @@ export const GroupPlanning = () => {
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
   const allSessions = [...seances, ...sessions];
 
-  // Filtrer les groupes pour ne garder que ceux avec au moins une séance
-  const groupsWithSessions = groups.filter((group) =>
-    allSessions.some((session) => session.group?.id === group.id)
-  );
-
-  const filteredGroups = groupsWithSessions.filter((group) => {
+  const filteredGroups = groups.filter((group) => {
     const matchesField = selectedField
       ? group.filiereId === selectedField
       : true;
