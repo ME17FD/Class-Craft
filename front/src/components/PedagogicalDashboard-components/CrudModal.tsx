@@ -113,7 +113,9 @@ const CrudModal: React.FC<CrudModalProps> = ({
               <select
                 name="filiereId"
                 value={formData?.filiereId || ""}
-                onChange={handleChange}>
+                onChange={handleChange}
+                required>
+                <option value="">Sélectionnez une filière</option>
                 {fields.map((field) => (
                   <option key={field.id} value={field.id}>
                     {field.name}
