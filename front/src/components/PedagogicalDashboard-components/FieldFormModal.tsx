@@ -176,18 +176,26 @@ const FieldFormModal: React.FC<FieldFormModalProps> = ({
     onSubmit({
       name,
       description,
-      modules: modules.map((m, index) => ({
-        id: field?.modules[index]?.id || 0,
-        name: m.name,
-        code: m.code,
-        filiereId: field?.id || 0,
-        subModules: m.subModules.map((sm, smIndex) => ({
-          id: field?.modules[index]?.subModules[smIndex]?.id || 0,
-          name: sm.name,
-          nbrHours: sm.nbrHours,
-          moduleId: field?.modules[index]?.id || 0,
-        })),
-      })),
+      modules: modules.map((m, index) => {
+        // Check if this is an existing module or a new one
+        const existingModule = field?.modules[index];
+        return {
+          id: existingModule?.id || 0,
+          name: m.name,
+          code: m.code,
+          filiereId: field?.id || 0,
+          subModules: m.subModules.map((sm, smIndex) => {
+            // Check if this is an existing submodule or a new one
+            const existingSubModule = existingModule?.subModules[smIndex];
+            return {
+              id: existingSubModule?.id || 0,
+              name: sm.name,
+              nbrHours: sm.nbrHours,
+              moduleId: existingModule?.id || 0,
+            };
+          }),
+        };
+      }),
     });
   };
 
