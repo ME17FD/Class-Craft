@@ -330,6 +330,15 @@ const CrudModal: React.FC<CrudModalProps> = ({
               />
             </div>
             <div className={styles.formGroup}>
+              <label>Email</label>
+              <input
+                type="text"
+                name="email"
+                value={formData?.email || ""}
+                onChange={handleChange}
+              />
+            </div>
+            <div className={styles.formGroup}>
               <label>Prénom</label>
               <input
                 type="text"

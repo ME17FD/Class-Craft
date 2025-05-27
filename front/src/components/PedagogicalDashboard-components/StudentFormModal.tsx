@@ -22,6 +22,7 @@ const StudentFormModal: React.FC<StudentFormModalProps> = ({
     lastName: "",
     firstName: "",
     groupId: null,
+    email: "",
   });
 
   useEffect(() => {
@@ -32,6 +33,7 @@ const StudentFormModal: React.FC<StudentFormModalProps> = ({
         lastName: student.lastName,
         firstName: student.firstName,
         groupId: student.groupId,
+        email: student.email,
       });
     }
   }, [student]);
@@ -60,7 +62,7 @@ const StudentFormModal: React.FC<StudentFormModalProps> = ({
     e.preventDefault();
     onSave({ ...formData, id: student.id });
   };
-
+console.log(formData);
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modal}>
@@ -117,7 +119,21 @@ const StudentFormModal: React.FC<StudentFormModalProps> = ({
                 required
               />
             </div>
+
+            
           </div>
+
+          <div className={styles.formGroup}>
+              <label>Email</label>
+              <input
+                type="text"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          
 
           <div className={styles.formGroup}>
             <label>Groupe</label>
