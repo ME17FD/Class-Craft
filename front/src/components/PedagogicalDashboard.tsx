@@ -9,6 +9,7 @@ import SubModulesTab from "./PedagogicalDashboard-components/SubModulesTab";
 import ProfessorsTab from "./PedagogicalDashboard-components/ProfessorsTab";
 import CrudModal from "./PedagogicalDashboard-components/CrudModal";
 import FieldFormModal from "./PedagogicalDashboard-components/FieldFormModal";
+import ClassroomTab from "./PedagogicalDashboard-components/ClassroomTab";
 import usePedagogicalData from "../utils/usePedagogicalData";
 import Sidebar from "./Sidebar";
 import { TabType, Field, ExtendedModule } from "../types/type";
@@ -118,6 +119,7 @@ const PedagogicalDashboard: React.FC = () => {
     { id: "modules" as TabType, label: "Modules" },
     { id: "submodules" as TabType, label: "Sous-modules" },
     { id: "professors" as TabType, label: "Enseignants" },
+    { id: "classrooms" as TabType, label: "Salles" },
   ];
 
   return (
@@ -189,8 +191,11 @@ const PedagogicalDashboard: React.FC = () => {
               modules={data.modules}
               fields={data.fields}
               professors={data.professors}
-              onEdit={(subModule) => handleEdit("submodules", subModule)}
-              onDelete={(subModule) => handleDelete("submodules", subModule)}
+              modalState={modalState}
+              handleAdd={handleAdd}
+              handleEdit={handleEdit}
+              handleDelete={handleDelete}
+              handleCloseModal={handleCloseModal}
             />
           )}
           {activeTab === "professors" && (
@@ -203,6 +208,17 @@ const PedagogicalDashboard: React.FC = () => {
               onDelete={(professor) => handleDelete("professors", professor)}
             />
           )}
+          {activeTab === "classrooms" && (
+            <ClassroomTab
+              classrooms={data.rooms}
+              onAdd={() => handleAdd("classrooms")}
+              onEdit={(classroom) => handleEdit("classrooms", classroom)}
+              onDelete={(classroom) => {
+                // Cette fonction sera appelée après confirmation
+                handleSave("classrooms", classroom, "delete");
+              }}
+            />
+          )}
         </div>
 
         {modalState.isOpen && modalState.type !== "delete" && (
@@ -212,6 +228,7 @@ const PedagogicalDashboard: React.FC = () => {
             entityType={activeTab}
             entity={modalState.entity}
             fields={data.fields}
+            professors={data.professors}
             modules={data.modules}
             subModules={data.subModules}
             groups={data.groups}

@@ -7,7 +7,7 @@ import Button from "./Button";
 interface SubModuleFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (subModule: Partial<SubModule>) => void;
+  onSubmit: (subModule: Omit<SubModule, "id">) => void;
   subModule?: SubModule;
   modules: Module[];
   fields: Field[];
@@ -21,31 +21,62 @@ const SubModuleFormModal: React.FC<SubModuleFormModalProps> = ({
   modules,
   fields,
 }) => {
-  const [formData, setFormData] = useState<Partial<SubModule>>({
+  // Définition d'un sous-module par défaut avec nbrHours initialisé à 0
+  const defaultSubModule: Omit<SubModule, "id"> = {
     name: "",
-    nbrHours: 0,
+    nbrHours: 0, // Valeur par défaut explicite
     moduleId: 0,
-  });
+  };
 
+  const [formData, setFormData] =
+    useState<Omit<SubModule, "id">>(defaultSubModule);
   const [selectedModule, setSelectedModule] = useState<Module | null>(null);
 
   useEffect(() => {
     if (subModule) {
-      setFormData(subModule);
-      const module = modules.find(m => m.id === subModule.moduleId);
+      // Mode édition - initialisation avec les valeurs existantes
+      setFormData({
+        name: subModule.name,
+        nbrHours: subModule.nbrHours ?? 0, // Protection contre null/undefined
+        moduleId: subModule.moduleId,
+      });
+      const module = modules.find((m) => m.id === subModule.moduleId);
       setSelectedModule(module || null);
+    } else {
+      // Mode création - réinitialisation aux valeurs par défaut
+      setFormData(defaultSubModule);
+      setSelectedModule(null);
     }
   }, [subModule, modules]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+
+    // Validation et conversion explicite de nbrHours
+    const submittedData = {
+      ...formData,
+      nbrHours: Number(formData.nbrHours) || 0, // Conversion et valeur par défaut
+    };
+
+    onSubmit(submittedData);
   };
 
-  const handleModuleChange = (moduleId: number) => {
-    const module = modules.find(m => m.id === moduleId);
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      nbrHours: value === "" ? 0 : Number(value), // Conversion en number
+    }));
+  };
+
+  const handleModuleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const moduleId = Number(e.target.value);
+    const module = modules.find((m) => m.id === moduleId);
     setSelectedModule(module || null);
-    setFormData(prev => ({ ...prev, moduleId }));
+    setFormData((prev) => ({
+      ...prev,
+      moduleId,
+    }));
   };
 
   if (!isOpen) return null;
@@ -54,8 +85,7 @@ const SubModuleFormModal: React.FC<SubModuleFormModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={subModule ? "Modifier le sous-module" : "Ajouter un sous-module"}
-    >
+      title={subModule ? "Modifier le sous-module" : "Ajouter un sous-module"}>
       <form onSubmit={handleSubmit}>
         <div className={styles.formGroup}>
           <label htmlFor="name">Nom du sous-module</label>
@@ -63,7 +93,9 @@ const SubModuleFormModal: React.FC<SubModuleFormModalProps> = ({
             type="text"
             id="name"
             value={formData.name}
-            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, name: e.target.value }))
+            }
             required
           />
         </div>
@@ -71,12 +103,13 @@ const SubModuleFormModal: React.FC<SubModuleFormModalProps> = ({
         <div className={styles.formGroup}>
           <label htmlFor="hours">Nombre d'heures</label>
           <input
-            type="number"
+            type="text"
             id="hours"
             value={formData.nbrHours}
-            onChange={(e) => setFormData(prev => ({ ...prev, nbrHours: parseInt(e.target.value) }))}
+            onChange={handleNumberChange}
             required
             min="0"
+            step="1"
           />
         </div>
 
@@ -85,9 +118,8 @@ const SubModuleFormModal: React.FC<SubModuleFormModalProps> = ({
           <select
             id="moduleId"
             value={formData.moduleId}
-            onChange={(e) => handleModuleChange(parseInt(e.target.value))}
-            required
-          >
+            onChange={handleModuleChange}
+            required>
             <option value="">Sélectionner un module</option>
             {modules.map((module) => (
               <option key={module.id} value={module.id}>
@@ -99,7 +131,9 @@ const SubModuleFormModal: React.FC<SubModuleFormModalProps> = ({
 
         {selectedModule && (
           <div className={styles.fieldInfo}>
-            Filière: {fields.find(f => f.id === selectedModule.filiereId)?.name}
+            Filière:{" "}
+            {fields.find((f) => f.id === selectedModule.filiereId)?.name ||
+              "Non spécifiée"}
           </div>
         )}
 
@@ -108,7 +142,7 @@ const SubModuleFormModal: React.FC<SubModuleFormModalProps> = ({
             Annuler
           </Button>
           <Button variant="primary" type="submit">
-            {subModule ? 'Modifier' : 'Ajouter'}
+            {subModule ? "Modifier" : "Ajouter"}
           </Button>
         </div>
       </form>
@@ -116,4 +150,4 @@ const SubModuleFormModal: React.FC<SubModuleFormModalProps> = ({
   );
 };
 
-export default SubModuleFormModal; 
+export default SubModuleFormModal;

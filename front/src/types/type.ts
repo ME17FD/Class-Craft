@@ -58,7 +58,7 @@ export type Group = {
 
 export type CrudModalType = 'add' | 'edit' | 'delete' | 'assign';
 
-export type TabType = 'groups' | 'students' | 'fields' | 'modules' | 'submodules' | 'professors' | 'weekly' | 'field' | 'daily' | 'create';
+export type TabType = 'groups' | 'students' | 'fields' | 'modules' | "classrooms"| 'submodules' | 'professors' | 'weekly' | 'field' | 'daily' | 'create';
 
 export interface ModalState {
   isOpen: boolean;
