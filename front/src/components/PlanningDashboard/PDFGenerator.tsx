@@ -10,6 +10,8 @@ import {
 import { Group, Professor } from "../../types/type";
 import { Session, Room } from "../../types/schedule";
 import style from "../../styles/PlanningDashboard/PlanningGroup.module.css";
+import React from "react";
+import { pdf } from "@react-pdf/renderer";
 
 interface Reservation {
   id: number;
@@ -232,79 +234,93 @@ const ExamPdfDocument = ({ data }: { data: PDFData }) => (
   </Document>
 );
 
-const RoomsPdfDocument = ({ data }: { data: PDFData }) => (
-  <Document>
-    <Page size="A4" style={styles.page} orientation="landscape">
-      <Text style={styles.title}>Occupation des salles</Text>
-      <Text style={styles.subtitle}>
-        {data.date &&
-          new Date(data.date).toLocaleDateString("fr-FR", {
+const RoomsPdfDocument = ({ data }: { data: PDFData }) => {
+  if (!data.rooms || !data.reservations || !data.date) {
+    return (
+      <Document>
+        <Page size="A4" style={styles.page} orientation="landscape">
+          <Text style={styles.title}>Données manquantes</Text>
+        </Page>
+      </Document>
+    );
+  }
+
+  const rooms = data.rooms;
+  const reservations = data.reservations;
+
+  return (
+    <Document>
+      <Page size="A4" style={styles.page} orientation="landscape">
+        <Text style={styles.title}>Occupation des salles</Text>
+        <Text style={styles.subtitle}>
+          {new Date(data.date).toLocaleDateString("fr-FR", {
             weekday: "long",
             year: "numeric",
             month: "long",
             day: "numeric",
           })}
-      </Text>
+        </Text>
 
-      <View style={styles.table}>
-        <View style={styles.tableRow}>
-          <Text style={styles.tableHeader}>Salle</Text>
-          <Text style={styles.tableHeader}>08:00-10:00</Text>
-          <Text style={styles.tableHeader}>10:15-12:15</Text>
-          <Text style={styles.tableHeader}>13:00-15:00</Text>
-          <Text style={styles.tableHeader}>15:15-17:15</Text>
-          <Text style={styles.tableHeader}>Capacité</Text>
-        </View>
-
-        {data.rooms?.map((room) => (
-          <View style={styles.tableRow} key={`room-${room.id}`}>
-            <Text style={styles.tableCell}>
-              {room.name} ({room.type})
-            </Text>
-
-            {["08:00-10:00", "10:15-12:15", "13:00-15:00", "15:15-17:15"].map(
-              (timeSlot, index) => {
-                const [start, end] = timeSlot.split("-");
-                const reservation = data.reservations?.find(
-                  (r) =>
-                    r.classroomId === room.id &&
-                    new Date(r.startDateTime).toLocaleTimeString("fr-FR", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }) <= end &&
-                    new Date(r.endDateTime).toLocaleTimeString("fr-FR", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }) >= start
-                );
-
-                return (
-                  <Text 
-                    style={styles.wideCell} 
-                    key={`room-${room.id}-timeslot-${index}-${timeSlot}`}
-                  >
-                    {reservation
-                      ? `Module: ${reservation.subModule?.name || "N/A"}\n` +
-                        `Groupe: ${reservation.group?.name || "N/A"}\n` +
-                        `Prof: ${
-                          reservation.subModule?.professor?.firstName || ""
-                        } ${
-                          reservation.subModule?.professor?.lastName || ""
-                        }\n` +
-                        `Présence: ${reservation.wasAttended ? "✔" : "✖"}`
-                      : "Libre"}
-                  </Text>
-                );
-              }
-            )}
-
-            <Text style={styles.tableCell}>{room.capacity}</Text>
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <Text style={styles.tableHeader}>Salle</Text>
+            <Text style={styles.tableHeader}>08:00-10:00</Text>
+            <Text style={styles.tableHeader}>10:15-12:15</Text>
+            <Text style={styles.tableHeader}>13:00-15:00</Text>
+            <Text style={styles.tableHeader}>15:15-17:15</Text>
+            <Text style={styles.tableHeader}>Capacité</Text>
           </View>
-        ))}
-      </View>
-    </Page>
-  </Document>
-);
+
+          {rooms.map((room) => (
+            <View style={styles.tableRow} key={`room-${room.id}`}>
+              <Text style={styles.tableCell}>
+                {room.name} {room.type ? `(${room.type})` : ''}
+              </Text>
+
+              {["08:00-10:00", "10:15-12:15", "13:00-15:00", "15:15-17:15"].map(
+                (timeSlot, index) => {
+                  const [start, end] = timeSlot.split("-");
+                  const reservation = reservations.find(
+                    (r) =>
+                      r.classroomId === room.id &&
+                      new Date(r.startDateTime).toLocaleTimeString("fr-FR", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }) <= end &&
+                      new Date(r.endDateTime).toLocaleTimeString("fr-FR", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }) >= start
+                  );
+
+                  return (
+                    <Text 
+                      style={styles.wideCell} 
+                      key={`room-${room.id}-timeslot-${index}-${timeSlot}`}
+                    >
+                      {reservation
+                        ? `Module: ${reservation.subModule?.name || "N/A"}\n` +
+                          `Groupe: ${reservation.group?.name || "N/A"}\n` +
+                          `Prof: ${
+                            reservation.subModule?.professor?.firstName || ""
+                          } ${
+                            reservation.subModule?.professor?.lastName || ""
+                          }\n` +
+                          `Présence: ${reservation.wasAttended ? "✔" : "✖"}`
+                        : "Libre"}
+                    </Text>
+                  );
+                }
+              )}
+
+              <Text style={styles.tableCell}>{room.capacity}</Text>
+            </View>
+          ))}
+        </View>
+      </Page>
+    </Document>
+  );
+};
 
 const PdfDocument = ({ data }: { data: PDFData }) => {
   switch (data.type) {
@@ -324,6 +340,8 @@ const PdfDocument = ({ data }: { data: PDFData }) => {
 };
 
 export const PDFGenerator = ({ data }: { data: PDFData }) => {
+  const [isGenerating, setIsGenerating] = React.useState(false);
+
   const getFileName = () => {
     switch (data.type) {
       case "group":
@@ -343,15 +361,63 @@ export const PDFGenerator = ({ data }: { data: PDFData }) => {
     }
   };
 
+  // Ensure data is valid before rendering
+  const isValidData = () => {
+    if (!data) return false;
+    
+    switch (data.type) {
+      case "rooms":
+        return Array.isArray(data.rooms) && Array.isArray(data.reservations);
+      case "group":
+        return data.group && Array.isArray(data.sessions);
+      case "professor":
+        return data.professor && Array.isArray(data.sessions);
+      case "makeup":
+      case "exam":
+        return data.group && Array.isArray(data.sessions);
+      default:
+        return false;
+    }
+  };
+
+  const handleGeneratePDF = async () => {
+    if (!isValidData()) {
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const blob = await pdf(<PdfDocument data={data} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = getFileName();
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  if (!isValidData()) {
+    return (
+      <button className={style.pdfButton} disabled>
+        Données invalides
+      </button>
+    );
+  }
+
   return (
-    <PDFDownloadLink
-      document={<PdfDocument data={data} />}
-      fileName={getFileName()}>
-      {({ loading }) => (
-        <button className={style.pdfButton} disabled={loading}>
-          {loading ? "Génération..." : "📄 Télécharger PDF"}
-        </button>
-      )}
-    </PDFDownloadLink>
+    <button 
+      className={style.pdfButton} 
+      onClick={handleGeneratePDF}
+      disabled={isGenerating}
+    >
+      {isGenerating ? "Génération..." : "📄 Télécharger PDF"}
+    </button>
   );
 };

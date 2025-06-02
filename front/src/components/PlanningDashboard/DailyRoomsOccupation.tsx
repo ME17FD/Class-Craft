@@ -1,11 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "../../styles/PlanningDashboard/DailyRoomsOccupation.module.css";
 import { usePlanningData } from "../../hooks/usePlanningData";
-import { format, parse, isSameDay } from "date-fns";
+import { format, parse, isSameDay, eachDayOfInterval, addDays } from "date-fns";
 import { Room } from "../../types/schedule";
 import { Professor, SubModule, Group } from "../../types/type";
 import * as XLSX from "xlsx";
-import { PDFGenerator } from "./PDFGenerator";
+import { RoomsPDFGenerator } from './RoomsPDFGenerator';
 
 interface Reservation {
   id: number;
@@ -37,6 +37,8 @@ const DailyRoomsOccupation: React.FC<DailyRoomsOccupationProps> = ({
   const { rooms, reservations, loading, error, updatePresence } =
     usePlanningData();
   const selectedDate = new Date(date);
+  const [useDateRange, setUseDateRange] = useState(false);
+  const [endDate, setEndDate] = useState(date);
 
   useEffect(() => {
     console.log("Current reservations:", reservations);
@@ -45,10 +47,39 @@ const DailyRoomsOccupation: React.FC<DailyRoomsOccupationProps> = ({
   }, [reservations, date, rooms]);
 
   const dayReservations = React.useMemo(() => {
-    const filtered = reservations.filter((reservation) =>
-      isSameDay(new Date(reservation.startDateTime), selectedDate)
-    );
-    console.log("Filtered reservations for date:", date, filtered);
+    console.log('Filtering reservations:', {
+      allReservations: reservations,
+      selectedDate: format(selectedDate, 'yyyy-MM-dd'),
+      selectedDateObj: selectedDate
+    });
+
+    const filtered = reservations.filter((reservation) => {
+      const reservationDate = new Date(reservation.startDateTime);
+      const isSameDayResult = isSameDay(reservationDate, selectedDate);
+      
+      console.log('Checking reservation:', {
+        reservationId: reservation.id,
+        reservationDate: format(reservationDate, 'yyyy-MM-dd'),
+        selectedDate: format(selectedDate, 'yyyy-MM-dd'),
+        isSameDay: isSameDayResult,
+        roomId: reservation.classroomId,
+        subModule: reservation.submodule?.name,
+        groupName: reservation.groupName
+      });
+
+      return isSameDayResult;
+    });
+
+    console.log('Filtered reservations for PDF:', {
+      filteredCount: filtered.length,
+      filteredReservations: filtered.map(r => ({
+        id: r.id,
+        roomId: r.classroomId,
+        date: format(new Date(r.startDateTime), 'yyyy-MM-dd'),
+        subModule: r.submodule?.name,
+        groupName: r.groupName
+      }))
+    });
     return filtered;
   }, [reservations, date]);
 
@@ -115,102 +146,129 @@ const DailyRoomsOccupation: React.FC<DailyRoomsOccupationProps> = ({
 
   const exportToExcel = () => {
     const workbook = XLSX.utils.book_new();
-    const data: (string | number)[][] = [];
+    
+    // Get date range
+    const dates = useDateRange
+      ? eachDayOfInterval({
+          start: new Date(date),
+          end: new Date(endDate),
+        })
+      : [new Date(date)];
 
-    // Header row
-    data.push(["Salle", ...timeSlots.map((slot) => slot.label), "Capacité"]);
+    // Create a sheet for each date
+    dates.forEach((currentDate) => {
+      const dateReservations = reservations.filter(reservation => 
+        isSameDay(new Date(reservation.startDateTime), currentDate)
+      );
 
-    rooms.forEach((room) => {
-      const row: (string | number)[] = [room.name];
+      const data: (string | number)[][] = [];
 
-      for (const slot of timeSlots) {
-        const reservation = dayReservations.find(
-          (r) =>
-            r.classroomId === room.id &&
-            isReservationInTimeSlot(r, slot.start, slot.end)
-        );
+      // Header row
+      data.push(["Salle", ...timeSlots.map((slot) => slot.label), "Capacité"]);
 
-        if (reservation) {
-          const moduleName = reservation.submodule?.name || "N/A";
-          const groupName =
-            reservation.groupName || `ID: ${reservation.groupId}` || "N/A";
-          const profName = reservation.submodule?.teacher
-            ? `${reservation.submodule.teacher.firstName} ${reservation.submodule.teacher.lastName}`
-            : "N/A";
-          const presence =
-            reservation.wasAttended === true
-              ? "Présent"
-              : reservation.wasAttended === false
-              ? "Absent"
-              : "N/A";
+      rooms.forEach((room) => {
+        const row: (string | number)[] = [room.name];
 
-          // multiline text to force Excel auto row height
-          const cellContent =
-            `Module: ${moduleName}\n` +
-            `Groupe: ${groupName}\n` +
-            `Prof: ${profName}\n` +
-            `Présence: ${presence}`;
-
-          row.push(cellContent);
-        } else {
-          row.push("-"); // fill libre cells with "-"
-        }
-      }
-
-      row.push(room.capacity);
-
-      data.push(row);
-    });
-
-    const worksheet = XLSX.utils.aoa_to_sheet(data);
-
-    // Bold headers
-    const range = XLSX.utils.decode_range(worksheet["!ref"] || "");
-    for (let C = range.s.c; C <= range.e.c; ++C) {
-      const cellAddress = XLSX.utils.encode_cell({ r: 0, c: C });
-      if (!worksheet[cellAddress]) continue;
-      if (!worksheet[cellAddress].s) worksheet[cellAddress].s = {};
-      worksheet[cellAddress].s.font = { bold: true };
-    }
-
-    // Wrap text & auto column width
-    const colWidths = data[0].map((_, colIndex) => {
-      let maxLength = 10;
-      for (let rowIndex = 0; rowIndex < data.length; rowIndex++) {
-        const cell = data[rowIndex][colIndex];
-        if (cell) {
-          const cellLines = String(cell).split("\n");
-          const longestLineLength = cellLines.reduce(
-            (max, line) => Math.max(max, line.length),
-            0
+        for (const slot of timeSlots) {
+          const reservation = dateReservations.find(
+            (r) =>
+              r.classroomId === room.id &&
+              isReservationInTimeSlot(r, slot.start, slot.end)
           );
-          maxLength = Math.max(maxLength, longestLineLength);
-        }
-      }
-      return { wch: maxLength + 2 };
-    });
-    worksheet["!cols"] = colWidths;
 
-    // Apply wrapText & vertical alignment top to all cells except header
-    for (let R = 1; R <= range.e.r; ++R) {
+          if (reservation) {
+            const moduleName = reservation.submodule?.name || "N/A";
+            const groupName =
+              reservation.groupName || `ID: ${reservation.groupId}` || "N/A";
+            const profName = reservation.submodule?.teacher
+              ? `${reservation.submodule.teacher.firstName} ${reservation.submodule.teacher.lastName}`
+              : "N/A";
+            const presence = reservation.wasAttended ? "X" : "0";
+
+            // multiline text to force Excel auto row height
+            const cellContent =
+              `Module: ${moduleName}\n` +
+              `Groupe: ${groupName}\n` +
+              `Prof: ${profName}\n` +
+              `${presence}`;
+
+            row.push(cellContent);
+          } else {
+            row.push("-"); // fill libre cells with "-"
+          }
+        }
+
+        row.push(room.capacity);
+        data.push(row);
+      });
+
+      const worksheet = XLSX.utils.aoa_to_sheet(data);
+
+      // Bold headers
+      const range = XLSX.utils.decode_range(worksheet["!ref"] || "");
       for (let C = range.s.c; C <= range.e.c; ++C) {
-        const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
-        const cell = worksheet[cellAddress];
-        if (cell) {
-          if (!cell.s) cell.s = {};
-          if (!cell.s.alignment) cell.s.alignment = {};
-          cell.s.alignment.wrapText = true;
-          cell.s.alignment.vertical = "top";
-        }
+        const cellAddress = XLSX.utils.encode_cell({ r: 0, c: C });
+        if (!worksheet[cellAddress]) continue;
+        if (!worksheet[cellAddress].s) worksheet[cellAddress].s = {};
+        worksheet[cellAddress].s.font = { bold: true };
       }
-    }
 
-    XLSX.utils.book_append_sheet(workbook, worksheet, `Occupation Salles`);
+      // Wrap text & auto column width
+      const colWidths = data[0].map((_, colIndex) => {
+        let maxLength = 10;
+        for (let rowIndex = 0; rowIndex < data.length; rowIndex++) {
+          const cell = data[rowIndex][colIndex];
+          if (cell) {
+            const cellLines = String(cell).split("\n");
+            const longestLineLength = cellLines.reduce(
+              (max, line) => Math.max(max, line.length),
+              0
+            );
+            maxLength = Math.max(maxLength, longestLineLength);
+          }
+        }
+        return { wch: maxLength + 2 };
+      });
+      worksheet["!cols"] = colWidths;
 
-    XLSX.writeFile(
-      workbook,
-      `occupation-salles-${format(selectedDate, "yyyy-MM-dd")}.xlsx`
-    );
+      // Apply wrapText & vertical alignment top to all cells except header
+      for (let R = 1; R <= range.e.r; ++R) {
+        let maxLines = 1; // Track maximum number of lines in this row
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+          const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+          const cell = worksheet[cellAddress];
+          if (cell) {
+            if (!cell.s) cell.s = {};
+            if (!cell.s.alignment) cell.s.alignment = {};
+            cell.s.alignment.wrapText = true;
+            cell.s.alignment.vertical = "top";
+            
+            // Calculate number of lines in this cell
+            const cellContent = String(cell.v || '');
+            const lineCount = cellContent.split('\n').length;
+            maxLines = Math.max(maxLines, lineCount);
+          }
+        }
+        
+        // Set row height based on content (approximately 15 points per line)
+        if (!worksheet['!rows']) worksheet['!rows'] = [];
+        worksheet['!rows'][R] = { hpt: maxLines * 15 };
+      }
+
+      // Add sheet with formatted date as name
+      const sheetName = format(currentDate, "dd-MM-yyyy");
+      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+    });
+
+    // Generate filename based on date range
+    const filename = useDateRange
+      ? `occupation-salles-${format(new Date(date), "yyyy-MM-dd")}-${format(
+          new Date(endDate),
+          "yyyy-MM-dd"
+        )}.xlsx`
+      : `occupation-salles-${format(new Date(date), "yyyy-MM-dd")}.xlsx`;
+
+    XLSX.writeFile(workbook, filename);
   };
 
   if (loading) {
@@ -253,20 +311,39 @@ const DailyRoomsOccupation: React.FC<DailyRoomsOccupationProps> = ({
               rooms,
               reservations,
               dayReservations,
+              selectedDate: format(selectedDate, 'yyyy-MM-dd')
             })
           }>
           Log Current State
         </button>
-        <button onClick={exportToExcel} style={{ marginLeft: "10px" }}>
-          Export to Excel
-        </button>
-        <PDFGenerator
-          data={{
-            type: "rooms",
-            rooms: rooms,
-            reservations: dayReservations,
-            date: date,
-          }}
+        <div className={styles["export-controls"]}>
+          <label>
+            <input
+              type="checkbox"
+              checked={useDateRange}
+              onChange={(e) => setUseDateRange(e.target.checked)}
+            />
+            Utiliser une plage de dates
+          </label>
+          {useDateRange && (
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              min={date}
+              max={format(addDays(new Date(date), 30), 'yyyy-MM-dd')}
+              className={styles["date-input"]}
+            />
+          )}
+          <button onClick={exportToExcel} style={{ marginLeft: "10px" }}>
+            Export to Excel
+          </button>
+        </div>
+        <RoomsPDFGenerator
+          rooms={rooms}
+          reservations={reservations}
+          startDate={date}
+          endDate={useDateRange ? endDate : undefined}
         />
       </div>
 
