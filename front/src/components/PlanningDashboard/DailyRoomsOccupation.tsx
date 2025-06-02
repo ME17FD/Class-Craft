@@ -164,7 +164,7 @@ const DailyRoomsOccupation: React.FC<DailyRoomsOccupationProps> = ({
       const data: (string | number)[][] = [];
 
       // Header row
-      data.push(["Salle", ...timeSlots.map((slot) => slot.label), "Capacité"]);
+      data.push(["Salle", ...timeSlots.map((slot) => slot.label)]);
 
       rooms.forEach((room) => {
         const row: (string | number)[] = [room.name];
@@ -198,7 +198,6 @@ const DailyRoomsOccupation: React.FC<DailyRoomsOccupationProps> = ({
           }
         }
 
-        row.push(room.capacity);
         data.push(row);
       });
 
@@ -304,26 +303,17 @@ const DailyRoomsOccupation: React.FC<DailyRoomsOccupationProps> = ({
       <h2>{format(selectedDate, "dd MMMM yyyy")}</h2>
 
       <div className={styles["debug-info"]}>
-        <p>Showing {dayReservations.length} reservations for this date</p>
-        <button
-          onClick={() =>
-            console.log("Current state:", {
-              rooms,
-              reservations,
-              dayReservations,
-              selectedDate: format(selectedDate, 'yyyy-MM-dd')
-            })
-          }>
-          Log Current State
-        </button>
         <div className={styles["export-controls"]}>
-          <label>
-            <input
-              type="checkbox"
-              checked={useDateRange}
-              onChange={(e) => setUseDateRange(e.target.checked)}
-            />
+          <label className={styles.toggleLabel}>
             Utiliser une plage de dates
+            <div className={styles.toggleSwitch}>
+              <input
+                type="checkbox"
+                checked={useDateRange}
+                onChange={(e) => setUseDateRange(e.target.checked)}
+              />
+              <span className={styles.slider}></span>
+            </div>
           </label>
           {useDateRange && (
             <input
@@ -335,16 +325,18 @@ const DailyRoomsOccupation: React.FC<DailyRoomsOccupationProps> = ({
               className={styles["date-input"]}
             />
           )}
-          <button onClick={exportToExcel} style={{ marginLeft: "10px" }}>
-            Export to Excel
-          </button>
+          <div className={styles["export-buttons"]}>
+            <button onClick={exportToExcel}>
+              Télécharger Excel
+            </button>
+            <RoomsPDFGenerator
+              rooms={rooms}
+              reservations={reservations}
+              startDate={date}
+              endDate={useDateRange ? endDate : undefined}
+            />
+          </div>
         </div>
-        <RoomsPDFGenerator
-          rooms={rooms}
-          reservations={reservations}
-          startDate={date}
-          endDate={useDateRange ? endDate : undefined}
-        />
       </div>
 
       <div className={styles["planning-grid"]}>

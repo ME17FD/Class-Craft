@@ -6,6 +6,9 @@ import { fr } from 'date-fns/locale';
 import style from '../../styles/PlanningDashboard/PlanningGroup.module.css';
 import pdfStyles from '../../styles/PlanningDashboard/RoomsPDFGenerator.module.css';
 import { Professor, SubModule, Group } from '../../types/type';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
+import dailyStyles from '../../styles/PlanningDashboard/DailyRoomsOccupation.module.css';
 
 interface Reservation {
   id: number;
@@ -98,6 +101,9 @@ const styles = StyleSheet.create({
     padding: '5px',
     border: '1px solid #ccc',
     borderRadius: '4px',
+  },
+  "export-button": {
+    // Add appropriate styles for the export button
   },
 });
 
@@ -316,11 +322,11 @@ export const RoomsPDFGenerator: React.FC<RoomsPDFGeneratorProps> = ({
   return (
     <div className={pdfStyles.container}>
       <button
-        className={style.pdfButton}
         onClick={handleGeneratePDF}
         disabled={isGenerating}
+        className={dailyStyles["export-button"]}
       >
-        {isGenerating ? 'Génération...' : '📄 Télécharger PDF'}
+        {isGenerating ? "Génération..." : "Télécharger PDF"}
       </button>
     </div>
   );
