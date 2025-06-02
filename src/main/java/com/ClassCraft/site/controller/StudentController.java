@@ -33,6 +33,7 @@ public class StudentController {
     @GetMapping
     public ResponseEntity<List<StudentDTO>> getAllStudents() {
         List<StudentDTO> dtos = studentRepository.findAll().stream()
+            .filter(student -> Boolean.TRUE.equals(student.getApproved()))
             .map(StudentDTO::fromEntity)
             .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
@@ -44,6 +45,15 @@ public class StudentController {
             .map(StudentDTO::fromEntity)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/unapproved")
+    public ResponseEntity<List<StudentDTO>> getUnapprovedStudents() {
+        List<StudentDTO> unapprovedStudents = studentRepository.findByApprovedIsNullOrApprovedFalse()
+            .stream()
+            .map(StudentDTO::fromEntity)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(unapprovedStudents);
     }
 
     @PostMapping
@@ -61,6 +71,7 @@ public class StudentController {
                 student.setEmail(updated.getEmail());
                 student.setCNE(updated.getCNE());
                 student.setRegistrationNumber(updated.getRegistrationNumber());
+                student.setApproved(updated.getApproved());
                 groupRepository.findById(updated.getGroupId()).ifPresent(group -> student.setGroup(group));
                 
                 Student saved = studentRepository.save(student);
@@ -70,11 +81,11 @@ public class StudentController {
     }
 
     @DeleteMapping("/{id}")
-public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
-    if (studentRepository.existsById(id)) {
-        studentRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
+        if (studentRepository.existsById(id)) {
+            studentRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
-    return ResponseEntity.notFound().build();
-}
 }

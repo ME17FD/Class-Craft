@@ -246,6 +246,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             "Rami", "Slimani", "Tazi", "Zeroual", "Benali", "El Ouazzani", "Hassani", "Khalil"
         };
 
+        // Create 100 approved students
         for (int i = 0; i < 100; i++) {
             Student student = new Student();
             // Use a different combination of names for each student
@@ -262,6 +263,24 @@ public class DatabaseSeeder implements CommandLineRunner {
             student.setGroup(groups.get(i % groups.size()));
             students.add(student);
         }
+
+        // Create 20 unapproved students
+        for (int i = 0; i < 20; i++) {
+            Student student = new Student();
+            int firstNameIndex = (i + random.nextInt(32)) % firstNames.length;
+            int lastNameIndex = (i + random.nextInt(32)) % lastNames.length;
+            
+            student.setFirstName(firstNames[firstNameIndex]);
+            student.setLastName(lastNames[lastNameIndex]);
+            student.setEmail("pending.student" + (i + 1) + "@classcraft.com");
+            student.setPassword(passwordEncoder.encode("pending" + (i + 1)));
+            student.setApproved(false);
+            student.setCNE("P" + String.format("%05d", i + 1));
+            student.setRegistrationNumber("PR" + String.format("%05d", i + 1));
+            student.setGroup(groups.get(i % groups.size()));
+            students.add(student);
+        }
+
         return students;
     }
 

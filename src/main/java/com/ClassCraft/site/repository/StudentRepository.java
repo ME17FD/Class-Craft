@@ -13,5 +13,5 @@ public interface StudentRepository extends UserRepository<Student> {
     int countByGroupId(Long groupId);
     boolean existsByCNE(String cne);
     boolean existsByRegistrationNumber(String registrationNumber);
-    
+    List<Student> findByApprovedIsNullOrApprovedFalse();
 }

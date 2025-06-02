@@ -7,6 +7,7 @@ public class ProfessorDTO extends UserDTO {
     private String grade;
     private List<ModuleDTO> modules;
     private List<SubModuleDTO> subModules;
+    private Boolean approved;
     
     public String getSpecialty() {
         return specialty;
@@ -37,5 +38,13 @@ public class ProfessorDTO extends UserDTO {
 
     public void setSubModules(List<SubModuleDTO> subModules) {
         this.subModules = subModules;
+    }
+
+    public Boolean getApproved() {
+        return approved;
+    }
+
+    public void setApproved(Boolean approved) {
+        this.approved = approved;
     }
 }

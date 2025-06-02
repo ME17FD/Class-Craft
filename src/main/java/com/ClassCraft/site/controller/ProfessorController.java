@@ -51,6 +51,7 @@ public class ProfessorController {
                     dto.setEmail(professor.getEmail());
                     dto.setSpecialty(professor.getSpecialty());
                     dto.setGrade(professor.getGrade());
+                    dto.setApproved(professor.getApproved());
 
                     // Fetch modules and submodules assigned to this professor
                     List<SubModule> subModuleEntities = subModuleRepository.findByTeacher(professor);
@@ -152,6 +153,7 @@ public class ProfessorController {
             p.setFirstName(updated.getFirstName());
             p.setLastName(updated.getLastName());
             p.setEmail(updated.getEmail());
+            p.setApproved(updated.getApproved());
             return ResponseEntity.ok(professorRepository.save(p));
         }).orElse(ResponseEntity.notFound().build());
     }

@@ -8,7 +8,9 @@ public class StudentDTO extends UserDTO {
     private Long groupId;
     private String groupName;
     private String password;
-public static StudentDTO fromEntity(Student student) {
+    private Boolean approved;
+
+    public static StudentDTO fromEntity(Student student) {
         StudentDTO dto = new StudentDTO();
         
         // Set UserDTO fields
@@ -16,6 +18,7 @@ public static StudentDTO fromEntity(Student student) {
         dto.setFirstName(student.getFirstName());
         dto.setLastName(student.getLastName());
         dto.setEmail(student.getEmail());
+        dto.setApproved(student.getApproved());
         
         // Set Student-specific fields
         dto.setCNE(student.getCNE());
@@ -43,6 +46,13 @@ public static StudentDTO fromEntity(Student student) {
     public String getGroupName() { return groupName; }
     public void setGroupName(String groupName) { this.groupName = groupName; }
 
+    public Boolean getApproved() {
+        return approved;
+    }
+
+    public void setApproved(Boolean approved) {
+        this.approved = approved;
+    }
 
     public String getPassword() {
         return password;
