@@ -3,6 +3,7 @@ import { usePlanning } from "../../context/PlanningContext";
 import styles from "../../styles/PlanningDashboard/PlanningGroup.module.css";
 import { Professor } from "../../types/type";
 import { FiChevronDown, FiChevronRight } from "react-icons/fi";
+import { useApiData } from "../../hooks/useApiData";
 
 interface ProfessorGroupsProps {
   professor?: Professor;
@@ -20,8 +21,10 @@ const ProfessorGroups: React.FC<ProfessorGroupsProps> = ({ professor }) => {
       </div>
     );
   }
+  const { students } = useApiData();
 
   // Mémoization des données filtrées
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { taughtGroups, groupSessions } = useMemo(() => {
     // Filtrer les sessions du professeur
     const profSessions = sessions.filter(
@@ -99,32 +102,17 @@ const ProfessorGroups: React.FC<ProfessorGroupsProps> = ({ professor }) => {
 
             {expandedGroups.includes(group.id) && (
               <div className={styles.groupDetails}>
-                <div className={styles.scheduleSection}>
-                  <h4>Emploi du temps</h4>
-                  {groupSessions
-                    .filter((s) => s.group?.id === group.id)
-                    .map((session) => (
-                      <div key={session.id} className={styles.sessionPreview}>
-                        <div className={styles.sessionTime}>
-                          <span>{session.day || session.dayOfWeek}</span>
-                          <span>
-                            {session.startTime} - {session.endTime}
-                          </span>
-                        </div>
-                        <div className={styles.sessionInfo}>
-                          <span className={styles.module}>
-                            {session.module?.name ||
-                              session.subModule?.name ||
-                              "Cours"}
-                          </span>
-                          {session.classroom?.name && (
-                            <span className={styles.classroom}>
-                              Salle: {session.classroom.name}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                <div className={styles.studentList}>
+                  <h4>Étudiants du groupe {group.name}</h4>
+                  <ul>
+                    {students
+                      .filter((student) => student.groupId === group.id)
+                      .map((student) => (
+                        <li key={student.id}>
+                          {student.firstName} {student.lastName}
+                        </li>
+                      ))}
+                  </ul>
                 </div>
               </div>
             )}

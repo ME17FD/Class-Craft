@@ -5,16 +5,17 @@ import {
   Student,
   CrudModalType
 } from "../types/type";
-//import { useMockData } from '../hooks/useMockData';
 import { useApiData } from "../hooks/useApiData";
+
 const usePedagogicalData = () => {
   const {
+    rooms,
     fields,
     modules,
     subModules,
     groups,
     professors,
-    students:initialStudents,
+    students: initialStudents,
     addField,
     updateField,
     deleteField,
@@ -33,15 +34,21 @@ const usePedagogicalData = () => {
     addStudent,
     updateStudent,
     deleteStudent,
+    addClassroom,
+    updateClassroom,
+    deleteClassroom,
     assignStudentsToGroup,
     removeStudentsFromGroup,
   } = useApiData();
+
   const [students, setStudents] = useState<Student[]>(initialStudents);
+  
   useEffect(() => {
     if (initialStudents.length > 0) {
       setStudents(initialStudents);
     }
   }, [initialStudents]);
+
   const [modalState, setModalState] = useState<ModalState>({
     isOpen: false,
     type: "add",
@@ -125,18 +132,19 @@ const usePedagogicalData = () => {
             deleteProfessor(entity.id);
             break;
           case 'students':
-            console.log('Deleting student');
             deleteStudent(entity.id);
+            break;
+          case 'classrooms':
+            deleteClassroom(entity.id);
             break;
         }
         handleCloseModal();
         return;
       }
-  
+
       // Then handle save operations (add/edit)
       const saveOperation = operation as SaveOperation;
-      console.log(`${entityType} ${saveOperation} action`);
-  
+
       switch (entityType) {
         case 'fields':
           saveOperation === 'add' ? addField(entity) : updateField(entity);
@@ -155,6 +163,9 @@ const usePedagogicalData = () => {
           break;
         case 'students':
           saveOperation === 'add' ? addStudent(entity) : updateStudent(entity);
+          break;
+        case 'classrooms':
+          saveOperation === 'add' ? addClassroom(entity) : updateClassroom(entity);
           break;
       }
       handleCloseModal();
@@ -179,6 +190,9 @@ const usePedagogicalData = () => {
       addStudent,
       updateStudent,
       deleteStudent,
+      addClassroom,
+      updateClassroom,
+      deleteClassroom,
     ]
   );
 
@@ -199,6 +213,7 @@ const usePedagogicalData = () => {
       groups,
       professors,
       allStudents: students,
+      rooms,
     },
     modalState,
     handleAdd,

@@ -6,6 +6,7 @@ import PlanningDashboard from "./components/PlanningDashboard/PlanningDashboard"
 import PedagogicalDashboard from "./components/PedagogicalDashboard";
 import StudentDashboard from "./components/StudentDashboard/StudentDashboard";
 import ProfessorDashboard from "./components/ProfessorDashboard/ProfessorDashboard";
+import ApprovalManager from "./components/ApprovalManager";
 const App: React.FC = () => {
   return (
     <Router>
@@ -32,6 +33,10 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute Component={PlanningDashboard} role="ADMIN" />
           }
+        />
+        <Route
+          path="/approval-dashboard"
+          element={<ProtectedRoute Component={ApprovalManager} role="ADMIN" />}
         />
 
         {/* Protected for PROFESSOR */}

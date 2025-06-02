@@ -6,9 +6,12 @@ export type Student = {
   firstName: string;
   groupId: number | null;
   email?: string;
+  approved?: boolean | null;
+
 };
 
 export type Module = {
+
   id?: number;
   name: string;
   code: string;
@@ -42,7 +45,7 @@ export type Professor = {
   lastName: string;  // Changé ici
   email: string;
   password?: string;
-  approved?: boolean;
+  approved?: boolean |null;
   grade?: string;
   specialty?: string;
   modules?: number[];
@@ -58,7 +61,7 @@ export type Group = {
 
 export type CrudModalType = 'add' | 'edit' | 'delete' | 'assign';
 
-export type TabType = 'groups' | 'students' | 'fields' | 'modules' | 'submodules' | 'professors' | 'weekly' | 'field' | 'daily' | 'create';
+export type TabType = 'groups' | 'students' | 'fields' | 'modules' | "classrooms"| 'submodules' | 'professors' | 'weekly' | 'field' | 'daily' | 'create';
 
 export interface ModalState {
   isOpen: boolean;
