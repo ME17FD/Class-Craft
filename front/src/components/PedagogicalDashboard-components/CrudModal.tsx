@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import styles from "../../styles/PedagogicalDashboard-components/CrudModal.module.css";
 import Button from "./Button";
@@ -45,6 +47,10 @@ const CrudModal: React.FC<CrudModalProps> = ({
   );
   const [temporarilySelectedSubModules, setTemporarilySelectedSubModules] =
     useState<number[]>([]);
+  const [
+    availableSubModulesForAssignment,
+    setAvailableSubModulesForAssignment,
+  ] = useState<SubModule[]>([]);
 
   // Initialize formData with proper default values
   const [formData, setFormData] = useState<Record<string, any>>(() => {
@@ -91,6 +97,14 @@ const CrudModal: React.FC<CrudModalProps> = ({
     }
   }, [selectedModule, subModules]);
 
+  useEffect(() => {
+    if (type === "edit" && entityType === "modules") {
+      // Load unassigned submodules when editing a module
+      const unassignedSubModules = subModules.filter((sm) => !sm.moduleId);
+      setAvailableSubModulesForAssignment(unassignedSubModules);
+    }
+  }, [type, entityType, subModules]);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -134,12 +148,21 @@ const CrudModal: React.FC<CrudModalProps> = ({
   };
 
   const handleRemoveSubModule = (subModuleId: number) => {
+    const removedSubModule = subModules.find((sm) => sm.id === subModuleId);
     setFormData({
       ...formData,
       subModules: formData.subModules.filter(
         (id: number) => id !== subModuleId
       ),
     });
+
+    // If the submodule was unassigned before being added, make it available again
+    if (removedSubModule && !removedSubModule.moduleId) {
+      setAvailableSubModulesForAssignment((prev) => [
+        ...prev,
+        removedSubModule,
+      ]);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -195,9 +218,9 @@ const CrudModal: React.FC<CrudModalProps> = ({
           </select>
         </div>
 
-        {/* Submodules section - always visible */}
+        {/* Current submodules */}
         <div className={styles.formGroup}>
-          <label>Sous-modules</label>
+          <label>Sous-modules actuels</label>
           <div className={styles.selectedItemsContainer}>
             {formData.subModules?.map((subModId: number) => {
               const subModule = subModules.find((sm) => sm.id === subModId);
@@ -208,45 +231,62 @@ const CrudModal: React.FC<CrudModalProps> = ({
                   <span>
                     {subModule.name} ({subModule.nbrHours}h)
                   </span>
-                  <Button
-                    variant="delete"
-                    onClick={() => handleRemoveSubModule(subModule.id)}>
-                    ×
-                  </Button>
+                  {isEditMode && (
+                    <Button
+                      variant="delete"
+                      onClick={() => handleRemoveSubModule(subModule.id)}>
+                      ×
+                    </Button>
+                  )}
                 </div>
               );
             })}
           </div>
-
-          <div className={styles.selectionContainer}>
-            <select
-              value={selectedModule || ""}
-              onChange={(e) => setSelectedModule(Number(e.target.value))}>
-              <option value="">Sélectionner un module</option>
-              {modules.map((module) => (
-                <option key={module.id} value={module.id}>
-                  {module.name}
-                </option>
-              ))}
-            </select>
-
-            <Button
-              variant="primary"
-              onClick={() => {
-                if (selectedModule) {
-                  const moduleSubs = subModules.filter(
-                    (sm) => sm.moduleId === selectedModule
-                  );
-                  handleAddSubModules(moduleSubs.map((sm) => sm.id));
-                }
-              }}
-              disabled={!selectedModule}>
-              Ajouter sous-modules
-            </Button>
-          </div>
         </div>
 
-        {/* Professors section - only in edit mode */}
+        {/* Submodule assignment (edit mode only) */}
+        {isEditMode && (
+          <div className={styles.formGroup}>
+            <label>Attribuer des sous-modules disponibles</label>
+            <div className={styles.selectionContainer}>
+              <select
+                multiple
+                size={5}
+                value={temporarilySelectedSubModules}
+                onChange={(e) => {
+                  const options = Array.from(e.target.selectedOptions);
+                  const values = options.map((opt) => Number(opt.value));
+                  setTemporarilySelectedSubModules(values);
+                }}>
+                {availableSubModulesForAssignment.map((subModule) => (
+                  <option key={subModule.id} value={subModule.id}>
+                    {subModule.name} ({subModule.nbrHours}h)
+                  </option>
+                ))}
+              </select>
+
+              <Button
+                variant="primary"
+                onClick={() => {
+                  if (temporarilySelectedSubModules.length > 0) {
+                    handleAddSubModules(temporarilySelectedSubModules);
+                    // Update available submodules list
+                    setAvailableSubModulesForAssignment((prev) =>
+                      prev.filter(
+                        (sm) => !temporarilySelectedSubModules.includes(sm.id)
+                      )
+                    );
+                    setTemporarilySelectedSubModules([]);
+                  }
+                }}
+                disabled={temporarilySelectedSubModules.length === 0}>
+                Attribuer
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Associated professors (edit mode only) */}
         {isEditMode && (
           <div className={styles.formGroup}>
             <label>Professeurs associés</label>
@@ -310,45 +350,6 @@ const CrudModal: React.FC<CrudModalProps> = ({
                 <option value="AMPHI">Amphithéâtre</option>
                 <option value="SALLE_TD">Salle de TD</option>
                 <option value="SALLE_TP">Salle de TP</option>
-              </select>
-            </div>
-          </>
-        );
-        return (
-          <>
-            <div className={styles.formGroup}>
-              <label>Nom de la salle</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name || ""}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label>Capacité</label>
-              <input
-                type="number"
-                name="capacity"
-                value={formData.capacity || 0}
-                onChange={handleChange}
-                min="1"
-                required
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label>Type de salle</label>
-              <select
-                name="type"
-                value={formData.type || ""}
-                onChange={handleChange}
-                required>
-                <option value="">Sélectionner un type</option>
-                <option value="Amphithéâtre">Amphithéâtre</option>
-                <option value="Salle de cours">Salle de cours</option>
-                <option value="Laboratoire">Laboratoire</option>
-                <option value="Salle informatique">Salle informatique</option>
               </select>
             </div>
           </>

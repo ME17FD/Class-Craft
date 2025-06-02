@@ -19,17 +19,16 @@ export default function Sidebar() {
       setIsOpen(false);
     };
 
-    const handleLogout = () => {
-      // Clear the user's session data
-      localStorage.removeItem("token");
-      localStorage.removeItem("userRole");
-      localStorage.removeItem("userDetails");
-      // Redirect to login
-      navigate("/");
-    };
+  const handleLogout = () => {
+    // Clear the user's session data
+    localStorage.removeItem("token");
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("userDetails");
+    // Redirect to login
+    navigate("/");
+  };
 
-    const userDetails = JSON.parse(localStorage.getItem("userDetails") || "{}");
-
+  const userDetails = JSON.parse(localStorage.getItem("userDetails") || "{}");
 
   return (
     <>
@@ -62,7 +61,10 @@ export default function Sidebar() {
               className={styles.profileImage}
             />
           </div>
-          <h3 className={styles.profileName}> {userDetails.firstName} {userDetails.lastName}</h3>
+          <h3 className={styles.profileName}>
+            {" "}
+            {userDetails.firstName} {userDetails.lastName}
+          </h3>
         </div>
 
         {/* Boutons de navigation */}
@@ -77,7 +79,11 @@ export default function Sidebar() {
             onClick={handleNavigation("/planning-dashboard")}>
             Planning
           </button>
-          <button className={styles.navButton}>Profile</button>
+          <button
+            className={styles.navButton}
+            onClick={handleNavigation("/approval-dashboard")}>
+            Aprobation
+          </button>
         </div>
 
         {/* Bouton de déconnexion (en bas) */}

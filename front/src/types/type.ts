@@ -6,9 +6,12 @@ export type Student = {
   firstName: string;
   groupId: number | null;
   email?: string;
+  approved?: boolean | null;
+
 };
 
 export type Module = {
+
   id?: number;
   name: string;
   code: string;
@@ -42,7 +45,7 @@ export type Professor = {
   lastName: string;  // Changé ici
   email: string;
   password?: string;
-  approved?: boolean;
+  approved?: boolean |null;
   grade?: string;
   specialty?: string;
   modules?: number[];

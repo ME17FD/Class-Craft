@@ -1,4 +1,4 @@
-import { Group, Professor, Module, SubModule, Field } from './type';
+import { Group, Professor, Module, SubModule, Field , Student} from './type';
 
 // Type pour une séance
 export interface Session {
@@ -31,6 +31,7 @@ export interface Session {
     subModule?: SubModule;
     classroom?: Room;
     group?: Group;
+    student?: Student;
     professorPresent?: boolean;
     duration?: number;
 }

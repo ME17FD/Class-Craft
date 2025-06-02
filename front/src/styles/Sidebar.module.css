@@ -10,7 +10,7 @@
     /* Remplace #000a99 */
     color: white;
     transition: left 0.3s ease;
-    z-index: 1000;
+    z-index: 100000;
     padding: var(--space-lg);
     /* Utilisation de votre variable d'espacement */
     box-shadow: var(--shadow-lg);
