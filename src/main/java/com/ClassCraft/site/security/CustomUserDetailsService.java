@@ -72,10 +72,13 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     private boolean isAccountEnabled(User user) {
-        if (user instanceof Student) {
-            return ((Student) user).getApproved();
+        if (user instanceof Student student) {
+            return student.getApproved();
         }
-        // For Admin and Professor, you might have different approval logic
+        if (user instanceof Professor professor) {
+            return professor.getApproved();
+        }
+        // For Admin you might have different approval logic
         return true; // Default to true if no approval needed
     }
 
