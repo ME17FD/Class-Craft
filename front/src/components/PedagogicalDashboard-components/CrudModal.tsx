@@ -371,10 +371,10 @@ const CrudModal: React.FC<CrudModalProps> = ({
               <label>Filière</label>
               <select
                 name="filiereId"
-                value={formData.filiereId || ""}
+                value={formData?.filiereId || ""}
                 onChange={handleChange}
                 required>
-                <option value="">Sélectionner une filière</option>
+                <option value="">Sélectionnez une filière</option>
                 {fields.map((field) => (
                   <option key={field.id} value={field.id}>
                     {field.name}
@@ -494,6 +494,15 @@ const CrudModal: React.FC<CrudModalProps> = ({
                 value={formData.lastName || ""}
                 onChange={handleChange}
                 required
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Email</label>
+              <input
+                type="text"
+                name="email"
+                value={formData?.email || ""}
+                onChange={handleChange}
               />
             </div>
             <div className={styles.formGroup}>

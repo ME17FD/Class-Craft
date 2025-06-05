@@ -109,6 +109,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<StudentDTO> register(@RequestBody StudentDTO studentDTO) {
+        studentDTO.setApproved(false);
         StudentDTO student = studentService.create(studentDTO);
         return ResponseEntity.ok(student);
     }

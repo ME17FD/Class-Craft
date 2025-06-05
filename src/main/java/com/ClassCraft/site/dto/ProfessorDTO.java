@@ -38,4 +38,6 @@ public class ProfessorDTO extends UserDTO {
     public void setSubModules(List<SubModuleDTO> subModules) {
         this.subModules = subModules;
     }
+
+
 }

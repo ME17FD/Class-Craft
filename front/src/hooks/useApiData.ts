@@ -25,6 +25,7 @@ export const useApiData = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [seances, setSeances] = useState<Session[]>([]);
   const [rooms, setRooms] = useState<Room[]>([]); 
+  const [unapprovedStudents, setUnapprovedStudents] = useState<Student[]>([]);
   
 
 
@@ -180,8 +181,9 @@ const deleteSceance = useCallback(async (sceanceId: number) => {
   }, []);
 
   const updateField = useCallback(async (field: Field) => {
-    await api.put(`/api/filieres/${field.id}`, field);
-    setFields((prev) => prev.map((f) => (f.id === field.id ? field : f)));
+    const res = await api.put(`/api/filieres/${field.id}`, field);
+    setFields((prev) => prev.map((f) => (f.id === field.id ? res.data : f)));
+    return res.data;
   }, []);
 
   const deleteField = useCallback(async (fieldId: number) => {
@@ -197,8 +199,9 @@ const deleteSceance = useCallback(async (sceanceId: number) => {
   }, []);
 
   const updateModule = useCallback(async (module: Module) => {
-    await api.put(`/api/modules/${module.id}`, module);
-    setModules((prev) => prev.map((m) => (m.id === module.id ? module : m)));
+    const res = await api.put(`/api/modules/${module.id}`, module);
+    setModules((prev) => prev.map((m) => (m.id === module.id ? res.data : m)));
+    return res.data;
   }, []);
 
   const deleteModule = useCallback(async (moduleId: number) => {
@@ -214,10 +217,11 @@ const deleteSceance = useCallback(async (sceanceId: number) => {
   }, []);
 
   const updateSubModule = useCallback(async (subModule: SubModule) => {
-    await api.put(`/api/submodules/${subModule.id}`, subModule);
+    const res = await api.put(`/api/submodules/${subModule.id}`, subModule);
     setSubModules((prev) =>
-      prev.map((s) => (s.id === subModule.id ? subModule : s))
+      prev.map((s) => (s.id === subModule.id ? res.data : s))
     );
+    return res.data;
   }, []);
 
   const deleteSubModule = useCallback(async (subModuleId: number) => {
@@ -296,6 +300,17 @@ const deleteSceance = useCallback(async (sceanceId: number) => {
   }, []);
 
   // ----- CRUD: Students -----
+  const fetchUnapprovedStudents = useCallback(async () => {
+    try {
+      const response = await api.get("/api/students/unapproved");
+      setUnapprovedStudents(response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch unapproved students:", error);
+      throw error;
+    }
+  }, []);
+
   const addStudent = useCallback(async (student: Omit<Student, "id">): Promise<Student> => {
     const res = await api.post<Student>("/api/students", student);
     setStudents(prev => [...prev, res.data]);
@@ -351,6 +366,7 @@ const deleteSceance = useCallback(async (sceanceId: number) => {
     deleteStudent,
     fetchData,
     assignStudentsToGroup,
-    removeStudentsFromGroup
+    removeStudentsFromGroup,
+    fetchUnapprovedStudents
   };
 };

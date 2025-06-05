@@ -4,15 +4,24 @@ import { Room, Session } from "../../types/schedule";
 import styles from "../../styles/PlanningDashboard/GroupFormModal.module.css";
 import api from "../../services/api";
 
+// Session type enum mapping
+const SessionType = {
+  CM: 0,
+  TD: 1,
+  TP: 2
+} as const;
+
+type SessionTypeValue = typeof SessionType[keyof typeof SessionType];
+
 interface SessionFormModalProps {
   session: Session | null;
   day: string;
   time: string;
+  group: Group;
   modules: Module[];
   subModules: SubModule[];
   professors: Professor[];
   rooms: Room[];
-  groups: Group[];
   existingSessions: Session[];
   onClose: () => void;
   onSave: (session: Session) => void;
@@ -22,13 +31,13 @@ export const SessionFormModal = ({
   session,
   day,
   time,
+  group,
   onClose,
   onSave,
   modules = [],
   subModules = [],
   professors = [],
   rooms = [],
-  groups = [],
   existingSessions = [],
 }: SessionFormModalProps) => {
   const [selectedModule, setSelectedModule] = useState(
@@ -37,47 +46,27 @@ export const SessionFormModal = ({
   const [selectedSubModule, setSelectedSubModule] = useState(
     session?.subModule?.id?.toString() || ""
   );
-  const [selectedProfessor, setSelectedProfessor] = useState(
-    session?.professor?.id?.toString() || ""
+  const [selectedRoom, setSelectedRoom] = useState(session?.classroom?.id?.toString() || "");
+  const [selectedType, setSelectedType] = useState<SessionTypeValue>(
+    session?.type === 'CM' ? 0 : 
+    session?.type === 'TD' ? 1 : 
+    session?.type === 'TP' ? 2 : 0
   );
-  const [selectedRoom, setSelectedRoom] = useState(session?.classroom?.id || "");
-  const [selectedType, setSelectedType] = useState(session?.type || "CM");
-  const [selectedGroup, setSelectedGroup] = useState<string>(
-    session?.group?.id?.toString() || ""
-  );
-  const [duration, setDuration] = useState(session?.duration || 1);
+  const [frequency, setFrequency] = useState(session?.frequency || 1);
+  const [wasAttended, setWasAttended] = useState(session?.wasAttended || false);
 
-  // Get groups based on mode (add/edit)
-  // Modifier la fonction getAvailableGroups comme suit:
-  const getAvailableGroups = () => {
-    if (session?.id) {
-      // Edit mode - return only the current group (locked)
-      return groups.filter((group) => group.id === session.group?.id);
-    } else {
-      // Add mode - only show groups without any sessions in the entire schedule
-      return groups.filter((group) => {
-        const hasSession = existingSessions.some(
-          (s) => s.group?.id === group.id
-        );
-        return !hasSession;
-      });
-    }
+  // Format time for backend
+  const formatTimeForBackend = (timeStr: string) => {
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}:00`;
   };
 
-  const availableGroups = getAvailableGroups();
-
-  useEffect(() => {
-    if (selectedSubModule) {
-      const subMod = subModules.find(
-        (sm) => sm.id === Number(selectedSubModule)
-      );
-      setDuration(subMod?.nbrHours || 1);
-    }
-  }, [selectedSubModule, subModules]);
-
-  const calculateEndTime = (start: string, hours: number) => {
+  // Calculate end time (always 1 hour after start time)
+  const calculateEndTime = (start: string) => {
     const [h, m] = start.split(":").map(Number);
-    const totalMinutes = h * 60 + m + hours * 60;
+    const totalMinutes = h * 60 + m + 60; // Add 1 hour
     const endH = Math.floor(totalMinutes / 60);
     const endM = totalMinutes % 60;
     return `${endH.toString().padStart(2, "0")}:${endM
@@ -85,69 +74,91 @@ export const SessionFormModal = ({
       .padStart(2, "0")}`;
   };
 
+  // Convert day to English format
+  const formatDayOfWeek = (day: string): string => {
+    const dayMap: { [key: string]: string } = {
+      'lundi': 'Monday',
+      'mardi': 'Tuesday',
+      'mercredi': 'Wednesday',
+      'jeudi': 'Thursday',
+      'vendredi': 'Friday',
+      'samedi': 'Saturday',
+      'dimanche': 'Sunday',
+      'Lundi': 'Monday',
+      'Mardi': 'Tuesday',
+      'Mercredi': 'Wednesday',
+      'Jeudi': 'Thursday',
+      'Vendredi': 'Friday',
+      'Samedi': 'Saturday',
+      'Dimanche': 'Sunday'
+    };
+    return dayMap[day] || day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
+  };
+
+  useEffect(() => {
+    if (selectedSubModule) {
+      const subMod = subModules.find(
+        (sm) => sm.id === Number(selectedSubModule)
+      );
+      // No need to set professor as it will be handled by the backend
+    }
+  }, [selectedSubModule, subModules]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
-      // Validate and find all required objects
-      const selectedProf = professors.find(
-        (p) => p.id === Number(selectedProfessor)
-      );
       const selectedMod = modules.find((m) => m.id === Number(selectedModule));
-
-      const selectedRoomObj = rooms.find((r) => r.name === selectedRoom);
-      const selectedGroupObj = availableGroups.find(
-        (g) => g.id === Number(selectedGroup)
-      );
-
-      if (
-        !selectedProf ||
-        !selectedMod ||
-        !selectedRoomObj ||
-        !selectedGroupObj
-      ) {
-        alert("Veuillez remplir tous les champs obligatoires");
-        return;
-      }
       const selectedSubMod = subModules.find(
         (sm) => sm.id === Number(selectedSubModule)
       );
-      // Format times for backend
-      const formatTimeForBackend = (timeStr: string) => {
-        const [hours, minutes] = timeStr.split(":").map(Number);
-        return `${hours.toString().padStart(2, "0")}:${minutes
-          .toString()
-          .padStart(2, "0")}:00`;
-      };
+      const selectedRoomObj = rooms.find((r) => r.id === Number(selectedRoom));
 
-      const sessionData = {
-        day,
+      if (!selectedMod || !selectedRoomObj) {
+        throw new Error("Veuillez remplir tous les champs obligatoires");
+      }
+
+      const sessionType = selectedType === 0 ? 'CM' as const : 
+                         selectedType === 1 ? 'TD' as const : 
+                         'TP' as const;
+
+      const sessionData: Session = {
+        id: session?.id || 0,
+        dayOfWeek: formatDayOfWeek(day),
         startTime: formatTimeForBackend(time),
-        endTime: formatTimeForBackend(calculateEndTime(time, duration)),
-        professor: { id: selectedProf.id },
-        module: { id: selectedMod.id },
-        subModule: selectedSubMod ? { id: selectedSubMod.id } : null,
-        room: { id: selectedRoomObj.id },
-        type: selectedType,
-        group: { id: selectedGroupObj.id },
-        professorPresent: session?.professorPresent || false,
-        duration,
+        endTime: formatTimeForBackend(calculateEndTime(time)),
+        frequency: frequency,
+        wasAttended: wasAttended,
+        type: sessionType,
+        group: { id: group.id || 0, name: group.name || '' },
+        subModule: selectedSubMod ? {
+          id: selectedSubMod.id,
+          name: selectedSubMod.name,
+          nbrHours: selectedSubMod.nbrHours,
+          moduleId: selectedMod.id || 0,
+          professor: selectedSubMod.professor
+        } : undefined,
+        module: {
+          id: selectedMod.id,
+          name: selectedMod.name,
+          code: selectedMod.code || '',
+          filiereId: selectedMod.filiereId || null
+        },
+        professor: selectedSubMod?.professor,
+        classroom: {
+          id: selectedRoomObj.id,
+          name: selectedRoomObj.name,
+          capacity: selectedRoomObj.capacity,
+          type: selectedRoomObj.type || ''
+        }
       };
 
-      // Send request
-      const response = session?.id
-        ? await api.put(`/api/seances/${session.id}`, sessionData)
-        : await api.post("/api/seances", sessionData);
-
-      onSave(response.data);
+      console.log('Sending session data:', JSON.stringify(sessionData, null, 2));
+      onSave(sessionData);
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erreur lors de l'enregistrement de la séance:", error);
-      alert(
-        `Erreur lors de l'enregistrement: 
-        
-        `
-      );
+      const errorMessage = error.response?.data?.message || error.message || "Une erreur est survenue lors de l'enregistrement";
+      alert(`Erreur lors de l'enregistrement: ${errorMessage}`);
     }
   };
 
@@ -166,41 +177,15 @@ export const SessionFormModal = ({
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGrid}>
             <div className={styles.formGroup}>
-              <label>Groupe</label>
-              <select
-                value={selectedGroup}
-                onChange={(e) => setSelectedGroup(e.target.value)}
-                required
-                disabled={!!session?.id} // Désactivé en mode édition
-              >
-                <option value="">Sélectionner un groupe</option>
-                {availableGroups.map((group) => (
-                  <option key={group.id} value={group.id}>
-                    {group.name}
-                  </option>
-                ))}
-              </select>
-              {availableGroups.length === 0 && !session?.id && (
-                <p className={styles.errorText}>
-                  Tous les groupes disponibles ont déjà une séance dans le
-                  planning
-                </p>
-              )}
-            </div>
-
-            <div className={styles.formGroup}>
               <label>Type de séance</label>
               <select
                 value={selectedType}
-                onChange={(e) =>
-                  setSelectedType(e.target.value as Session["type"])
-                }
+                onChange={(e) => setSelectedType(Number(e.target.value) as SessionTypeValue)}
                 required>
-                <option value="CM">CM</option>
-                <option value="TD">TD</option>
-                <option value="TP">TP</option>
-                <option value="EXAM">Examen</option>
-                <option value="RATTRAPAGE">Rattrapage</option>
+                <option value="">Sélectionner un type</option>
+                <option value={SessionType.CM}>CM</option>
+                <option value={SessionType.TD}>TD</option>
+                <option value={SessionType.TP}>TP</option>
               </select>
             </div>
 
@@ -223,15 +208,14 @@ export const SessionFormModal = ({
             </div>
 
             <div className={styles.formGroup}>
-              <label>Sous-module (optionnel)</label> {/* Modifié le label */}
+              <label>Sous-module (optionnel)</label>
               <select
                 value={selectedSubModule}
                 onChange={(e) => setSelectedSubModule(e.target.value)}
                 disabled={!selectedModule}>
                 <option value="">
                   Sélectionner un sous-module (optionnel)
-                </option>{" "}
-                {/* Modifié */}
+                </option>
                 {subModules
                   .filter((sm) => sm.moduleId === Number(selectedModule))
                   .map((subModule) => (
@@ -243,21 +227,6 @@ export const SessionFormModal = ({
             </div>
 
             <div className={styles.formGroup}>
-              <label>Professeur</label>
-              <select
-                value={selectedProfessor}
-                onChange={(e) => setSelectedProfessor(e.target.value)}
-                required>
-                <option value="">Sélectionner un professeur</option>
-                {professors.map((prof) => (
-                  <option key={prof.id} value={prof.id}>
-                    {prof.firstName} {prof.lastName}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.formGroup}>
               <label>Salle</label>
               <select
                 value={selectedRoom}
@@ -265,7 +234,7 @@ export const SessionFormModal = ({
                 required>
                 <option value="">Sélectionner une salle</option>
                 {rooms.map((room) => (
-                  <option key={room.id} value={room.name}>
+                  <option key={room.id} value={room.id}>
                     {room.name} ({room.type})
                   </option>
                 ))}
@@ -273,17 +242,25 @@ export const SessionFormModal = ({
             </div>
 
             <div className={styles.formGroup}>
-              <label>Durée (heures)</label>
+              <label>Fréquence (en semaines)</label>
               <input
                 type="number"
                 min="1"
-                max="8"
-                value={duration}
-                onChange={(e) =>
-                  setDuration(Math.max(1, Math.min(8, Number(e.target.value))))
-                }
-                className={styles.durationInput}
+                value={frequency}
+                onChange={(e) => setFrequency(Number(e.target.value))}
+                required
               />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={wasAttended}
+                  onChange={(e) => setWasAttended(e.target.checked)}
+                />
+                Séance effectuée
+              </label>
             </div>
           </div>
 
@@ -296,8 +273,7 @@ export const SessionFormModal = ({
             </button>
             <button
               type="submit"
-              className={styles.saveButton}
-              disabled={availableGroups.length === 0 && !session?.id}>
+              className={styles.saveButton}>
               {session ? "Mettre à jour" : "Créer"}
             </button>
           </div>

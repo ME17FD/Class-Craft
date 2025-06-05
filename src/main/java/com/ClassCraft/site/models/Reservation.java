@@ -2,6 +2,9 @@ package com.ClassCraft.site.models;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -29,6 +32,7 @@ public class Reservation {
     private SubModule subModule;
     
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Group group;
     
     @ManyToOne

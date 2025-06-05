@@ -14,9 +14,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "student_group")
+@Getter
+@Setter
 public class Group {
 
     @Id
@@ -33,6 +37,12 @@ public class Group {
     @JoinColumn(name = "filiere_id", nullable = true)
     @JsonBackReference
     private Filiere filiere;
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Sceance> sceances;
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Reservation> Reservation;
 
     // Getter for id
     public Long getId() {
@@ -79,7 +89,6 @@ public class Group {
         return students != null ? students.size() : 0;
     }
 
-    // Setter for size of students (Not necessary if you don't want to manually change the size)
     public void setSize(Integer size) {
         // Not required as size is derived from students list size
     }

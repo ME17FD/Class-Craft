@@ -178,11 +178,11 @@ export const GroupFormModal = ({
             session={selectedSession}
             day={selectedDay}
             time={selectedTime}
+            group={group || { id: 0, name: "", filiereId: 0, students: [] }}
             modules={modules}
             subModules={subModules}
             professors={professors}
             rooms={rooms}
-            groups={groups}
             existingSessions={[...sessions, ...seances]}
             onClose={() => setShowSessionModal(false)}
             onSave={handleAddSession}

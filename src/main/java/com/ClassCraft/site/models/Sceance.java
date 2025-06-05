@@ -2,6 +2,9 @@ package com.ClassCraft.site.models;
 
 import java.sql.Time;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Entity;
@@ -37,18 +40,23 @@ public class Sceance {
 
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private SubModule subModule;
      
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Module module;
     
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Group group;
     
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Classroom classroom;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Professor professor;
 
 

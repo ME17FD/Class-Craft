@@ -178,14 +178,18 @@ const GroupsTab: React.FC<GroupsTabProps> = ({
       <div className={styles.header}>
         <div className={styles.filters}>
           <select
-            value={selectedField || ""}
-            onChange={(e) => setSelectedField(e.target.value ? Number(e.target.value) : null)}
+            value={selectedField !== null ? selectedField : ""}
+            onChange={(e) => {
+              const val = e.target.value;
+              setSelectedField(val === "" ? null : Number(val));
+            }}
           >
             <option value="">Toutes les filières</option>
             {fields.map((field) => (
               <option key={field.id} value={field.id}>{field.name}</option>
             ))}
           </select>
+
 
           <select
             value={selectedModule || ""}

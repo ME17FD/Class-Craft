@@ -14,7 +14,6 @@ import com.ClassCraft.site.dto.SeanceDTO;
 import com.ClassCraft.site.dto.SubModuleDTO;
 import com.ClassCraft.site.models.Classroom;
 import com.ClassCraft.site.models.Group;
-import com.ClassCraft.site.models.Module;
 import com.ClassCraft.site.models.Professor;
 import com.ClassCraft.site.models.Sceance;
 import com.ClassCraft.site.models.SubModule;
@@ -141,6 +140,8 @@ public class SeanceServiceImpl {
         session.setEndTime(seanceDTO.getEndTime());
         session.setFrequency(seanceDTO.getFrequency());
         session.setWasAttended(seanceDTO.getWasAttended());
+        session.setDayOfWeek(seanceDTO.getDayOfWeek());
+        session.setType(Sceance.SceanceType.valueOf(seanceDTO.getType()));
 
         // Remplir SubModule
         if (seanceDTO.getSubModule() != null) {
@@ -166,14 +167,6 @@ public class SeanceServiceImpl {
             classroom.setName(seanceDTO.getClassroom().getName());
             classroom.setCapacity(seanceDTO.getClassroom().getCapacity());
             session.setClassroom(classroom);
-        }
-
-        // Remplir Module (via SubModule)
-        if (seanceDTO.getModule() != null) {
-            Module module = new Module();
-            module.setId(seanceDTO.getModule().getId());
-            module.setName(seanceDTO.getModule().getName());
-            session.setModule(module);
         }
 
         // Remplir Professor (via SubModule)

@@ -42,6 +42,7 @@ const PedagogicalDashboard: React.FC = () => {
     addModule,
     updateSubModule,
     addSubModule,
+    fetchData,
   } = useApiData();
 
   const handleFieldEdit = (field: Field) => {
@@ -73,41 +74,76 @@ const PedagogicalDashboard: React.FC = () => {
   const handleFieldSave = async (
     fieldData: Omit<Field, "id"> & { modules: ExtendedModule[] }
   ) => {
-    // Save the field and modules
-    const fieldId = fieldModalState.field?.id || 0;
+    try {
+      // Save the field and modules
+      const fieldId = fieldModalState.field?.id || 0;
 
-    // Step 1: Save or update the field (Filière)
-    const savedField = fieldId
-      ? await updateField({ ...fieldData, id: fieldId })
-      : await addField(fieldData);
+      // Step 1: Save or update the field (Filière)
+      const savedField = fieldId
+        ? await updateField({ ...fieldData, id: fieldId })
+        : await addField(fieldData);
 
-    // Step 2: Save or update modules linked to the field
-    for (const module of fieldData.modules) {
-      const savedModule = module.id
-        ? await updateModule({ ...module })
-        : await addModule({ ...module, filiereId: savedField.id });
+      if (!savedField || !savedField.id) {
+        throw new Error('Failed to save field');
+      }
 
-      // Step 3: Save or update submodules linked to this module
-      for (const sub of module.subModules || []) {
-        if (sub.id) {
-          await updateSubModule({ ...sub });
-        } else {
-          await addSubModule({ ...sub, moduleId: savedModule.id });
+      // Step 2: Save or update modules linked to the field
+      const savedModules = [];
+      for (const module of fieldData.modules) {
+        try {
+          const savedModule = module.id
+            ? await updateModule({ ...module, filiereId: savedField.id })
+            : await addModule({ ...module, filiereId: savedField.id });
+
+          if (!savedModule || !savedModule.id) {
+            throw new Error('Failed to save module');
+          }
+
+          // Step 3: Save or update submodules linked to this module
+          const savedSubModules = [];
+          for (const sub of module.subModules || []) {
+            try {
+              const savedSub = sub.id
+                ? await updateSubModule({ ...sub, moduleId: savedModule.id })
+                : await addSubModule({ ...sub, moduleId: savedModule.id });
+              savedSubModules.push(savedSub);
+            } catch (error) {
+              console.error('Error saving submodule:', error);
+              throw error;
+            }
+          }
+
+          savedModules.push({
+            ...savedModule,
+            subModules: savedSubModules
+          });
+        } catch (error) {
+          console.error('Error saving module:', error);
+          throw error;
         }
       }
+
+      // Update the fields state after save
+      setFieldModalState({
+        isOpen: false,
+        field: {
+          ...savedField,
+          modules: savedModules,
+        },
+      });
+
+      // Close the modal
+      handleFieldClose();
+
+      // Use handleSave to update the state through usePedagogicalData
+      handleSave("fields", savedField, fieldId ? "edit" : "add");
+
+      // Refresh all data to ensure everything is in sync
+      await fetchData();
+    } catch (error) {
+      console.error('Error saving field:', error);
+      // You might want to show an error message to the user here
     }
-
-    // Update the fields state after save
-    setFieldModalState({
-      isOpen: false,
-      field: {
-        ...savedField,
-        modules: fieldData.modules,
-      },
-    });
-
-    // Close the modal
-    handleFieldClose();
   };
 
   const { deleteGroup } = useApiData();
