@@ -1,5 +1,17 @@
 import { Group, Professor, Module, SubModule, Field , Student} from './type';
-
+export interface CalendarEvent {
+  id: number;
+  title: string;
+  start: Date;
+  end: Date;
+  resource: {
+    room?: Room;
+    group?: Group;
+    professor?: Professor;
+    type: "CM" | "TD" | "TP" | "EXAM" | "RATTRAPAGE" | "EVENT";
+    professorPresent?: boolean;
+  };
+}
 // Type pour une séance
 export interface Session {
     id: number;
@@ -85,6 +97,8 @@ export interface Room {
     capacity: number;
     type?: string;
 } 
+
+
 
 
 
