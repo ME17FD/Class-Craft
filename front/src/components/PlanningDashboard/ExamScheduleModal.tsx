@@ -1,4 +1,4 @@
-import { Session } from "../../types/schedule";
+import { ExamSession } from "../../types/schedule";
 import { Group } from "../../types/type";
 import styles from "../../styles/PlanningDashboard/PlanningGroup.module.css";
 import { useMemo } from "react";
@@ -6,7 +6,7 @@ import { PDFGenerator } from "./PDFGenerator";
 
 interface ExamScheduleModalProps {
   group: Group;
-  sessions: Session[];
+  sessions: ExamSession[];
   onClose: () => void;
   onTimeSlotClick: (day: string, time: string) => void;
 }
@@ -74,16 +74,16 @@ export const ExamScheduleModal = ({
 
         <div className={styles.scheduleGrid}>
           <div className={styles.timeColumn}>
-            {timeSlots.map((time, i) => (
-              <div key={`time-${i}`} className={styles.timeCell}>
-                {i === 0 ? "" : time}
+            {timeSlots.map((time) => (
+              <div key={time} className={styles.timeSlot}>
+                {time}
               </div>
             ))}
           </div>
 
           {weekDays.map((day) => {
             const daySessions = sessions.filter(
-              (s) => s.day === day || s.dayOfWeek === day
+              (s) => new Date(s.startDateTime).toLocaleDateString('fr-FR', { weekday: 'long' }).toUpperCase() === day
             );
 
             return (
@@ -95,16 +95,14 @@ export const ExamScheduleModal = ({
                 {timeSlots.slice(1).map((time) => {
                   const normalizedTime = normalizeTime(time);
                   const session = daySessions.find((s) => {
-                    const start = normalizeTime(s.startTime || "");
-                    const end = normalizeTime(s.endTime || "");
+                    const start = new Date(s.startDateTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                    const end = new Date(s.endDateTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
                     return start <= normalizedTime && end > normalizedTime;
                   });
 
                   return (
                     <div
-                      key={
-                        session ? `exam-${session.id}` : `empty-${day}-${time}`
-                      }
+                      key={session ? `exam-${session.id}` : `empty-${day}-${time}`}
                       className={`${styles.timeSlot} ${styles.examSession} ${
                         session ? styles.occupied : ""
                       }`}
@@ -112,16 +110,11 @@ export const ExamScheduleModal = ({
                       {session && (
                         <div className={styles.sessionContent}>
                           <div className={styles.sessionTitle}>
-                            {session.module?.name || session.subModule?.name}
+                            {session.subModuleId}
                           </div>
                           <div className={styles.sessionDetails}>
                             <div>
-                              <strong>Salle:</strong> {session.classroom?.name}
-                            </div>
-                            <div>
-                              <strong>Surveillant:</strong>{" "}
-                              {session.professor?.firstName}{" "}
-                              {session.professor?.lastName}
+                              <strong>Salle:</strong> {session.classroomId}
                             </div>
                           </div>
                         </div>

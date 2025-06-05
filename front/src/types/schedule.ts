@@ -1,4 +1,5 @@
 import { Group, Professor, Module, SubModule, Field , Student} from './type';
+import { ReservationType } from '../hooks/usePlanningData';
 
 // Type pour une séance
 export interface Session {
@@ -20,7 +21,7 @@ export interface Session {
         teacher: Professor;
     };
     groupName?: string | null;
-    type: 'CM' | 'TD' | 'TP';
+    type: 'CM' | 'TD' | 'TP' | ReservationType;
     
     // Legacy fields
     dayOfWeek?: string;
@@ -85,7 +86,19 @@ export interface Room {
     name: string;
     capacity: number;
     type?: string;
-} 
+}
+
+export interface ExamSession {
+    id: number;
+    startDateTime: string;
+    endDateTime: string;
+    wasAttended: boolean;
+    groupId: number | null;
+    groupName: string | null;
+    classroomId: number;
+    subModuleId: number;
+    type: ReservationType;
+}
 
 
 

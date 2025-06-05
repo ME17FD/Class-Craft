@@ -23,8 +23,8 @@
     background: white;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 16px;
-    margin-bottom: 20px;
+    padding: 12px;
+    margin-bottom: 16px;
     transition: transform 0.2s;
 }
 
@@ -36,91 +36,99 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
     border-bottom: 1px solid #eee;
+}
+
+.cardHeader h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text-dark);
 }
 
 .badge {
     background: #1976d2;
     color: white;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 0.8rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 500;
 }
 
 .examList,
 .makeupList {
-    margin: 12px 0;
+    margin: 8px 0;
 }
 
 .examList h4,
 .makeupList h4 {
-    margin: 8px 0;
+    margin: 6px 0;
     color: #555;
+    font-size: 0.85rem;
+    font-weight: 600;
 }
 
 .examItem,
 .makeupItem {
-    padding: 10px;
-    margin: 6px 0;
+    padding: 8px;
+    margin: 4px 0;
     border-radius: 4px;
     cursor: pointer;
     transition: background 0.2s;
+    font-size: 0.85rem;
 }
 
 .examItem {
-    background: #f8d7da20;
-    border-left: 3px solid #dc3545;
+    background: #f8d7da15;
+    border-left: 2px solid #dc3545;
 }
 
 .makeupItem {
-    background: #fff3cd20;
-    border-left: 3px solid #ffc107;
+    background: #fff3cd15;
+    border-left: 2px solid #ffc107;
 }
 
 .examItem:hover {
-    background: #f8d7da50;
+    background: #f8d7da30;
 }
 
 .makeupItem:hover {
-    background: #fff3cd50;
+    background: #fff3cd30;
 }
 
 .examBadge {
     background: #dc3545;
     color: white;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    margin-left: 8px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 0.65rem;
+    margin-left: 6px;
+    font-weight: 500;
 }
 
 .makeupBadge {
     background: #ffc107;
     color: #212529;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    margin-left: 8px;
-}
-
-.originalExam {
-    font-size: 0.8rem;
-    color: #666;
-    margin-top: 4px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 0.65rem;
+    margin-left: 6px;
+    font-weight: 500;
 }
 
 .noItems {
     color: #999;
     font-style: italic;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    padding: 4px 0;
 }
 
 .groupExamsGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    padding: 8px 0;
 }
 
 .pageTitle {
@@ -743,4 +751,57 @@
 .emptyClassmates p {
     font-size: 1.1rem;
     margin: 0;
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.createButton {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.createButton:hover {
+    background-color: #45a049;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.radioGroup {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+}
+
+.radioLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.radioLabel:hover {
+    background-color: #f5f5f5;
+}
+
+.radioLabel input[type="radio"] {
+    width: 1.2rem;
+    height: 1.2rem;
+    cursor: pointer;
 }

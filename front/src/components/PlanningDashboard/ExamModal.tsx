@@ -1,52 +1,107 @@
-import { Room, Session } from "../../types/schedule";
+import { Room, ExamSession } from "../../types/schedule";
 import styles from "../../styles/PlanningDashboard/PlanningGroup.module.css";
 import { useState } from "react";
 import { useApiData } from "../../hooks/useApiData";
+import { usePlanningData, ReservationType } from "../../hooks/usePlanningData";
+import { Group } from "../../types/type";
 
 interface ExamModalProps {
-  exam: Session;
+  exam: ExamSession;
   rooms: Room[];
-
+  group: Group;
   onClose: () => void;
-  onSave: (exam: Session) => void;
+  onSave: (exam: ExamSession) => void;
 }
 
-export const ExamModal = ({ exam, onClose, onSave }: ExamModalProps) => {
+export const ExamModal = ({ exam, group, onClose, onSave }: ExamModalProps) => {
   const {
     professors = [],
     modules = [],
     subModules = [],
     rooms = [],
   } = useApiData();
+  const { createReservation, updateReservation } = usePlanningData();
   const [editedExam, setEditedExam] = useState(exam);
-  const [selectedRoom, setSelectedRoom] = useState<string>(typeof exam?.classroom === 'string' ? exam.classroom : exam?.classroom?.name || "");
-  const handleChange = (field: keyof Session, value: any) => {
+  const [selectedRoom, setSelectedRoom] = useState<string>(rooms.find(r => r.id === exam.classroomId)?.name || "");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  // Filter submodules by group's filiere
+  const filteredSubModules = subModules.filter(subModule => {
+    const module = modules.find(m => m.id === subModule.moduleId);
+    return module?.filiereId === group.filiereId;
+  });
+
+  const handleChange = (field: keyof ExamSession, value: any) => {
     setEditedExam((prev) => ({
       ...prev,
       [field]: value,
     }));
+    // Clear error for this field when it's changed
+    if (formErrors[field]) {
+      setFormErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
   };
 
-  const calculateEndTime = (start: string, hours: number) => {
-    const [h, m] = start.split(":").map(Number);
-    const totalMinutes = h * 60 + m + hours * 60;
-    const endH = Math.floor(totalMinutes / 60);
-    const endM = totalMinutes % 60;
-    return `${endH.toString().padStart(2, "0")}:${endM
-      .toString()
-      .padStart(2, "0")}`;
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    
+    if (!editedExam.subModuleId) {
+      errors.subModuleId = "Le module est requis";
+    }
+    if (!selectedRoom) {
+      errors.classroomId = "La salle est requise";
+    }
+    if (!editedExam.startDateTime) {
+      errors.startDateTime = "La date et l'heure sont requises";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
 
-    // Calcul automatique de l'heure de fin si la durée ou l'heure de début change
-    const updatedExam = {
-      ...editedExam,
-      endTime: calculateEndTime(editedExam.startTime||"", editedExam.duration||0),
-    };
+    if (isSubmitting) {
+      return; // Prevent double submission
+    }
 
-    onSave(updatedExam);
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const selectedRoomObj = rooms.find(r => r.name === selectedRoom);
+      const updatedExam = {
+        ...editedExam,
+        classroomId: selectedRoomObj?.id || 0,
+      };
+
+      // Call createReservation/updateReservation and wait for the response
+      const savedExam = await (updatedExam.id ? updateReservation(updatedExam) : createReservation(updatedExam));
+      
+      // Only call onSave and close after we have the saved exam
+      if (savedExam) {
+        onSave(savedExam);
+        onClose();
+      } else {
+        throw new Error("Failed to save exam");
+      }
+    } catch (err: any) {
+      console.error("Failed to save exam:", err);
+      setError(err.response?.data?.message || "Une erreur est survenue lors de la sauvegarde de l'examen");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -59,135 +114,88 @@ export const ExamModal = ({ exam, onClose, onSave }: ExamModalProps) => {
           </button>
         </div>
 
+        {error && (
+          <div className={styles.errorMessage}>
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGrid}>
+            {/* Type d'examen */}
+            <div className={styles.formGroup}>
+              <label>Type d'examen</label>
+              <div className={styles.radioGroup}>
+                <label className={styles.radioLabel}>
+                  <input
+                    type="radio"
+                    name="examType"
+                    value={ReservationType.EXAM}
+                    checked={editedExam.type === ReservationType.EXAM}
+                    onChange={(e) => handleChange("type", e.target.value)}
+                  />
+                  Examen Normal
+                </label>
+                <label className={styles.radioLabel}>
+                  <input
+                    type="radio"
+                    name="examType"
+                    value={ReservationType.RATTRAPAGE}
+                    checked={editedExam.type === ReservationType.RATTRAPAGE}
+                    onChange={(e) => handleChange("type", e.target.value)}
+                  />
+                  Rattrapage
+                </label>
+              </div>
+            </div>
+
             {/* Module */}
             <div className={styles.formGroup}>
               <label>Module</label>
               <select
-                value={editedExam.module?.id || ""}
+                value={editedExam.subModuleId || ""}
                 onChange={(e) => {
-                  const module = modules.find(
-                    (m) => m.id === Number(e.target.value)
-                  );
-                  handleChange("module", module);
-                }}
-                required>
-                <option value="">Sélectionner un module</option>
-                {modules.map((module) => (
-                  <option key={module.id} value={module.id}>
-                    {module.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Sous-module */}
-            <div className={styles.formGroup}>
-              <label>Sous-module</label>
-              <select
-                value={editedExam.subModule?.id || ""}
-                onChange={(e) => {
-                  const subModule = subModules.find(
+                  const subModule = filteredSubModules.find(
                     (sm) => sm.id === Number(e.target.value)
                   );
-                  handleChange("subModule", subModule);
+                  if (subModule) {
+                    handleChange("subModuleId", subModule.id);
+                  }
                 }}
-                disabled={!editedExam.module}>
-                <option value="">Sélectionner un sous-module</option>
-                {subModules
-                  .filter((sm) => sm.moduleId === editedExam.module?.id)
-                  .map((subModule) => (
-                    <option key={subModule.id} value={subModule.id}>
-                      {subModule.name}
-                    </option>
-                  ))}
-              </select>
-            </div>
-
-            {/* Groupe */}
-
-            {/* Surveillant */}
-            <div className={styles.formGroup}>
-              <label>Surveillant</label>
-              <select
-                value={editedExam.professor?.id || ""}
-                onChange={(e) => {
-                  const professor = professors.find(
-                    (p) => p.id === Number(e.target.value)
-                  );
-                  if (professor) handleChange("professor", professor);
-                }}
+                className={formErrors.subModuleId ? styles.error : ""}
                 required>
-                <option value="">Sélectionner un surveillant</option>
-                {professors.map((professor) => (
-                  <option key={professor.id} value={professor.id}>
-                    {professor.firstName} {professor.lastName}
+                <option value="">Sélectionner un module</option>
+                {filteredSubModules.map((subModule) => (
+                  <option key={subModule.id} value={subModule.id}>
+                    {subModule.name}
                   </option>
                 ))}
               </select>
+              {formErrors.subModuleId && (
+                <span className={styles.fieldError}>{formErrors.subModuleId}</span>
+              )}
             </div>
 
-            {/* Date */}
+            {/* Date et Heure */}
             <div className={styles.formGroup}>
-              <label>Date</label>
+              <label>Date et Heure de début</label>
               <input
-                type="date"
-                value={editedExam.day || ""}
-                onChange={(e) => handleChange("day", e.target.value)}
-                required
-              />
-            </div>
-
-            {/* Heure de début */}
-            <div className={styles.formGroup}>
-              <label>Heure de début</label>
-              <input
-                type="time"
-                value={editedExam.startTime || ""}
+                type="datetime-local"
+                value={editedExam.startDateTime ? new Date(editedExam.startDateTime).toISOString().slice(0, 16) : ""}
                 onChange={(e) => {
-                  handleChange("startTime", e.target.value);
-                  // Recalculer l'heure de fin automatiquement
-                  handleChange(
-                    "endTime",
-                    calculateEndTime(e.target.value, editedExam.duration||0)
-                  );
+                  const date = new Date(e.target.value);
+                  handleChange("startDateTime", date.toISOString());
+                  // Set end time based on exam type (2 hours for normal exam, 1.5 hours for makeup)
+                  const duration = editedExam.type === ReservationType.EXAM ? 2 : 1.5;
+                  const endDate = new Date(date.getTime() + duration * 60 * 60 * 1000);
+                  handleChange("endDateTime", endDate.toISOString());
                 }}
+                className={formErrors.startDateTime ? styles.error : ""}
                 required
               />
-            </div>
-
-            {/* Durée */}
-            <div className={styles.formGroup}>
-              <label>Durée (heures)</label>
-              <input
-                type="number"
-                min="1"
-                max="6"
-                step="0.5"
-                value={editedExam.duration || 2}
-                onChange={(e) => {
-                  const duration = parseFloat(e.target.value);
-                  handleChange("duration", duration);
-                  // Recalculer l'heure de fin automatiquement
-                  handleChange(
-                    "endTime",
-                    calculateEndTime(editedExam.startTime || "", duration)
-                  );
-                }}
-                required
-              />
-            </div>
-
-            {/* Heure de fin (calculée automatiquement) */}
-            <div className={styles.formGroup}>
-              <label>Heure de fin</label>
-              <input
-                type="text"
-                value={editedExam.endTime || ""}
-                readOnly
-                className={styles.readOnlyInput}
-              />
+              {formErrors.startDateTime && (
+                <span className={styles.fieldError}>{formErrors.startDateTime}</span>
+              )}
             </div>
 
             {/* Salle */}
@@ -196,6 +204,7 @@ export const ExamModal = ({ exam, onClose, onSave }: ExamModalProps) => {
               <select
                 value={selectedRoom}
                 onChange={(e) => setSelectedRoom(e.target.value)}
+                className={formErrors.classroomId ? styles.error : ""}
                 required>
                 <option value="">Sélectionner une salle</option>
                 {rooms.map((room) => (
@@ -204,6 +213,9 @@ export const ExamModal = ({ exam, onClose, onSave }: ExamModalProps) => {
                   </option>
                 ))}
               </select>
+              {formErrors.classroomId && (
+                <span className={styles.fieldError}>{formErrors.classroomId}</span>
+              )}
             </div>
           </div>
 
@@ -211,11 +223,15 @@ export const ExamModal = ({ exam, onClose, onSave }: ExamModalProps) => {
             <button
               type="button"
               className={styles.cancelButton}
-              onClick={onClose}>
+              onClick={onClose}
+              disabled={isSubmitting}>
               Annuler
             </button>
-            <button type="submit" className={styles.saveButton}>
-              {exam.id ? "Mettre à jour" : "Créer"}
+            <button 
+              type="submit" 
+              className={styles.saveButton}
+              disabled={isSubmitting}>
+              {isSubmitting ? "Enregistrement..." : (exam.id ? "Mettre à jour" : "Créer")}
             </button>
           </div>
         </form>

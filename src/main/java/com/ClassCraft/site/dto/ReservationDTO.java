@@ -2,6 +2,8 @@ package com.ClassCraft.site.dto;
 
 import java.time.LocalDateTime;
 
+import lombok.ToString;
+@ToString
 public class ReservationDTO {
     private Long id;
     private LocalDateTime startDateTime;

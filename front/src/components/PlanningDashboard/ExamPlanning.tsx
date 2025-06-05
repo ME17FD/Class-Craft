@@ -1,20 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useApiData } from "../../hooks/useApiData";
-import { usePlanningData } from "../../hooks/usePlanningData";
+import { usePlanningData, ReservationType } from "../../hooks/usePlanningData";
 import { ExamsCard } from "./ExamsCard";
 import { ExamModal } from "./ExamModal";
 import { MakeupModal } from "./RattrapageModal";
 import { ExamScheduleModal } from "./ExamScheduleModal";
 import { MakeupScheduleModal } from "./RattrapageScheduleModal";
-import { Session } from "../../types/schedule";
+import { ExamSession } from "../../types/schedule";
 import styles from "../../styles/PlanningDashboard/PlanningGroup.module.css";
 import { Group } from "../../types/type";
 
 export const ExamPlanning = () => {
   const { groups = [] } = useApiData();
-  const { reservations = [] } = usePlanningData();
-  const [selectedExam, setSelectedExam] = useState<Session | null>(null);
-  const [selectedMakeup, setSelectedMakeup] = useState<Session | null>(null);
+  const { reservations = [], createReservation, updateReservation, setReservations } = usePlanningData();
+  const [selectedExam, setSelectedExam] = useState<ExamSession | null>(null);
+  const [selectedMakeup, setSelectedMakeup] = useState<ExamSession | null>(null);
   const [selectedGroupForExamSchedule, setSelectedGroupForExamSchedule] =
     useState<Group | null>(null);
   const [selectedGroupForMakeupSchedule, setSelectedGroupForMakeupSchedule] =
@@ -22,19 +22,39 @@ export const ExamPlanning = () => {
   const [, setSelectedTimeSlot] = useState<{
     day: string;
     time: string;
-    type: "EXAM" | "RATTRAPAGE";
+    type: ReservationType;
   } | null>(null);
+
+  // Add debug logging for reservations
+  useEffect(() => {
+    console.log("Current reservations:", reservations);
+  }, [reservations]);
+
+  const handleCreateNewExam = (group: Group, type: ReservationType = ReservationType.EXAM) => {
+    const newExam: ExamSession = {
+      id: 0,
+      type,
+      startDateTime: new Date().toISOString(),
+      endDateTime: new Date(Date.now() + (type === ReservationType.EXAM ? 2 : 1.5) * 60 * 60 * 1000).toISOString(),
+      wasAttended: false,
+      groupId: group.id || null,
+      groupName: group.name || null,
+      classroomId: 0,
+      subModuleId: 0
+    };
+    setSelectedExam(newExam);
+  };
 
   const handleTimeSlotClick = (
     day: string,
     time: string,
-    type: "EXAM" | "RATTRAPAGE"
+    type: ReservationType
   ) => {
     setSelectedTimeSlot({ day, time, type });
 
     // Trouver la session existante
     const group =
-      type === "EXAM"
+      type === ReservationType.EXAM
         ? selectedGroupForExamSchedule
         : selectedGroupForMakeupSchedule;
     const existingSession = reservations.find(
@@ -46,9 +66,9 @@ export const ExamPlanning = () => {
     );
 
     if (existingSession) {
-      type === "EXAM"
-        ? setSelectedExam(existingSession)
-        : setSelectedMakeup(existingSession);
+      type === ReservationType.EXAM
+        ? setSelectedExam(existingSession as ExamSession)
+        : setSelectedMakeup(existingSession as ExamSession);
     } else {
       // Créer une nouvelle session
       const startDate = new Date();
@@ -56,9 +76,9 @@ export const ExamPlanning = () => {
       startDate.setMinutes(parseInt(time.split(':')[1]));
       
       const endDate = new Date(startDate);
-      endDate.setHours(endDate.getHours() + (type === "EXAM" ? 2 : 1.5));
+      endDate.setHours(endDate.getHours() + (type === ReservationType.EXAM ? 2 : 1.5));
 
-      const newSession: Session = {
+      const newSession: ExamSession = {
         id: 0,
         type,
         startDateTime: startDate.toISOString(),
@@ -69,9 +89,41 @@ export const ExamPlanning = () => {
         classroomId: 0,
         subModuleId: 0
       };
-      type === "EXAM"
+      type === ReservationType.EXAM
         ? setSelectedExam(newSession)
         : setSelectedMakeup(newSession);
+    }
+  };
+
+  const handleSaveExam = async (savedExam: ExamSession) => {
+    try {
+      console.log("Saving exam:", savedExam);
+      
+      // Update local state with the saved exam
+      setReservations((prev: ExamSession[]) => {
+        console.log("Previous reservations:", prev);
+        const examId = Number(savedExam.id);
+        
+        // Check if this exam already exists in the state
+        const existingExamIndex = prev.findIndex(
+          reservation => Number(reservation.id) === examId
+        );
+
+        const updated = existingExamIndex === -1
+          ? [...prev, savedExam]  // Add new exam
+          : prev.map((reservation: ExamSession) => 
+              Number(reservation.id) === examId ? savedExam : reservation
+            );  // Update existing exam
+        
+        console.log("Updated reservations:", updated);
+        return updated;
+      });
+
+      // Close modals after state update
+      setSelectedExam(null);
+      setSelectedTimeSlot(null);
+    } catch (error) {
+      console.error("Failed to update local state:", error);
     }
   };
 
@@ -81,20 +133,26 @@ export const ExamPlanning = () => {
 
       <div className={styles.groupExamsGrid}>
         {groups.map((group) => {
+          // Ensure we're working with numbers for IDs
+          const groupId = Number(group.id);
           const groupSessions = reservations.filter(
-            (s) => s.groupId === group.id
+            (s) => Number(s.groupId) === groupId
           );
-          const exams = groupSessions.filter((s) => s.type === "EXAM");
-          const makeups = groupSessions.filter((s) => s.type === "RATTRAPAGE");
+          console.log(`Group ${group.name} sessions:`, groupSessions);
+          const exams = groupSessions.filter((s) => s.type === ReservationType.EXAM);
+          const makeups = groupSessions.filter((s) => s.type === ReservationType.RATTRAPAGE);
+          console.log(`Group ${group.name} exams:`, exams);
+          console.log(`Group ${group.name} makeups:`, makeups);
 
           return (
             <ExamsCard
-              key={group.id}
+              key={groupId}
               group={group}
               exams={exams}
               makeups={makeups}
-              onExamClick={() => setSelectedGroupForExamSchedule(group)}
+              onExamClick={(exam) => setSelectedExam(exam)}
               onMakeupClick={() => setSelectedGroupForMakeupSchedule(group)}
+              onCreateExamClick={() => handleCreateNewExam(group)}
             />
           );
         })}
@@ -107,11 +165,11 @@ export const ExamPlanning = () => {
           sessions={reservations.filter(
             (s) =>
               s.groupId === selectedGroupForExamSchedule.id &&
-              s.type === "EXAM"
+              s.type === ReservationType.EXAM
           )}
           onClose={() => setSelectedGroupForExamSchedule(null)}
           onTimeSlotClick={(day, time) =>
-            handleTimeSlotClick(day, time, "EXAM")
+            handleTimeSlotClick(day, time, ReservationType.EXAM)
           }
         />
       )}
@@ -123,11 +181,11 @@ export const ExamPlanning = () => {
           sessions={reservations.filter(
             (s) =>
               s.groupId === selectedGroupForMakeupSchedule.id &&
-              s.type === "RATTRAPAGE"
+              s.type === ReservationType.RATTRAPAGE
           )}
           onClose={() => setSelectedGroupForMakeupSchedule(null)}
           onTimeSlotClick={(day, time) =>
-            handleTimeSlotClick(day, time, "RATTRAPAGE")
+            handleTimeSlotClick(day, time, ReservationType.RATTRAPAGE)
           }
         />
       )}
@@ -136,16 +194,13 @@ export const ExamPlanning = () => {
       {selectedExam && (
         <ExamModal
           exam={selectedExam}
+          group={groups.find(g => g.id === selectedExam.groupId) || groups[0]}
           rooms={[]}
           onClose={() => {
             setSelectedExam(null);
             setSelectedTimeSlot(null);
           }}
-          onSave={(updatedExam) => {
-            console.log("Examen sauvegardé:", updatedExam);
-            setSelectedExam(null);
-            setSelectedTimeSlot(null);
-          }}
+          onSave={handleSaveExam}
         />
       )}
 

@@ -1,13 +1,15 @@
 import { Group } from "../../types/type";
-import { Session } from "../../types/schedule";
+import { ExamSession } from "../../types/schedule";
 import styles from "../../styles/PlanningDashboard/PlanningGroup.module.css";
+import { useApiData } from "../../hooks/useApiData";
 
 interface GroupExamsCardProps {
   group: Group;
-  exams: Session[];
-  makeups: Session[];
-  onExamClick: (exam: Session) => void;
+  exams: ExamSession[];
+  makeups: ExamSession[];
+  onExamClick: (exam: ExamSession) => void;
   onMakeupClick: () => void;
+  onCreateExamClick: () => void;
 }
 
 export const ExamsCard = ({
@@ -16,10 +18,12 @@ export const ExamsCard = ({
   makeups,
   onExamClick,
   onMakeupClick,
+  onCreateExamClick,
 }: GroupExamsCardProps) => {
-  const formatDateTime = (session: Session) => {
-    // If we have startDateTime (new reservation format)
-    if ('startDateTime' in session && session.startDateTime) {
+  const { subModules = [], rooms = [] } = useApiData();
+
+  const formatDateTime = (session: ExamSession) => {
+    if (session.startDateTime) {
       const date = new Date(session.startDateTime);
       const dayName = date.toLocaleDateString('fr-FR', { weekday: 'long' });
       const formattedDate = date.toLocaleDateString('fr-FR', {
@@ -33,29 +37,37 @@ export const ExamsCard = ({
       });
       return `${dayName} ${formattedDate} ${time}`;
     }
+    return "";
+  };
 
-    // Fallback to old format
-    const dayTranslation: Record<string, string> = {
-      MONDAY: "Lundi",
-      TUESDAY: "Mardi",
-      WEDNESDAY: "Mercredi",
-      THURSDAY: "Jeudi",
-      FRIDAY: "Vendredi",
-      SATURDAY: "Samedi",
-    };
-    const dayOfWeek = session.dayOfWeek?.toUpperCase() || '';
-    const dayName = dayTranslation[dayOfWeek] || session.dayOfWeek || '';
-    const time = session.startTime?.split(":").slice(0, 2).join(":") || "";
-    return `${dayName} ${time}`;
+  const getModuleName = (subModuleId: number) => {
+    const subModule = subModules.find(sm => sm.id === subModuleId);
+    return subModule?.name || "Module non spécifié";
+  };
+
+  const getClassroomName = (classroomId: number) => {
+    const classroom = rooms.find(r => r.id === classroomId);
+    return classroom?.name || "Salle non spécifiée";
   };
 
   return (
     <div className={styles.groupExamCard}>
       <div className={styles.cardHeader}>
         <h3>{group.name}</h3>
-        <span className={styles.badge}>
-          {exams.length + makeups.length} sessions
-        </span>
+        <div className={styles.headerActions}>
+          <button 
+            className={styles.createButton}
+            onClick={(e) => {
+              e.stopPropagation();
+              onCreateExamClick();
+            }}
+          >
+            + Nouvel Examen
+          </button>
+          <span className={styles.badge}>
+            {exams.length + makeups.length} sessions
+          </span>
+        </div>
       </div>
 
       <div className={styles.examList}>
@@ -63,15 +75,15 @@ export const ExamsCard = ({
         {exams.length > 0 ? (
           exams.map((exam) => (
             <div
-              key={`exam-${exam.id}`}
+              key={`exam-${exam.id || exam.startDateTime}`}
               className={styles.examItem}
               onClick={() => onExamClick(exam)}>
               <div>
-                <strong>{exam.submodule?.name || "Examen"}</strong>
+                <strong>{getModuleName(exam.subModuleId)}</strong>
                 <span className={styles.examBadge}>Examen</span>
               </div>
               <div>
-                {formatDateTime(exam)} - Salle {exam.classroom?.type} {exam.classroom?.name}
+                {formatDateTime(exam)} - {getClassroomName(exam.classroomId)}
               </div>
             </div>
           ))
@@ -84,13 +96,15 @@ export const ExamsCard = ({
         <h4>Rattrapages ({makeups.length})</h4>
         {makeups.length > 0 ? (
           makeups.map((makeup) => (
-            <div key={`makeup-${makeup.id}`} className={styles.makeupItem}>
+            <div 
+              key={`makeup-${makeup.id || makeup.startDateTime}`} 
+              className={styles.makeupItem}>
               <div>
-                <strong>{makeup.submodule?.name || "Rattrapage"}</strong>
+                <strong>{getModuleName(makeup.subModuleId)}</strong>
                 <span className={styles.makeupBadge}>Rattrapage</span>
               </div>
               <div>
-                {formatDateTime(makeup)} - Salle {makeup.classroom?.name}
+                {formatDateTime(makeup)} - {getClassroomName(makeup.classroomId)}
               </div>
             </div>
           ))

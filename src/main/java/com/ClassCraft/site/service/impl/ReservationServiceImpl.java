@@ -164,12 +164,23 @@ public class ReservationServiceImpl implements ReservationService {
         if (reservationDTO.getStartDateTime().isBefore(LocalDateTime.now())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot create reservations in the past");
         }
+
+        if (reservationDTO.getType() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Reservation type is required");
+        }
+
+        try {
+            Reservation.ReservationType.valueOf(reservationDTO.getType());
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid reservation type: " + reservationDTO.getType());
+        }
     }
 
     private void mapToEntity(ReservationDTO dto, Reservation entity) {
         entity.setStartDateTime(dto.getStartDateTime());
         entity.setEndDateTime(dto.getEndDateTime());
         entity.setWasAttended(dto.getWasAttended());
+        entity.setType(Reservation.ReservationType.valueOf(dto.getType()));
 
         Classroom classroom = classroomRepository.findById(dto.getClassroomId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Classroom not found"));

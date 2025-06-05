@@ -1,37 +1,59 @@
-import { Room, Session } from "../../types/schedule";
+import { Room, ExamSession } from "../../types/schedule";
 import styles from "../../styles/PlanningDashboard/PlanningGroup.module.css";
 import { useState } from "react";
 import { useApiData } from "../../hooks/useApiData";
+import { ReservationType } from "../../hooks/usePlanningData";
 
 interface MakeupModalProps {
-  makeup: Session;
+  makeup: ExamSession;
   rooms: Room[];
   onClose: () => void;
-  onSave: (makeup: Session) => void;
+  onSave: (makeup: ExamSession) => void;
 }
 
-export const MakeupModal = ({ makeup, onClose, onSave }: MakeupModalProps) => {
+export const MakeupModal = ({ makeup, rooms, onClose, onSave }: MakeupModalProps) => {
   const {
     professors = [],
     modules = [],
     subModules = [],
-    rooms = [],
+    rooms: apiRooms = [],
   } = useApiData();
-  const [editedMakeup, setEditedMakeup] = useState(makeup);
-  const [, setSelectedRoom] = useState<Room | null>(
-    makeup?.classroom ? rooms.find(r => r.id === Number(makeup.classroom)) || null : null
-  );
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleChange = (field: keyof Session, value: any) => {
+  const [editedMakeup, setEditedMakeup] = useState({
+    ...makeup,
+    type: ReservationType.RATTRAPAGE
+  });
+  const [selectedRoom, setSelectedRoom] = useState<string>(rooms.find(r => r.id === makeup.classroomId)?.name || "");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleChange = (field: keyof ExamSession, value: any) => {
     setEditedMakeup((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(editedMakeup);
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const selectedRoomObj = rooms.find(r => r.name === selectedRoom);
+      const updatedMakeup = {
+        ...editedMakeup,
+        classroomId: selectedRoomObj?.id || 0,
+        type: ReservationType.RATTRAPAGE
+      };
+
+      onSave(updatedMakeup);
+      onClose();
+    } catch (err) {
+      console.error("Failed to save makeup:", err);
+      setError("Une erreur est survenue lors de la sauvegarde du rattrapage");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -44,108 +66,50 @@ export const MakeupModal = ({ makeup, onClose, onSave }: MakeupModalProps) => {
           </button>
         </div>
 
+        {error && (
+          <div className={styles.errorMessage}>
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGrid}>
             {/* Module */}
             <div className={styles.formGroup}>
               <label>Module</label>
               <select
-                value={editedMakeup.module?.id || ""}
-                onChange={(e) => {
-                  const module = modules.find(
-                    (m) => m.id === Number(e.target.value)
-                  );
-                  handleChange("module", module);
-                }}
-                required>
-                <option value="">Sélectionner un module</option>
-                {modules.map((module) => (
-                  <option key={module.id} value={module.id}>
-                    {module.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Sous-module */}
-            <div className={styles.formGroup}>
-              <label>Sous-module</label>
-              <select
-                value={editedMakeup.subModule?.id || ""}
+                value={editedMakeup.subModuleId || ""}
                 onChange={(e) => {
                   const subModule = subModules.find(
                     (sm) => sm.id === Number(e.target.value)
                   );
-                  handleChange("subModule", subModule);
-                }}
-                disabled={!editedMakeup.module}>
-                <option value="">Sélectionner un sous-module</option>
-                {subModules
-                  .filter((sm) => sm.moduleId === editedMakeup.module?.id)
-                  .map((subModule) => (
-                    <option key={subModule.id} value={subModule.id}>
-                      {subModule.name}
-                    </option>
-                  ))}
-              </select>
-            </div>
-
-            {/* Groupe */}
-
-            {/* Professeur */}
-            <div className={styles.formGroup}>
-              <label>Professeur</label>
-              <select
-                value={editedMakeup.professor?.id || ""}
-                onChange={(e) => {
-                  const professor = professors.find(
-                    (p) => p.id === Number(e.target.value)
-                  );
-                  if (professor) handleChange("professor", professor);
+                  if (subModule) {
+                    handleChange("subModuleId", subModule.id);
+                  }
                 }}
                 required>
-                <option value="">Sélectionner un professeur</option>
-                {professors.map((professor) => (
-                  <option key={professor.id} value={professor.id}>
-                    {professor.firstName} {professor.lastName}
+                <option value="">Sélectionner un module</option>
+                {subModules.map((subModule) => (
+                  <option key={subModule.id} value={subModule.id}>
+                    {subModule.name}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Date */}
+            {/* Date et heure */}
             <div className={styles.formGroup}>
-              <label>Date</label>
+              <label>Date et heure</label>
               <input
-                type="date"
-                value={editedMakeup.day || ""}
-                onChange={(e) => handleChange("day", e.target.value)}
-                required
-              />
-            </div>
-
-            {/* Heure de début */}
-            <div className={styles.formGroup}>
-              <label>Heure de début</label>
-              <input
-                type="time"
-                value={editedMakeup.startTime || ""}
-                onChange={(e) => handleChange("startTime", e.target.value)}
-                required
-              />
-            </div>
-
-            {/* Durée */}
-            <div className={styles.formGroup}>
-              <label>Durée (heures)</label>
-              <input
-                type="number"
-                min="1"
-                max="8"
-                value={editedMakeup.duration || 1}
-                onChange={(e) =>
-                  handleChange("duration", Number(e.target.value))
-                }
+                type="datetime-local"
+                value={new Date(editedMakeup.startDateTime).toISOString().slice(0, 16)}
+                onChange={(e) => {
+                  const date = new Date(e.target.value);
+                  handleChange("startDateTime", date.toISOString());
+                  // Set end time (1.5 hours for makeup)
+                  const endDate = new Date(date.getTime() + 1.5 * 60 * 60 * 1000);
+                  handleChange("endDateTime", endDate.toISOString());
+                }}
                 required
               />
             </div>
@@ -154,36 +118,35 @@ export const MakeupModal = ({ makeup, onClose, onSave }: MakeupModalProps) => {
             <div className={styles.formGroup}>
               <label>Salle</label>
               <select
-                
-                onChange={(e) => {
-                  const room = rooms.find(r => r.id === Number(e.target.value));
-                  setSelectedRoom(room || null);
-                  handleChange("classroom", room?.id || null);
-                }}
-                required>
+                value={selectedRoom}
+                onChange={(e) => setSelectedRoom(e.target.value)}
+                required
+              >
                 <option value="">Sélectionner une salle</option>
                 {rooms.map((room) => (
                   <option key={room.id} value={room.name}>
-                    {room.name} ({room.type})
+                    {room.name}
                   </option>
                 ))}
               </select>
             </div>
-
-            {/* Date examen original */}
-
-            {/* Raison */}
           </div>
 
-          <div className={styles.modalFooter}>
+          <div className={styles.formActions}>
             <button
               type="button"
               className={styles.cancelButton}
-              onClick={onClose}>
+              onClick={onClose}
+              disabled={isSubmitting}
+            >
               Annuler
             </button>
-            <button type="submit" className={styles.saveButton}>
-              {makeup.id ? "Mettre à jour" : "Créer"}
+            <button
+              type="submit"
+              className={styles.saveButton}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Enregistrement..." : "Enregistrer"}
             </button>
           </div>
         </form>
