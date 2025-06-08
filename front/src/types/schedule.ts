@@ -1,6 +1,21 @@
-import { Group, Professor, Module, SubModule, Field , Student} from './type';
+import { Group, Professor, Module, SubModule, Field , Student, Classroom} from './type';
 import { ReservationType } from '../hooks/usePlanningData';
 
+export interface CalendarEvent {
+  id: number;
+  title: string;
+  start: Date;
+  end: Date;
+  resource: {
+    field?:Field;
+    room?: Classroom;
+    group?: Group;
+    professor?: Professor;
+    seances?:Session;
+    type: string;
+    wasAttended?: boolean;
+  };
+}
 // Type pour une séance
 export interface Session {
     id: number;
@@ -99,6 +114,11 @@ export interface ExamSession {
     subModuleId: number;
     type: ReservationType;
 }
+
+
+
+
+
 
 
 
