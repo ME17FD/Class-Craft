@@ -11,7 +11,6 @@ const ApprovalManager: React.FC = () => {
     deleteStudent,
     updateProfessor,
     deleteProfessor,
-    fetchData,
     fetchUnapprovedStudents,
   } = useApiData();
 

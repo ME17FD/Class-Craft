@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useApiData } from "../../hooks/useApiData";
 import ProfessorSessions from "./ProfessorSessions";
 import ProfessorGroups from "./ProfessorGroups";

@@ -65,7 +65,7 @@ const usePedagogicalData = () => {
     });
   }, []);
 
-  const handleEdit = useCallback((entityType: TabType, entity: any) => {
+  const handleEdit = useCallback(async (entityType: TabType, entity: any) => {
     setModalState({
       isOpen: true,
       type: "edit",
@@ -74,7 +74,7 @@ const usePedagogicalData = () => {
     });
   }, []);
 
-  const handleDelete = useCallback((entityType: TabType, entity: any) => {
+  const handleDelete = useCallback(async (entityType: TabType, entity: any) => {
     setModalState({
       isOpen: true,
       type: "delete",

@@ -270,7 +270,6 @@ const PedagogicalDashboard: React.FC = () => {
             groups={data.groups}
             onSave={handleSave}
             onClose={handleCloseModal}
-            onAssignStudent={handleAssignStudents}
           />
         )}
 

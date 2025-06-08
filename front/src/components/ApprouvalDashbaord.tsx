@@ -24,13 +24,11 @@ type ApprovalFilter = 'all' | 'approved' | 'unapproved';
 
 const ApprovalDashboard: React.FC<ApprovalDashboardProps> = ({
   pendingStudents,
-  pendingProfessors,
   allStudents,
   allProfessors,
   onApproveStudent,
   onRejectStudent,
   onApproveProfessor,
-  onRejectProfessor,
   onUnapproveStudent,
   onDeleteApprovedStudent,
   onUnapproveProfessor,

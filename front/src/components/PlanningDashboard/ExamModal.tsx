@@ -15,7 +15,6 @@ interface ExamModalProps {
 
 export const ExamModal = ({ exam, group, onClose, onSave }: ExamModalProps) => {
   const {
-    professors = [],
     modules = [],
     subModules = [],
     rooms = [],

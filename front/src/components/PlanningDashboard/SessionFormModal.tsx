@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Module, SubModule, Professor, Group } from "../../types/type";
 import { Room, Session } from "../../types/schedule";
 import styles from "../../styles/PlanningDashboard/GroupFormModal.module.css";
-import api from "../../services/api";
 
 // Session type enum mapping
 const SessionType = {
@@ -36,9 +35,7 @@ export const SessionFormModal = ({
   onSave,
   modules = [],
   subModules = [],
-  professors = [],
   rooms = [],
-  existingSessions = [],
 }: SessionFormModalProps) => {
   const [selectedModule, setSelectedModule] = useState(
     session?.module?.id?.toString() || ""
@@ -97,9 +94,6 @@ export const SessionFormModal = ({
 
   useEffect(() => {
     if (selectedSubModule) {
-      const subMod = subModules.find(
-        (sm) => sm.id === Number(selectedSubModule)
-      );
       // No need to set professor as it will be handled by the backend
     }
   }, [selectedSubModule, subModules]);

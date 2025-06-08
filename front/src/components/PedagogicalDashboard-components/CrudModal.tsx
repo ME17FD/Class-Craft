@@ -41,10 +41,6 @@ const CrudModal: React.FC<CrudModalProps> = ({
   onSave,
   onClose,
 }) => {
-  const [selectedModule, setSelectedModule] = useState<number | null>(null);
-  const [availableSubModules, setAvailableSubModules] = useState<SubModule[]>(
-    []
-  );
   const [temporarilySelectedSubModules, setTemporarilySelectedSubModules] =
     useState<number[]>([]);
   const [
@@ -87,17 +83,6 @@ const CrudModal: React.FC<CrudModalProps> = ({
   });
 
   useEffect(() => {
-    if (selectedModule) {
-      const filteredSubModules = subModules.filter(
-        (sm) => sm.moduleId === selectedModule
-      );
-      setAvailableSubModules(filteredSubModules);
-    } else {
-      setAvailableSubModules([]);
-    }
-  }, [selectedModule, subModules]);
-
-  useEffect(() => {
     if (type === "edit" && entityType === "modules") {
       // Load unassigned submodules when editing a module
       const unassignedSubModules = subModules.filter((sm) => !sm.moduleId);
@@ -114,27 +99,6 @@ const CrudModal: React.FC<CrudModalProps> = ({
       [name]:
         name === "hours" || name === "nbrHours" ? Number(value) || 0 : value,
     }));
-  };
-
-  const handleAddModule = () => {
-    if (selectedModule && !formData.modules.includes(selectedModule)) {
-      setFormData({
-        ...formData,
-        modules: [...formData.modules, selectedModule],
-      });
-      setSelectedModule(null);
-    }
-  };
-
-  const handleRemoveModule = (moduleId: number) => {
-    setFormData({
-      ...formData,
-      modules: formData.modules.filter((id: number) => id !== moduleId),
-      subModules: formData.subModules.filter((id: number) => {
-        const subModule = subModules.find((sm) => sm.id === id);
-        return subModule?.moduleId !== moduleId;
-      }),
-    });
   };
 
   const handleAddSubModules = (subModuleIds: number[]) => {
@@ -252,7 +216,7 @@ const CrudModal: React.FC<CrudModalProps> = ({
               <select
                 multiple
                 size={5}
-                value={temporarilySelectedSubModules}
+                value={temporarilySelectedSubModules.map(String)}
                 onChange={(e) => {
                   const options = Array.from(e.target.selectedOptions);
                   const values = options.map((opt) => Number(opt.value));
@@ -295,7 +259,7 @@ const CrudModal: React.FC<CrudModalProps> = ({
                 .filter((prof) =>
                   prof.subModules?.some((sm) =>
                     formData.subModules?.includes(
-                      typeof sm === "object" ? sm.id : sm
+                      typeof sm === "object" ? (sm as { id: number }).id : sm
                     )
                   )
                 )
@@ -561,7 +525,7 @@ const CrudModal: React.FC<CrudModalProps> = ({
             <Button variant="secondary" onClick={onClose}>
               Annuler
             </Button>
-            <Button variant="delete" onClick={handleSubmit}>
+            <Button variant="delete" onClick={() => handleSubmit({} as React.FormEvent)}>
               Supprimer
             </Button>
           </div>

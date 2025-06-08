@@ -25,9 +25,6 @@ export const useApiData = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [seances, setSeances] = useState<Session[]>([]);
   const [rooms, setRooms] = useState<Room[]>([]); 
-  const [unapprovedStudents, setUnapprovedStudents] = useState<Student[]>([]);
-  
-
 
   const fetchData = async () => {
     console.log("Initiating API requests...");
@@ -303,7 +300,6 @@ const deleteSceance = useCallback(async (sceanceId: number) => {
   const fetchUnapprovedStudents = useCallback(async () => {
     try {
       const response = await api.get("/api/students/unapproved");
-      setUnapprovedStudents(response.data);
       return response.data;
     } catch (error) {
       console.error("Failed to fetch unapproved students:", error);

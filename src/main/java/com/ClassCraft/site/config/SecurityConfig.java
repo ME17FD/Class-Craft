@@ -23,7 +23,8 @@ public class SecurityConfig {
     private static final List<String> ALLOWED_ORIGINS = Arrays.asList(
         "http://localhost:5173",  // Vite default
         "http://localhost:3000",  // Create React App default
-        "http://127.0.0.1:5173"   // Alternative localhost
+        "http://127.0.0.1:5173",   // Alternative localhost
+        "https://theclasscraft.netlify.app"
     );
 
     @Bean

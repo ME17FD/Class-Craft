@@ -1,32 +1,15 @@
 import React, { useState } from 'react';
 import { pdf, Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
-import { Room } from '../../types/schedule';
-import { format, eachDayOfInterval, isSameDay, addDays, parse } from 'date-fns';
+import { Room, ExamSession } from '../../types/schedule';
+import { format, eachDayOfInterval, isSameDay, parse } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import style from '../../styles/PlanningDashboard/PlanningGroup.module.css';
 import pdfStyles from '../../styles/PlanningDashboard/RoomsPDFGenerator.module.css';
-import { Professor, SubModule, Group } from '../../types/type';
-import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import dailyStyles from '../../styles/PlanningDashboard/DailyRoomsOccupation.module.css';
 
-interface Reservation {
-  id: number;
-  startDateTime: string;
-  endDateTime: string;
-  wasAttended: boolean;
-  subModuleId: number;
-  groupId: number;
-  classroomId: number;
-  submodule?: SubModule & { teacher?: Professor };
-  group?: Group;
-  classroom?: Room;
-  groupName?: string;
-}
-
 interface RoomsPDFGeneratorProps {
   rooms: Room[];
-  reservations: Reservation[];
+  reservations: ExamSession[];
   startDate: string;
   endDate?: string;
 }
@@ -115,7 +98,7 @@ const timeSlots = [
 ];
 
 const isReservationInTimeSlot = (
-  reservation: Reservation,
+  reservation: ExamSession,
   slotStart: string,
   slotEnd: string
 ): boolean => {
@@ -156,7 +139,7 @@ const RoomsPDFDocument = ({ rooms, reservations, startDate, endDate }: RoomsPDFG
       roomId: r.classroomId,
       date: format(new Date(r.startDateTime), 'yyyy-MM-dd'),
       subModule: r.submodule?.name,
-      groupName: r.groupName || r.group?.name
+      groupName: r.groupName
     })),
     startDate,
     endDate,
@@ -180,7 +163,7 @@ const RoomsPDFDocument = ({ rooms, reservations, startDate, endDate }: RoomsPDFG
             roomId: r.classroomId,
             date: format(new Date(r.startDateTime), 'yyyy-MM-dd'),
             subModule: r.submodule?.name,
-            groupName: r.groupName || r.group?.name
+            groupName: r.groupName
           }))
         });
 
@@ -226,7 +209,7 @@ const RoomsPDFDocument = ({ rooms, reservations, startDate, endDate }: RoomsPDFG
                           isSameRoom,
                           isInTimeSlot,
                           subModule: r.submodule?.name,
-                          groupName: r.groupName || r.group?.name
+                          groupName: r.groupName
                         });
 
                         return isSameRoom && isInTimeSlot;
@@ -240,7 +223,7 @@ const RoomsPDFDocument = ({ rooms, reservations, startDate, endDate }: RoomsPDFG
                       >
                         {reservation && reservation.submodule?.name
                           ? `Module: ${reservation.submodule.name}\n` +
-                            `Groupe: ${reservation.groupName || reservation.group?.name || 'N/A'}\n` +
+                            `Groupe: ${reservation.groupName || 'N/A'}\n` +
                             `Prof: ${
                               reservation.submodule.teacher
                                 ? `${reservation.submodule.teacher.firstName} ${reservation.submodule.teacher.lastName}`

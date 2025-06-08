@@ -25,10 +25,10 @@ const ProfessorGroups: React.FC<ProfessorGroupsProps> = ({ professor }) => {
 
   // Mémoization des données filtrées
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const { taughtGroups, groupSessions } = useMemo(() => {
+  const { taughtGroups } = useMemo(() => {
     // Filtrer les sessions du professeur
     const profSessions = sessions.filter(
-      (s) => s.professor?.id === professor.id || s.professorId === professor.id
+      (s) => s.professor?.id === professor.id || s.professor?.id === professor.id
     );
 
     // Extraire les groupes uniques
@@ -37,9 +37,9 @@ const ProfessorGroups: React.FC<ProfessorGroupsProps> = ({ professor }) => {
 
     profSessions.forEach((session) => {
       const group = session.group;
-      if (group && !groupMap.has(group.id)) {
+      if (group && group.id !== undefined && group.name !== undefined && !groupMap.has(group.id)) {
         groupMap.set(group.id, true);
-        uniqueGroups.push(group);
+        uniqueGroups.push({ id: group.id, name: group.name });
       }
     });
 

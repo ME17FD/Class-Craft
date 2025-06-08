@@ -24,9 +24,7 @@ const ClassroomsTab: React.FC<ClassroomsTabProps> = ({
     null
   );
 
-  const handleDeleteClick = (classroom: Classroom) => {
-    setClassroomToDelete(classroom);
-  };
+  
 
   const handleConfirmDelete = () => {
     if (classroomToDelete) {
@@ -36,9 +34,9 @@ const ClassroomsTab: React.FC<ClassroomsTabProps> = ({
   };
 
   const columns = [
-    { header: "Nom", accessor: "name" },
-    { header: "Capacité", accessor: "capacity" },
-    { header: "Type", accessor: "type" },
+    { header: "Nom", accessor: "name" as keyof Room },
+    { header: "Capacité", accessor: "capacity" as keyof Room },
+    { header: "Type", accessor: "type" as keyof Room },
     {
       header: "Actions",
       render: (classroom: Room) => (

@@ -2,23 +2,9 @@ import React, { useEffect, useState } from "react";
 import styles from "../../styles/PlanningDashboard/DailyRoomsOccupation.module.css";
 import { usePlanningData } from "../../hooks/usePlanningData";
 import { format, parse, isSameDay, eachDayOfInterval, addDays } from "date-fns";
-import { Room } from "../../types/schedule";
-import { Professor, SubModule, Group } from "../../types/type";
+import { ExamSession } from "../../types/schedule";
 import * as XLSX from "xlsx";
 import { RoomsPDFGenerator } from './RoomsPDFGenerator';
-
-interface Reservation {
-  id: number;
-  startDateTime: string;
-  endDateTime: string;
-  wasAttended: boolean;
-  subModuleId: number;
-  groupId: number;
-  classroomId: number;
-  subModule?: SubModule & { professor?: Professor };
-  group?: Group;
-  classroom?: Room;
-}
 
 interface DailyRoomsOccupationProps {
   date: string;
@@ -84,7 +70,7 @@ const DailyRoomsOccupation: React.FC<DailyRoomsOccupationProps> = ({
   }, [reservations, date]);
 
   const isReservationInTimeSlot = (
-    reservation: Reservation,
+    reservation: ExamSession,
     slotStart: string,
     slotEnd: string
   ): boolean => {
@@ -116,7 +102,7 @@ const DailyRoomsOccupation: React.FC<DailyRoomsOccupationProps> = ({
   };
 
   const getReservationStatus = (
-    reservation: Reservation | null
+    reservation: ExamSession | null
   ): "empty" | "absent" | "occupied" => {
     if (!reservation) return "empty";
     if (reservation.wasAttended === false) return "absent";

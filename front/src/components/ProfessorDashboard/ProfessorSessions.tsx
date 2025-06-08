@@ -61,8 +61,8 @@ const ProfessorSessions: React.FC<ProfessorSessionsProps> = ({
     const worksheet = XLSX.utils.json_to_sheet(
       filteredSessions.map((s) => ({
         Jour:
-          dayTranslations[s.dayOfWeek?.toUpperCase?.()] ||
-          dayTranslations[s.day?.toUpperCase?.()] ||
+          dayTranslations[(s.dayOfWeek?.toUpperCase() || '')] ||
+          dayTranslations[(s.day?.toUpperCase() || '')] ||
           s.dayOfWeek ||
           s.day,
         "Heure Début": s.startTime?.slice(0, 5),
@@ -116,8 +116,8 @@ const ProfessorSessions: React.FC<ProfessorSessionsProps> = ({
               {timeSlots.slice(1).map((time) => {
                 const normalizedTime = normalizeTime(time);
                 const session = daySessions.find((s) => {
-                  const start = normalizeTime(s.startTime);
-                  const end = normalizeTime(s.endTime);
+                  const start = normalizeTime(s.startTime || '');
+                  const end = normalizeTime(s.endTime || '');
                   return start <= normalizedTime && normalizedTime < end;
                 });
 

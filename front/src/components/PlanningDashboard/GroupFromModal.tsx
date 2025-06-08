@@ -28,7 +28,6 @@ export const GroupFormModal = ({
     professors = [],
     rooms = [],
     seances = [],
-    groups = [],
   } = useApiData();
   const { sessions } = usePlanning();
   const [name, setName] = useState(group?.name || "");

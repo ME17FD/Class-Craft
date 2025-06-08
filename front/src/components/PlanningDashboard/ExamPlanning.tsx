@@ -12,7 +12,7 @@ import { Group } from "../../types/type";
 
 export const ExamPlanning = () => {
   const { groups = [] } = useApiData();
-  const { reservations = [], createReservation, updateReservation, setReservations } = usePlanningData();
+  const { reservations = [], setReservations } = usePlanningData();
   const [selectedExam, setSelectedExam] = useState<ExamSession | null>(null);
   const [selectedMakeup, setSelectedMakeup] = useState<ExamSession | null>(null);
   const [selectedGroupForExamSchedule, setSelectedGroupForExamSchedule] =

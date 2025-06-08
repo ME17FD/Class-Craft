@@ -13,10 +13,7 @@ interface MakeupModalProps {
 
 export const MakeupModal = ({ makeup, rooms, onClose, onSave }: MakeupModalProps) => {
   const {
-    professors = [],
-    modules = [],
     subModules = [],
-    rooms: apiRooms = [],
   } = useApiData();
   const [editedMakeup, setEditedMakeup] = useState({
     ...makeup,
