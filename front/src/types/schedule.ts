@@ -113,6 +113,21 @@ export interface ExamSession {
     classroomId: number;
     subModuleId: number;
     type: ReservationType;
+    submodule?: {
+        id: number;
+        name: string;
+        nbrHours: number;
+        moduleId: number;
+        moduleName: string;
+        teacherId: number;
+        teacher: Professor;
+    };
+    classroom?: {
+        id: number;
+        name: string;
+        capacity: number;
+        type: string;
+    };
 }
 
 

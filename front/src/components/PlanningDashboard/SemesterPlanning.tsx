@@ -1,11 +1,12 @@
 import React from "react";
-import { Calendar, dateFnsLocalizer, Views } from "react-big-calendar";
+import { Calendar, dateFnsLocalizer, Views, View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { useApiData } from "../../hooks/useApiData";
 import { CalendarEvent } from "../../types/schedule";
 import { usePlanningData } from "../../hooks/usePlanningData";
+import { Classroom } from "../../types/type";
 
 const locales = { fr };
 
@@ -20,47 +21,75 @@ const localizer = dateFnsLocalizer({
 const SemesterPlanning: React.FC = () => {
   const { rooms, groups, fields } = useApiData();
   const { reservations } = usePlanningData();
-  const [currentView, setCurrentView] = React.useState(Views.MONTH);
+  const [currentView, setCurrentView] = React.useState<View>(Views.MONTH);
   const [currentDate, setCurrentDate] = React.useState(new Date());
   const [filterRoom, setFilterRoom] = React.useState<string>("all");
   const [filterGroup, setFilterGroup] = React.useState<string>("all");
   const [filterField, setFilterField] = React.useState<string>("all");
 
   // Convertir les réservations en événements pour le calendrier
-  const events: CalendarEvent[] = reservations.map((reservation) => ({
-    id: reservation.id,
-    title: `${reservation.submodule?.name || "Réservation"} - ${
-      reservation.group?.name || ""
-    }`,
-    start: new Date(reservation.startDateTime),
-    end: new Date(reservation.endDateTime),
-    resource: {
-      room: reservation.classroom,
-      group: reservation.group,
-      professor: reservation.submodule?.professor,
-      type: reservation?.type || "RESERVATION",
-      wasAttended: reservation.wasAttended,
-      fieldId: reservation.group?.filiereId?.toString(),
-    },
-  }));
+  const events: CalendarEvent[] = reservations.map((reservation) => {
+    const group = groups.find(g => g.id === reservation.groupId);
+    const room = reservation.classroom || rooms.find(r => r.id === reservation.classroomId) as Classroom | undefined;
+    const field = fields.find(f => f.id === group?.filiereId);
+
+    // Parse the ISO strings and create dates in local timezone
+    const startDate = new Date(reservation.startDateTime);
+    const endDate = new Date(reservation.endDateTime);
+
+    // Ensure the dates are set to the local timezone
+    const localStart = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth(),
+      startDate.getDate(),
+      startDate.getHours(),
+      startDate.getMinutes()
+    );
+
+    const localEnd = new Date(
+      endDate.getFullYear(),
+      endDate.getMonth(),
+      endDate.getDate(),
+      endDate.getHours(),
+      endDate.getMinutes()
+    );
+
+    return {
+      id: reservation.id,
+      title: `${reservation.submodule?.name || "Réservation"} - ${
+        group?.name || reservation.groupName || ""
+      }`,
+      start: localStart,
+      end: localEnd,
+      resource: {
+        room,
+        group,
+        field,
+        type: reservation.type || "RESERVATION",
+        wasAttended: reservation.wasAttended,
+        professor: reservation.submodule?.teacher
+      },
+    };
+  });
 
   // Appliquer les filtres
   const filteredEvents = events.filter((event) => {
     const roomMatch =
-      filterRoom === "all" || event.resource.room?.id.toString() === filterRoom;
+      filterRoom === "all" || event.resource.room?.id?.toString() === filterRoom;
 
     const groupMatch =
       filterGroup === "all" ||
-      event.resource.group?.id.toString() === filterGroup;
+      event.resource.group?.id?.toString() === filterGroup;
 
     const fieldMatch =
-      filterField === "all" || event.resource.fieldId === filterField;
+      filterField === "all" || 
+      event.resource.field?.id?.toString() === filterField;
 
     return roomMatch && groupMatch && fieldMatch;
   });
 
   return (
-    <div style={{ height: "700px", padding: "20px" }}>
+    <div style={{ height: "800px", padding: "20px", paddingBottom: "40px" }}>
       <div
         style={{
           marginBottom: "20px",
@@ -75,7 +104,7 @@ const SemesterPlanning: React.FC = () => {
           style={{ padding: "8px", borderRadius: "4px" }}>
           <option value="all">Toutes les filières</option>
           {fields.map((field) => (
-            <option key={field.id} value={field.id.toString()}>
+            <option key={field.id} value={field.id?.toString()}>
               {field.name}
             </option>
           ))}
@@ -101,7 +130,7 @@ const SemesterPlanning: React.FC = () => {
           style={{ padding: "8px", borderRadius: "4px" }}>
           <option value="all">Tous les groupes</option>
           {groups.map((group) => (
-            <option key={group.id} value={group.id.toString()}>
+            <option key={group.id} value={group.id?.toString()}>
               {group.name}
             </option>
           ))}
@@ -116,10 +145,14 @@ const SemesterPlanning: React.FC = () => {
         defaultView={Views.MONTH}
         views={[Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]}
         view={currentView}
-        onView={setCurrentView}
+        onView={(view: View) => setCurrentView(view)}
         date={currentDate}
         onNavigate={setCurrentDate}
         culture="fr"
+        onSelectEvent={(event) => {
+          setCurrentView(Views.DAY);
+          setCurrentDate(event.start);
+        }}
         messages={{
           month: "Mois",
           week: "Semaine",
@@ -143,30 +176,25 @@ const SemesterPlanning: React.FC = () => {
           if (event.resource.type === "EXAM") backgroundColor = "#e71d1d";
           if (!event.resource.wasAttended) backgroundColor = "#9E9E9E";
 
-          return { style: { backgroundColor } };
+          return { 
+            style: { 
+              backgroundColor, 
+              height: 'auto', 
+              whiteSpace: 'normal', 
+              overflow: 'visible' 
+            }
+          };
         }}
         components={{
           event: ({ event }: { event: CalendarEvent }) => (
-            <div style={{ padding: "5px" }}>
-              <strong>{event.title}</strong>
-              <div>Type: {event.resource.type}</div>
-              {event.resource.room && (
-                <div>Salle: {event.resource.room.name}</div>
-              )}
+            <div style={{ 
+              padding: "2px 4px", 
+              fontSize: "0.8em",
+            }}>
+              <div style={{ fontWeight: "bold" }}>{event.resource.type} {event.resource.group?.name || ""}</div>
               {event.resource.professor && (
-                <div>
-                  Professeur: {event.resource.professor.firstName}{" "}
-                  {event.resource.professor.lastName}
-                </div>
+                <div>Prof: {event.resource.professor.firstName} {event.resource.professor.lastName} {event.resource.room?.name || ""}</div>
               )}
-              <div>
-                {event.start.toLocaleTimeString()} -{" "}
-                {event.end.toLocaleTimeString()}
-              </div>
-              <div>
-                Statut:{" "}
-                {event.resource.wasAttended ? "Effectuée" : "Non effectuée"}
-              </div>
             </div>
           ),
         }}

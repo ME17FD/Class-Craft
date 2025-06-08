@@ -30,7 +30,7 @@ interface AuthResponse {
   };
 }
 
-const API_URL = "http://localhost:8080/api/auth";
+const API_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080') + "/api/auth";
 
 export const register = async (userData: UserData): Promise<void> => {
   await axios.post(`${API_URL}/register`, userData, { withCredentials: true });
