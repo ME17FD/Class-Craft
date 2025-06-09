@@ -1,18 +1,23 @@
 package com.ClassCraft.site.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.web.server.ResponseStatusException;
@@ -95,10 +100,10 @@ class GroupServiceTest {
 
     @Test
     void update_WhenGroupExists_ShouldUpdateGroup() {
-        when(groupRepository.existsById(1L)).thenReturn(true);
-        when(modelMapper.map(groupDTO, Group.class)).thenReturn(group);
+        when(groupRepository.findById(1L)).thenReturn(Optional.of(group));
+        lenient().when(modelMapper.map(any(GroupDTO.class), eq(Group.class))).thenReturn(group);
+        lenient().when(modelMapper.map(any(Group.class), eq(GroupDTO.class))).thenReturn(groupDTO);
         when(groupRepository.save(any(Group.class))).thenReturn(group);
-        when(modelMapper.map(group, GroupDTO.class)).thenReturn(groupDTO);
 
         GroupDTO result = groupService.update(1L, groupDTO);
 
@@ -109,7 +114,7 @@ class GroupServiceTest {
 
     @Test
     void update_WhenGroupDoesNotExist_ShouldThrowException() {
-        when(groupRepository.existsById(1L)).thenReturn(false);
+        when(groupRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(ResponseStatusException.class, () -> groupService.update(1L, groupDTO));
     }

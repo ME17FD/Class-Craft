@@ -1,15 +1,19 @@
 package com.ClassCraft.site.security;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -71,6 +75,8 @@ class CustomUserDetailsServiceTest {
         assertEquals(TEST_EMAIL, userDetails.getUsername());
         assertEquals("password", userDetails.getPassword());
         assertTrue(userDetails.isEnabled());
+        assertTrue(userDetails.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ROLE_STUDENT")));
     }
 
     @Test
@@ -84,6 +90,8 @@ class CustomUserDetailsServiceTest {
         assertEquals(TEST_EMAIL, userDetails.getUsername());
         assertEquals("password", userDetails.getPassword());
         assertTrue(userDetails.isEnabled());
+        assertTrue(userDetails.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ROLE_PROFESSOR")));
     }
 
     @Test
@@ -98,6 +106,8 @@ class CustomUserDetailsServiceTest {
         assertEquals(TEST_EMAIL, userDetails.getUsername());
         assertEquals("password", userDetails.getPassword());
         assertTrue(userDetails.isEnabled());
+        assertTrue(userDetails.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN")));
     }
 
     @Test
@@ -130,5 +140,28 @@ class CustomUserDetailsServiceTest {
         verify(studentRepository).findByEmail(TEST_EMAIL);
         verify(professorRepository).findByEmail(TEST_EMAIL);
         verify(adminRepository).findByEmail(TEST_EMAIL);
+    }
+
+    @Test
+    void loadUserByUsername_WhenStudentNotApproved_ShouldReturnDisabledUser() {
+        student.setApproved(false);
+        when(studentRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(student));
+
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(TEST_EMAIL);
+
+        assertNotNull(userDetails);
+        assertFalse(userDetails.isEnabled());
+    }
+
+    @Test
+    void loadUserByUsername_WhenProfessorNotApproved_ShouldReturnDisabledUser() {
+        professor.setApproved(false);
+        when(studentRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.empty());
+        when(professorRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(professor));
+
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(TEST_EMAIL);
+
+        assertNotNull(userDetails);
+        assertFalse(userDetails.isEnabled());
     }
 } 

@@ -48,8 +48,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authenticateUser(jwt, request);
             }
 
-            filterChain.doFilter(request, response);
-
         } catch (AuthenticationCredentialsNotFoundException ex) {
             logger.warn("Invalid authentication attempt: {}", ex.getMessage());
             sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
@@ -59,6 +57,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (Exception ex) {
             logger.error("Authentication error", ex);
             sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Authentication failed");
+        } finally {
+            filterChain.doFilter(request, response);
         }
     }
 

@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,12 +26,17 @@ public class StudentServiceImpl implements UserService<StudentDTO> {
 
     private final StudentRepository studentRepository;
     private final ModelMapper modelMapper;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public StudentDTO create(StudentDTO dto) {
+        if (dto == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "StudentDTO cannot be null");
+        }
+        if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email cannot be null or empty");
+        }
         if (studentRepository.existsByEmail(dto.getEmail())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
         }
@@ -65,6 +69,12 @@ public class StudentServiceImpl implements UserService<StudentDTO> {
     @Override
     @Transactional
     public StudentDTO update(Long id, StudentDTO dto) {
+        if (dto == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "StudentDTO cannot be null");
+        }
+        if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email cannot be null or empty");
+        }
         return studentRepository.findById(id)
                 .map(existingStudent -> {
                     modelMapper.map(dto, existingStudent);

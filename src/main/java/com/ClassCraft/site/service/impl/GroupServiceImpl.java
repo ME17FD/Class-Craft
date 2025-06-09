@@ -1,17 +1,18 @@
 package com.ClassCraft.site.service.impl;
 
-import com.ClassCraft.site.dto.GroupDTO;
-import com.ClassCraft.site.models.Group;
-import com.ClassCraft.site.repository.GroupRepository;
-import com.ClassCraft.site.service.GroupService;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.ClassCraft.site.dto.GroupDTO;
+import com.ClassCraft.site.models.Group;
+import com.ClassCraft.site.repository.GroupRepository;
+import com.ClassCraft.site.service.GroupService;
 
 @Service
 @Transactional
@@ -41,12 +42,24 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public GroupDTO save(GroupDTO groupDTO) {
+        if (groupDTO == null) {
+            throw new IllegalArgumentException("GroupDTO cannot be null");
+        }
+        if (groupDTO.getName() == null || groupDTO.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Group name cannot be null or empty");
+        }
         Group group = modelMapper.map(groupDTO, Group.class);
         return modelMapper.map(groupRepository.save(group), GroupDTO.class);
     }
 
     @Override
     public GroupDTO update(Long id, GroupDTO groupDTO) {
+        if (groupDTO == null) {
+            throw new IllegalArgumentException("GroupDTO cannot be null");
+        }
+        if (groupDTO.getName() == null || groupDTO.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Group name cannot be null or empty");
+        }
         return groupRepository.findById(id)
                 .map(existing -> {
                     modelMapper.map(groupDTO, existing);

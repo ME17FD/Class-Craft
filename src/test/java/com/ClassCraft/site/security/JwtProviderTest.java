@@ -1,15 +1,15 @@
 package com.ClassCraft.site.security;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import java.util.Collections;
 
-import java.util.Date;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,7 +24,7 @@ class JwtProviderTest {
     private JwtProvider jwtProvider;
 
     private static final String TEST_SECRET = "testSecretKey123456789012345678901234567890123456789012345678901234567890";
-    private static final String TEST_USERNAME = "testuser";
+    private static final String TEST_EMAIL = "test@example.com";
     private static final String TEST_PASSWORD = "password";
 
     @BeforeEach
@@ -35,7 +35,7 @@ class JwtProviderTest {
     @Test
     void generateToken_ShouldGenerateValidToken() {
         // Create test authentication
-        UserDetails userDetails = new User(TEST_USERNAME, TEST_PASSWORD, java.util.Collections.emptyList());
+        UserDetails userDetails = new User(TEST_EMAIL, TEST_PASSWORD, Collections.emptyList());
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null);
 
         // Generate token
@@ -49,7 +49,7 @@ class JwtProviderTest {
     @Test
     void validateToken_WithValidToken_ShouldReturnTrue() {
         // Create test authentication
-        UserDetails userDetails = new User(TEST_USERNAME, TEST_PASSWORD, java.util.Collections.emptyList());
+        UserDetails userDetails = new User(TEST_EMAIL, TEST_PASSWORD, Collections.emptyList());
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null);
 
         // Generate token
@@ -73,7 +73,7 @@ class JwtProviderTest {
     @Test
     void validateToken_WithExpiredToken_ShouldReturnFalse() {
         // Create test authentication
-        UserDetails userDetails = new User(TEST_USERNAME, TEST_PASSWORD, java.util.Collections.emptyList());
+        UserDetails userDetails = new User(TEST_EMAIL, TEST_PASSWORD, Collections.emptyList());
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null);
 
         // Generate token with past expiration
@@ -110,5 +110,20 @@ class JwtProviderTest {
         boolean isValid = jwtProvider.validateToken(null);
 
         assertFalse(isValid);
+    }
+
+    @Test
+    void getEmailFromJwt_ShouldReturnEmail() {
+        // Create test authentication
+        UserDetails userDetails = new User(TEST_EMAIL, TEST_PASSWORD, Collections.emptyList());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null);
+
+        // Generate token
+        String token = jwtProvider.generateToken(authentication);
+
+        // Get email from token
+        String email = jwtProvider.getEmailFromJwt(token);
+
+        assertEquals(TEST_EMAIL, email);
     }
 } 

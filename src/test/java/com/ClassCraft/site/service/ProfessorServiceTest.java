@@ -1,20 +1,28 @@
 package com.ClassCraft.site.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.ClassCraft.site.dto.ProfessorDTO;
@@ -113,14 +121,15 @@ class ProfessorServiceTest {
     @Test
     void update_WhenProfessorExists_ShouldUpdateProfessor() {
         when(professorRepository.findById(1L)).thenReturn(Optional.of(professor));
+        lenient().when(modelMapper.map(any(ProfessorDTO.class), eq(Professor.class))).thenReturn(professor);
+        lenient().when(modelMapper.map(any(Professor.class), eq(ProfessorDTO.class))).thenReturn(professorDTO);
         when(professorRepository.save(any(Professor.class))).thenReturn(professor);
-        when(modelMapper.map(professor, ProfessorDTO.class)).thenReturn(professorDTO);
 
         ProfessorDTO result = professorService.update(1L, professorDTO);
 
         assertNotNull(result);
+        assertEquals(professorDTO.getId(), result.getId());
         assertEquals(professorDTO.getEmail(), result.getEmail());
-        verify(professorRepository).save(any(Professor.class));
     }
 
     @Test

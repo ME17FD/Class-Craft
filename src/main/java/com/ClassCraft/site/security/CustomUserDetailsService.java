@@ -4,6 +4,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.ClassCraft.site.models.Admin;
 import com.ClassCraft.site.models.Professor;
@@ -30,7 +31,11 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user ;
+        if (!StringUtils.hasText(email)) {
+            throw new IllegalArgumentException("Email cannot be null or empty");
+        }
+
+        User user;
 
         // Search in StudentRepository
         user = studentRepository.findByEmail(email).orElse(null);
